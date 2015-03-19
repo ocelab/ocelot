@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -25,7 +26,7 @@ import parser.CParser.IterationStatementContext;
 import parser.CParser.JumpStatementContext;
 import parser.CParser.LabeledStatementContext;
 import parser.CParser.SelectionStatementContext;
-import util.HiddenEdge;
+import util.LabeledEdge;
 
 public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	private static final int L_INPUT = 0;
@@ -34,13 +35,16 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	private static final int L_BREAK = 3;
 	private static final int L_CONTINUE = 4;
 	
-	private DirectedGraph<CodeFragment, HiddenEdge> graph;
+	private static final LabeledEdge TRUE_EDGE = new LabeledEdge(true);
+	private static final LabeledEdge GOTO_EDGE = new LabeledEdge("goto");
+	
+	private DirectedGraph<CodeFragment, LabeledEdge> graph;
 	private Map<String, CodeFragment> labels;
 	private List<Entry<String, CodeFragment>> gotos;
 	private List<CodeFragment> returns;
 	private TokenStream source;
 	
-	public CFGVisitor(DirectedGraph<CodeFragment, HiddenEdge> pGraph, TokenStream pSource) {
+	public CFGVisitor(DirectedGraph<CodeFragment, LabeledEdge> pGraph, TokenStream pSource) {
 		this.graph = pGraph;
 		this.labels = new HashMap<String, CodeFragment>();
 		this.gotos = new ArrayList<Entry<String, CodeFragment>>();
@@ -60,7 +64,16 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	 */
 	public void doFinalThings() {
 		for (Entry<String, CodeFragment> entry : this.gotos) {
-			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()));
+			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()), "goto");
+		}
+		
+		for (CodeFragment fragment : this.graph.vertexSet()) {
+			Set<LabeledEdge> edges = this.graph.edgesOf(fragment);
+			if (edges.contains(TRUE_EDGE)) {
+				for (LabeledEdge edge : edges)
+					if (edge.equals(GOTO_EDGE))
+						edge.setLabel(false);
+			}
 		}
 	}
 	
@@ -117,7 +130,18 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 		
 		if (ctx.getChildCount() == 2) {
 			List<List<CodeFragment>> subBlock = ctx.getChild(1).accept(this);
-			this.setOutput(statement.get(L_OUTPUT), subBlock.get(L_INPUT));
+			
+			for (CodeFragment fragment : statement.get(L_OUTPUT)) {
+				Object label;
+				if (fragment.isBreak())
+					label = "goto";
+				else if (fragment.isIf() || fragment.isLoop())
+					label = false;
+				else
+					label = "goto";
+				
+				this.setOutput(fragment, subBlock.get(L_INPUT), label);
+			}
 			
 			this.addBreakFragments(subBlock.get(L_BREAK), result);
 			this.addContinueFragments(subBlock.get(L_CONTINUE), result);
@@ -182,12 +206,12 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			
 			//Gets the "then" statements, visits it and sets all the exiting nodes as exiting nodes of the "if" statement
 			List<List<CodeFragment>> thenStatement = ctx.getChild(4).accept(this);
-			this.setOutput(ifDeclaration, thenStatement.get(0));
+			this.setOutput(ifDeclaration, thenStatement.get(0), true);
 			
 			if (ctx.getChildCount() > 5 && ctx.getChild(5).getText().equals("else")) {
 				//Gets the "then" statements, visits it and sets all the exiting nodes as exiting nodes of the "if" statement
 				List<List<CodeFragment>> elseStatement = ctx.getChild(6).accept(this);
-				this.setOutput(ifDeclaration, elseStatement.get(0));
+				this.setOutput(ifDeclaration, elseStatement.get(0), false);
 				
 				this.addBreakFragments(elseStatement.get(L_BREAK), result);
 				this.addOutputFragments(elseStatement.get(L_OUTPUT), result);
@@ -207,7 +231,9 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			
 			List<List<CodeFragment>> statement = ctx.getChild(4).accept(this);
 			
-			this.setOutput(switchDeclaration, statement.get(L_CASE));
+			for (CodeFragment fragment : statement.get(L_CASE)) {
+				this.setOutput(switchDeclaration, fragment, fragment.getCode().substring(5));
+			}
 			
 			this.addInputFragment(switchDeclaration, result);
 			this.addOutputFragments(statement.get(L_OUTPUT), result);
@@ -235,10 +261,10 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			this.graph.addVertex(whileCondition);
 			List<List<CodeFragment>> statement = ctx.getChild(4).accept(this);
 			
-			this.setOutput(whileCondition, statement.get(L_INPUT));
-			this.setOutput(statement.get(L_OUTPUT), whileCondition);
+			this.setOutput(whileCondition, statement.get(L_INPUT), true);
+			this.setOutput(statement.get(L_OUTPUT), whileCondition, "goto");
 			
-			this.setOutput(statement.get(L_CONTINUE), whileCondition);
+			this.setOutput(statement.get(L_CONTINUE), whileCondition, "goto");
 			
 			this.addInputFragment(whileCondition, result);
 			this.addOutputFragment(whileCondition, result);
@@ -282,11 +308,11 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			
 			List<List<CodeFragment>> statement = ctx.getChild(indexStatement).accept(this);
 			
-			this.setOutput(forInit, forCondition);
-			this.setOutput(forCondition, statement.get(L_INPUT));
-			this.setOutput(statement.get(L_OUTPUT), forIncrement);
-			this.setOutput(forIncrement, forCondition);
-			this.setOutput(statement.get(L_CONTINUE), forIncrement);
+			this.setOutput(forInit, forCondition, "goto");
+			this.setOutput(forCondition, statement.get(L_INPUT), true);
+			this.setOutput(statement.get(L_OUTPUT), forIncrement, "goto");
+			this.setOutput(forIncrement, forCondition, "goto");
+			this.setOutput(statement.get(L_CONTINUE), forIncrement, "goto");
 			
 			this.addInputFragment(forInit, result);
 			this.addOutputFragment(forCondition, result);
@@ -297,9 +323,9 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			this.graph.addVertex(whileCondition);
 			List<List<CodeFragment>> statement = ctx.getChild(4).accept(this);
 			
-			this.setOutput(whileCondition, statement.get(L_INPUT));
-			this.setOutput(statement.get(L_OUTPUT), whileCondition);
-			this.setOutput(statement.get(L_CONTINUE), whileCondition);
+			this.setOutput(whileCondition, statement.get(L_INPUT), true);
+			this.setOutput(statement.get(L_OUTPUT), whileCondition, "goto");
+			this.setOutput(statement.get(L_CONTINUE), whileCondition, "goto");
 			
 			this.addInputFragments(statement.get(L_INPUT), result);
 			this.addOutputFragment(whileCondition, result);
@@ -463,10 +489,12 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	 * @param pOut From which nodes start the edges
 	 * @param pIn In which nodes arrive the edges
 	 */
-	private void setOutput(List<CodeFragment> pOut, List<CodeFragment> pIn) {
+	private void setOutput(List<CodeFragment> pOut, List<CodeFragment> pIn, Object pLabel) {
 		for (CodeFragment out : pOut) 
-			for (CodeFragment in : pIn)
-				this.graph.addEdge(out, in);
+			for (CodeFragment in : pIn) {
+				LabeledEdge edge = this.graph.addEdge(out, in);
+				edge.setLabel(pLabel);
+			}
 	}
 	
 	/**
@@ -474,9 +502,11 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	 * @param pOut From which node start the edges
 	 * @param pIn In which nodes arrive the edges
 	 */
-	private void setOutput(CodeFragment pOut, List<CodeFragment> pIn) {
-		for (CodeFragment in: pIn)
-			this.graph.addEdge(pOut, in);
+	private void setOutput(CodeFragment pOut, List<CodeFragment> pIn, Object pLabel) {
+		for (CodeFragment in: pIn) {
+			LabeledEdge edge = this.graph.addEdge(pOut, in);
+			edge.setLabel(pLabel);
+		}
 	}
 	
 	/**
@@ -484,9 +514,11 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	 * @param pOut From which nodes start the edges
 	 * @param pIn In which node arrive the edges
 	 */
-	private void setOutput(List<CodeFragment> pOut, CodeFragment pIn) {
-		for (CodeFragment out: pOut)
-			this.graph.addEdge(out, pIn);
+	private void setOutput(List<CodeFragment> pOut, CodeFragment pIn, Object pLabel) {
+		for (CodeFragment out: pOut) {
+			LabeledEdge edge = this.graph.addEdge(out, pIn);
+			edge.setLabel(pLabel);
+		}
 	}
 	
 	/**
@@ -494,8 +526,9 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	 * @param pOut From which node start the edges
 	 * @param pIn In which node arrive the edges
 	 */
-	private void setOutput(CodeFragment pOut, CodeFragment pIn) {
-			this.graph.addEdge(pOut, pIn);
+	private void setOutput(CodeFragment pOut, CodeFragment pIn, Object pLabel) {
+			LabeledEdge edge = this.graph.addEdge(pOut, pIn);
+			edge.setLabel(pLabel);
 	}
 	
 	/**

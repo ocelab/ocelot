@@ -24,7 +24,7 @@ import parser.CVisitor;
 import parser.CodeFragment;
 import parser.InstrumentatorVisitor;
 import parser.CParser.CompilationUnitContext;
-import util.HiddenEdge;
+import util.LabeledEdge;
 import util.Utils;
 
 public class Main extends JFrame {
@@ -35,8 +35,9 @@ public class Main extends JFrame {
 	
 	public Main(String pSourceFile) throws IOException {
 		this.setSize(600, 600);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		DirectedGraph<CodeFragment, HiddenEdge> graph = new DefaultDirectedGraph<CodeFragment, HiddenEdge>(HiddenEdge.class);
+		DirectedGraph<CodeFragment, LabeledEdge> graph = new DefaultDirectedGraph<CodeFragment, LabeledEdge>(LabeledEdge.class);
 		
 		String source = Utils.readFile(pSourceFile);
 		
@@ -52,7 +53,7 @@ public class Main extends JFrame {
 		tree.accept(cfgVisitor);
 		cfgVisitor.doFinalThings();
 		
-		JGraph jgraph = new JGraph(new JGraphModelAdapter<CodeFragment, HiddenEdge>(graph) );
+		JGraph jgraph = new JGraph(new JGraphModelAdapter<CodeFragment, LabeledEdge>(graph) );
 		
 		jgraph.setPreferredSize(this.getSize());
 		this.getContentPane().add(jgraph);
