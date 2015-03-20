@@ -6,19 +6,37 @@ import java.util.List;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 public class CFGNode {
+	private static int lastId;
+	
+	private int id;
 	private List<IASTNode> nodes;
+	
+	static {
+		lastId = -1;
+	}
+	
+	private static int getID() {
+		lastId++;
+		return lastId;
+	}
 	
 	public CFGNode(IASTNode pNode) {
 		this.nodes = new ArrayList<IASTNode>();
 		this.nodes.add(pNode);
+		
+		this.id = CFGNode.getID();
 	}
 	
 	public CFGNode(List<IASTNode> pNodes) {
 		this.nodes = pNodes;
+		
+		this.id = CFGNode.getID();
 	}
 	
 	public CFGNode() {
 		this.nodes = new ArrayList<IASTNode>();
+		
+		this.id = CFGNode.getID();
 	}
 	
 	public void addASTNode(IASTNode pNode) {
@@ -49,7 +67,7 @@ public class CFGNode {
 	
 	@Override
 	public String toString() {
-		String result = "";
+		String result = "" + this.id + ": ";
 		for (IASTNode node : this.nodes)
 			if (node != null)
 				result += node.getRawSignature() + "\n";
