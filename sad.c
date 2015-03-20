@@ -1,12 +1,11 @@
 int sad(int a, int b, int c) {
-	switch (a) {
-	case 0:
-		b = 2;
-	case 2:
-		b = 3;
-		break;
-	default:
-		c = 0;
+	while (1) {
+		if (a == 0)
+			continue;
+		a++;
+		--b;
+		if (b == -1)
+			break;
 	}
 
 	return a;

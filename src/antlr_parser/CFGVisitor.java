@@ -1,4 +1,6 @@
-package parser;
+package antlr_parser;
+
+import it.unisa.ocelot.cfg.LabeledEdge;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -17,16 +19,15 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.omg.IOP.CodecFactory;
 
-import parser.CParser.BlockItemContext;
-import parser.CParser.BlockItemListContext;
-import parser.CParser.CompoundStatementContext;
-import parser.CParser.DeclarationContext;
-import parser.CParser.ExpressionStatementContext;
-import parser.CParser.IterationStatementContext;
-import parser.CParser.JumpStatementContext;
-import parser.CParser.LabeledStatementContext;
-import parser.CParser.SelectionStatementContext;
-import util.LabeledEdge;
+import antlr_parser.CParser.BlockItemContext;
+import antlr_parser.CParser.BlockItemListContext;
+import antlr_parser.CParser.CompoundStatementContext;
+import antlr_parser.CParser.ExpressionStatementContext;
+import antlr_parser.CParser.DeclarationContext;
+import antlr_parser.CParser.IterationStatementContext;
+import antlr_parser.CParser.JumpStatementContext;
+import antlr_parser.CParser.LabeledStatementContext;
+import antlr_parser.CParser.SelectionStatementContext;
 
 public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 	private static final int L_INPUT = 0;
@@ -67,8 +68,8 @@ public class CFGVisitor extends CBaseVisitor<List<List<CodeFragment>>> {
 			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()), "goto");
 		}
 		
-		for (CodeFragment fragment : this.graph.vertexSet()) {
-			Set<LabeledEdge> edges = this.graph.edgesOf(fragment);
+		for (CodeFragment node : this.graph.vertexSet()) {
+			Set<LabeledEdge> edges = this.graph.outgoingEdgesOf(node);
 			if (edges.contains(TRUE_EDGE)) {
 				for (LabeledEdge edge : edges)
 					if (edge.equals(GOTO_EDGE))

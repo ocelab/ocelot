@@ -1,4 +1,4 @@
-package parser;
+package antlr_parser;
 
 import org.antlr.v4.runtime.TokenStream;
 

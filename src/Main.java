@@ -1,3 +1,9 @@
+import it.unisa.ocelot.cfg.CFG;
+import it.unisa.ocelot.cfg.CFGVisitor;
+import it.unisa.ocelot.cfg.CFGNode;
+import it.unisa.ocelot.cfg.LabeledEdge;
+import it.unisa.ocelot.util.Utils;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -14,25 +20,35 @@ import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.*;
 import org.jgraph.JGraph;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.ListenableDirectedGraph;
 
-import parser.CFGNode;
-import parser.CFGVisitor;
-import parser.CLexer;
-import parser.CParser;
-import parser.CVisitor;
-import parser.CodeFragment;
-import parser.CDT_CFGVisitor;
-import parser.CParser.CompilationUnitContext;
-import util.LabeledEdge;
-import util.Utils;
+import antlr_parser.CLexer;
+import antlr_parser.CParser;
+import antlr_parser.CVisitor;
+import antlr_parser.CodeFragment;
+import antlr_parser.CParser.CompilationUnitContext;
+
+import com.jgraph.layout.tree.JGraphTreeLayout;
 
 public class Main extends JFrame {
 	public static void main(String[] args) throws Exception {
-		Main main = new Main(args[0], 1);
-		main.setVisible(true);
+		Main main1 = new Main(args[0], 1);
+		Main main2 = new Main(args[0]);
+			
+		if (main1.graph.edgeSet().equals(main2.graph.edgeSet()))
+			System.out.println("OK");
+		else {
+			System.out.println("NO");
+			main1.setVisible(true);
+			main2.setVisible(true);
+		}
+			
 	}
+	
+	public Graph graph;
 	
 	public Main(String pSourceFile) throws IOException {
 		this.setSize(600, 600);
@@ -47,7 +63,7 @@ public class Main extends JFrame {
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 		CParser parser = new CParser(tokenStream);
 		//CVisitor<CodeFragment> instrumented = new InstrumentatorVisitor();
-		CFGVisitor cfgVisitor = new CFGVisitor(graph, tokenStream);
+		antlr_parser.CFGVisitor cfgVisitor = new antlr_parser.CFGVisitor(graph, tokenStream);
 		CompilationUnitContext tree = parser.compilationUnit();
 		
 		cfgVisitor.prepare();
@@ -58,6 +74,8 @@ public class Main extends JFrame {
 		
 		jgraph.setPreferredSize(this.getSize());
 		this.getContentPane().add(jgraph);
+		
+		this.graph = graph;
 	}
 	
 	public Main(String pSourceFile, int second) throws Exception {
@@ -65,10 +83,10 @@ public class Main extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		String code = Utils.readFile(pSourceFile);
-		DirectedGraph<CFGNode, LabeledEdge> graph = new DefaultDirectedGraph<CFGNode, LabeledEdge>(LabeledEdge.class);
+		CFG graph = new CFG();
 		
 		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray());
-		CDT_CFGVisitor visitor = new CDT_CFGVisitor(graph);
+		CFGVisitor visitor = new CFGVisitor(graph);
 		
 		visitor.shouldVisitStatements = true;
 		visitor.prepare();
@@ -79,15 +97,17 @@ public class Main extends JFrame {
 		
 		jgraph.setPreferredSize(this.getSize());
 		this.getContentPane().add(jgraph);
+		
+		this.graph = graph;
 	}
 	
 	
 	public static void dmain(String[] args) throws Exception {
 		String code = Utils.readFile(args[0]);
-		DirectedGraph<CFGNode, LabeledEdge> graph = new DefaultDirectedGraph<CFGNode, LabeledEdge>(LabeledEdge.class);
+		CFG graph = new CFG();
 		
 		IASTTranslationUnit translationUnit = parse(code.toCharArray());
-		ASTVisitor visitor = new CDT_CFGVisitor(graph);
+		ASTVisitor visitor = new CFGVisitor(graph);
 		
 		visitor.shouldVisitStatements = true;
 		translationUnit.accept(visitor);
