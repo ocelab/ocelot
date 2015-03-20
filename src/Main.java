@@ -17,19 +17,20 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
+import parser.CFGNode;
 import parser.CFGVisitor;
 import parser.CLexer;
 import parser.CParser;
 import parser.CVisitor;
 import parser.CodeFragment;
-import parser.InstrumentatorVisitor;
+import parser.CDT_CFGVisitor;
 import parser.CParser.CompilationUnitContext;
 import util.LabeledEdge;
 import util.Utils;
 
 public class Main extends JFrame {
-	public static void main(String[] args) throws IOException {
-		Main main = new Main(args[0]);
+	public static void main(String[] args) throws Exception {
+		Main main = new Main(args[0], 1);
 		main.setVisible(true);
 	}
 	
@@ -45,7 +46,7 @@ public class Main extends JFrame {
 		Lexer lexer = new CLexer(stream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 		CParser parser = new CParser(tokenStream);
-		CVisitor<CodeFragment> instrumented = new InstrumentatorVisitor();
+		//CVisitor<CodeFragment> instrumented = new InstrumentatorVisitor();
 		CFGVisitor cfgVisitor = new CFGVisitor(graph, tokenStream);
 		CompilationUnitContext tree = parser.compilationUnit();
 		
@@ -59,24 +60,36 @@ public class Main extends JFrame {
 		this.getContentPane().add(jgraph);
 	}
 	
+	public Main(String pSourceFile, int second) throws Exception {
+		this.setSize(600, 600);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		String code = Utils.readFile(pSourceFile);
+		DirectedGraph<CFGNode, LabeledEdge> graph = new DefaultDirectedGraph<CFGNode, LabeledEdge>(LabeledEdge.class);
+		
+		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray());
+		CDT_CFGVisitor visitor = new CDT_CFGVisitor(graph);
+		
+		visitor.shouldVisitStatements = true;
+		visitor.prepare();
+		translationUnit.accept(visitor);
+		visitor.doFinalThings();
+		
+		JGraph jgraph = new JGraph(new JGraphModelAdapter<CFGNode, LabeledEdge>(graph));
+		
+		jgraph.setPreferredSize(this.getSize());
+		this.getContentPane().add(jgraph);
+	}
+	
 	
 	public static void dmain(String[] args) throws Exception {
-		String code = "typedef float myType; void f(int i) {} void f(double d) {} " +
-				"void main() { myType var = 4; f(var); }";
-		IASTTranslationUnit translationUnit = parse(code.toCharArray());
-		ASTVisitor visitor = new ASTVisitor() {
-			@Override public int visit(IASTName name) {
-				if (name.isReference()) {
-					IBinding b = name.resolveBinding();
-					IType type = (b instanceof IFunction) ? ((IFunction) b).getType() : null;
-					if (type != null)
-						System.out.print("Referencing " + name + ", type " + ASTTypeUtil.getType(type));
-				}
-				return ASTVisitor.PROCESS_CONTINUE;
-			}
-		};
+		String code = Utils.readFile(args[0]);
+		DirectedGraph<CFGNode, LabeledEdge> graph = new DefaultDirectedGraph<CFGNode, LabeledEdge>(LabeledEdge.class);
 		
-		visitor.shouldVisitNames = true;
+		IASTTranslationUnit translationUnit = parse(code.toCharArray());
+		ASTVisitor visitor = new CDT_CFGVisitor(graph);
+		
+		visitor.shouldVisitStatements = true;
 		translationUnit.accept(visitor);
 	}
 	
