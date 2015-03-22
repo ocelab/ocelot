@@ -1,4 +1,6 @@
 package it.unisa.ocelot.cfg;
+import it.unisa.ocelot.simulator.ExecutionEvent;
+
 import org.jgrapht.graph.DefaultEdge;
 
 
@@ -7,7 +9,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @author simone
  *
  */
-public class LabeledEdge extends DefaultEdge {
+public abstract class LabeledEdge extends DefaultEdge {
 	private Object label;
 	
 	/**
@@ -49,7 +51,19 @@ public class LabeledEdge extends DefaultEdge {
 		return this.label.toString();
 	}
 	
-	@Override
+	/**
+	 * Returns true if this branch matches the execution event
+	 * @return
+	 */
+	public abstract boolean matchesExecution(ExecutionEvent pEvent);
+	
+	/**
+	 * Returns true if this branch needs an event to be triggered in order to execute
+	 * @return
+	 */
+	public abstract boolean needsEvent();
+	
+	/**@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof LabeledEdge))
 			return false;
@@ -63,4 +77,5 @@ public class LabeledEdge extends DefaultEdge {
 			return edge.label.equals(this.label);
 		}
 	}
+	**/
 }

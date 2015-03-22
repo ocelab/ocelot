@@ -3,6 +3,10 @@ package it.unisa.ocelot.cfg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.cdt.core.dom.ast.IASTBreakStatement;
+import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
+import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
+import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 /**
@@ -74,7 +78,7 @@ public class CFGNode {
 	 * Joins another CFGNode to this one.
 	 * @param pNode CFGNode to be joined
 	 */
-	public void addASTNode(CFGNode pNode) {
+	public void join(CFGNode pNode) {
 		this.nodes.addAll(pNode.nodes);
 	}
 	
@@ -92,6 +96,38 @@ public class CFGNode {
 	 */
 	public List<IASTNode> getNodes() {
 		return this.nodes;
+	}
+	
+	/**
+	 * Returns the ID of the node
+	 * @return
+	 */
+	public int getId() {
+		return id;
+	}
+	
+	public boolean isContinue() {
+		if (this.nodes.size() == 1 && this.nodes.get(0) instanceof IASTContinueStatement)
+			return true;
+		return false;
+	}
+	
+	public boolean isBreak() {
+		if (this.nodes.size() == 1 && this.nodes.get(0) instanceof IASTBreakStatement)
+			return true;
+		return false;
+	}
+	
+	public boolean isGoto() {
+		if (this.nodes.size() == 1 && this.nodes.get(0) instanceof IASTGotoStatement)
+			return true;
+		return false;
+	}
+	
+	public boolean isCase() {
+		if (this.nodes.size() > 0 && this.nodes.get(0) instanceof IASTCaseStatement)
+			return true;
+		return false;
 	}
 	
 	@Override

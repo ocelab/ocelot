@@ -9,42 +9,34 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.Stack;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBreakStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLabelStatement;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTNullStatement;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.event.VertexSetListener;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 public class CFGVisitor extends ASTVisitor {
-	private static final LabeledEdge TRUE_EDGE = new LabeledEdge(true);
-	private static final LabeledEdge GOTO_EDGE = new LabeledEdge("goto");
-	
 	private ListenableDirectedGraph<CFGNode, LabeledEdge> graph;
 	private Map<String, CFGNode> labels;
 	private List<Entry<String, CFGNode>> gotos;
 	private List<CFGNode> returns;
 	private Stack<SubGraph> ioHandlers;
-	private CFGListener graphListener;
 	
 	/**
 	 * Creates a visitor of the C syntax tree able to generate its Control Flow Graph.  
@@ -56,44 +48,77 @@ public class CFGVisitor extends ASTVisitor {
 		this.gotos = new ArrayList<Entry<String, CFGNode>>();
 		this.returns = new ArrayList<CFGNode>();
 		this.ioHandlers = new Stack<SubGraph>();
-	}
-	
-	/**
-	 * Prepares for the visit. Sets up everything.
-	 */
-	public void prepare() {
-		CFGNode.reset();
-		CFGNode start = new CFGNode();
 		
-		this.graphListener = new CFGListener(start);
-		this.graph.addVertexSetListener(this.graphListener);
+		this.shouldVisitDeclarations = true;
+		this.shouldVisitStatements = true;
 	}
 	
-	/**
-	 * Called when everything has been visited.
-	 */
-	public void doFinalThings() {
+	protected void onExit() {
 		for (Entry<String, CFGNode> entry : this.gotos) {
-			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()), "goto");
+			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()), FlowEdge.class);
 		}
 		
+		List<CFGNode> toRemove = new ArrayList<CFGNode>();
 		for (CFGNode node : this.graph.vertexSet()) {
 			Set<LabeledEdge> edges = this.graph.outgoingEdgesOf(node);
-			if (edges.contains(TRUE_EDGE)) {
-				for (LabeledEdge edge : edges)
-					if (edge.equals(GOTO_EDGE))
-						edge.setLabel(false);
+			boolean hasTrueEdge = false;
+			for (LabeledEdge edge : edges) {
+				if (edge instanceof TrueEdge)
+					hasTrueEdge = true;
+			}
+			
+			if (hasTrueEdge) {
+				for (LabeledEdge edge : edges) {
+					if (edge instanceof FlowEdge) {
+						CFGNode source = this.graph.getEdgeSource(edge);
+						CFGNode dest = this.graph.getEdgeTarget(edge);
+						this.graph.removeEdge(edge);
+						this.setOutput(source, dest, FalseEdge.class);
+					}
+				}
+			}
+			
+			if (node.isContinue() || node.isBreak() || node.isGoto()) {
+				Set<LabeledEdge> incomingEdges = this.graph.incomingEdgesOf(node);
+				Set<LabeledEdge> outgoingEdges = this.graph.outgoingEdgesOf(node);
+				
+				for (LabeledEdge incoming : incomingEdges)
+					for (LabeledEdge outgoing : outgoingEdges) {
+						CFGNode source = this.graph.getEdgeSource(incoming);
+						CFGNode dest = this.graph.getEdgeTarget(outgoing);
+						this.setOutput(source, dest, (LabeledEdge)incoming.clone());
+						toRemove.add(node);
+					}
 			}
 		}
 		
-		CFGNode endNode = new CFGNode();
-		this.graph.removeVertexSetListener(this.graphListener);
-		this.graph.addVertex(endNode);
-		this.setOutput(this.returns, endNode, "goto");
-		if (!this.graph.containsEdge(this.graphListener.getEndNode(), endNode))
-			this.setOutput(this.graphListener.getEndNode(), endNode, "goto");
+		for (CFGNode dead : toRemove)
+			this.graph.removeVertex(dead);
 	}
 	
+	@Override
+	public int visit(IASTDeclaration name) {
+		if (name instanceof IASTFunctionDefinition) {
+			CFGNode.reset();
+			CFGNode startingNode = new CFGNode();
+			this.graph.addVertex(startingNode);
+			IASTFunctionDefinition function = (IASTFunctionDefinition)name;
+			
+			function.getBody().accept(this);
+			SubGraph body = this.ioHandlers.pop();
+			
+			CFGNode endingNode = new CFGNode();
+			this.graph.addVertex(endingNode);
+			
+			this.setOutput(startingNode, body.getInput(), FlowEdge.class);
+			this.setOutput(body.getOutput(), endingNode, FlowEdge.class);
+			this.setOutput(body.getBreaks(), endingNode, FlowEdge.class);
+			
+			this.onExit();
+		}
+		
+		return PROCESS_SKIP;
+	}
 	
 	//#############################################
 	//# Normal statements					  	  #
@@ -105,26 +130,69 @@ public class CFGVisitor extends ASTVisitor {
 	 */
 	public void visit(IASTCompoundStatement pStatement) {
 		SubGraph result = new SubGraph();
+		boolean keepItSimple = false;
 		
 		if (pStatement.getStatements().length != 0) {
 			pStatement.getStatements()[0].accept(this);
-			SubGraph lastNode = this.ioHandlers.pop();
+			SubGraph lastSubGraph = this.ioHandlers.pop();
 			
-			result.addInput(lastNode.getInput());
-			result.inheritOthers(lastNode);
+			result.inheritInput(lastSubGraph);
+			result.inheritOthers(lastSubGraph);
+			
+			if (this.isSimpleStatement(pStatement.getStatements()[0]) || this.isStartingSimpleStatement(pStatement.getStatements()[0]))
+				keepItSimple = true;
 			
 			for (int i = 1; i < pStatement.getStatements().length; i++) {
-				pStatement.getStatements()[i].accept(this);
-				SubGraph currentNode = this.ioHandlers.pop();
+				IASTStatement currentStatement = pStatement.getStatements()[i];
+				currentStatement.accept(this);
+				SubGraph currentSubGraph = this.ioHandlers.pop();
 				
-				this.setOutput(lastNode.getOutput(), currentNode.getInput(), "goto");
+				if (this.isSimpleStatement(currentStatement) || this.isEndingSimpleStatement(currentStatement)) {
+					if (keepItSimple) {
+						CFGNode lastVertex = lastSubGraph.getInput().get(0);
+						CFGNode newVertex = currentSubGraph.getInput().get(0);
+						
+						lastVertex.join(newVertex);
+						lastSubGraph.inheritBreak(currentSubGraph);
+						lastSubGraph.inheritContinue(currentSubGraph);
+						if (currentSubGraph.getOutput().size() == 0)
+							lastSubGraph.resetOutput();
+						currentSubGraph = lastSubGraph;
+						
+						currentSubGraph.joinVertices(newVertex, lastVertex);
+						this.joinVertices(newVertex, lastVertex);
+					} else {
+						keepItSimple = true;
+						this.setOutput(lastSubGraph.getOutput(), currentSubGraph.getInput(), FlowEdge.class);
+					}
+					
+					if (this.isEndingSimpleStatement(currentStatement))
+						keepItSimple = false;
+				} else {
+					keepItSimple = false;
+					if (currentSubGraph.getInput().get(0).isCase()) {
+						IASTCaseStatement caseSt = (IASTCaseStatement)currentSubGraph.getInput().get(0).getLeadingNode();
+						String label = caseSt.getExpression().getRawSignature();
+						this.setOutput(lastSubGraph.getOutput(), currentSubGraph.getInput(), new CaseEdge(label));
+					}else
+						this.setOutput(lastSubGraph.getOutput(), currentSubGraph.getInput(), FlowEdge.class);
+				}
 				
-				result.inheritOthers(currentNode);
+				if (this.isStartingSimpleStatement(currentStatement))
+					keepItSimple = true;
 				
-				lastNode = currentNode;
+				result.inheritOthers(currentSubGraph);
+				
+				lastSubGraph = currentSubGraph;
 			}
+				
 			
-			result.inheritOutput(lastNode);
+			result.inheritOutput(lastSubGraph);
+		} else {
+			CFGNode voidBlock = new CFGNode(pStatement);
+			this.graph.addVertex(voidBlock);
+			result.addInput(voidBlock);
+			result.addOutput(voidBlock);
 		}
 			
 		
@@ -208,12 +276,12 @@ public class CFGVisitor extends ASTVisitor {
 		result.inheritOutput(thenSubGraph);
 		result.inheritOthers(thenSubGraph);
 		
-		this.setOutput(condition, thenSubGraph.getInput(), true);
+		this.setOutput(condition, thenSubGraph.getInput(), TrueEdge.class);
 		if (elsePresent) {
 			pStatement.getElseClause().accept(this);
 			elseSubGraph = this.ioHandlers.pop();
 			
-			this.setOutput(condition, elseSubGraph.getInput(), false);
+			this.setOutput(condition, elseSubGraph.getInput(), FalseEdge.class);
 			
 			result.inheritOutput(elseSubGraph);
 			result.inheritOthers(elseSubGraph);
@@ -249,7 +317,7 @@ public class CFGVisitor extends ASTVisitor {
 			} else
 				label = "default";
 			
-			this.setOutput(expression, caseNode, label);
+			this.setOutput(expression, caseNode, new CaseEdge(label));
 		}
 		
 		result.addInput(expression);
@@ -277,9 +345,9 @@ public class CFGVisitor extends ASTVisitor {
 		pStatement.getBody().accept(this);
 		SubGraph bodySubGraph = this.ioHandlers.pop();
 		
-		this.setOutput(condition, bodySubGraph.getInput(), true);
-		this.setOutput(bodySubGraph.getOutput(), condition, "goto");
-		this.setOutput(bodySubGraph.getContinues(), condition, "goto");
+		this.setOutput(condition, bodySubGraph.getInput(), TrueEdge.class);
+		this.setOutput(bodySubGraph.getOutput(), condition, FlowEdge.class);
+		this.setOutput(bodySubGraph.getContinues(), condition, FlowEdge.class);
 		
 		result.addInput(condition);
 		result.addOutput(condition);
@@ -298,9 +366,9 @@ public class CFGVisitor extends ASTVisitor {
 		pStatement.getBody().accept(this);
 		SubGraph bodySubGraph = this.ioHandlers.pop();
 		
-		this.setOutput(condition, bodySubGraph.getInput(), true);
-		this.setOutput(bodySubGraph.getOutput(), condition, "goto");
-		this.setOutput(bodySubGraph.getContinues(), condition, "goto");
+		this.setOutput(condition, bodySubGraph.getInput(), TrueEdge.class);
+		this.setOutput(bodySubGraph.getOutput(), condition, FlowEdge.class);
+		this.setOutput(bodySubGraph.getContinues(), condition, FlowEdge.class);
 		
 		result.inheritInput(bodySubGraph);
 		result.addOutput(condition);
@@ -329,11 +397,11 @@ public class CFGVisitor extends ASTVisitor {
 		pStatement.getBody().accept(this);
 		SubGraph bodySubGraph = this.ioHandlers.pop();
 		
-		this.setOutput(initSubGraph.getOutput(), condition, "goto");
-		this.setOutput(condition, bodySubGraph.getInput(), true);
-		this.setOutput(bodySubGraph.getOutput(), incr, "goto");
-		this.setOutput(incr, condition, "goto");
-		this.setOutput(bodySubGraph.getContinues(), incr, "goto");
+		this.setOutput(initSubGraph.getOutput(), condition, FlowEdge.class);
+		this.setOutput(condition, bodySubGraph.getInput(), TrueEdge.class);
+		this.setOutput(bodySubGraph.getOutput(), incr, FlowEdge.class);
+		this.setOutput(incr, condition, FlowEdge.class);
+		this.setOutput(bodySubGraph.getContinues(), incr, FlowEdge.class);
 		
 		result.inheritInput(initSubGraph);
 		result.inheritCase(bodySubGraph);
@@ -474,6 +542,7 @@ public class CFGVisitor extends ASTVisitor {
 	 */
 	@Override
 	public int visit(IASTStatement statement) {
+		System.out.println(statement.getClass().toString());
 		if (statement instanceof IASTCompoundStatement)
 			this.visit((IASTCompoundStatement)statement);
 		else if (statement instanceof IASTDeclarationStatement)
@@ -513,7 +582,7 @@ public class CFGVisitor extends ASTVisitor {
 	}
 	
 	/**
-	 * @deprecated
+	 * 
 	 */
 	private boolean isSimpleStatement(IASTStatement pStatement) {
 		return  (pStatement instanceof IASTExpressionStatement) || 
@@ -521,18 +590,53 @@ public class CFGVisitor extends ASTVisitor {
 				(pStatement instanceof IASTDeclarationStatement);
 	}
 	
+	private boolean isStartingSimpleStatement(IASTStatement pStatement) {
+		return  (pStatement instanceof IASTLabelStatement) 	|| 
+				(pStatement instanceof IASTCaseStatement)	||
+				(pStatement instanceof IASTDefaultStatement);
+	}
+	
+	private boolean isEndingSimpleStatement(IASTStatement pStatement) {
+		return  (pStatement instanceof IASTBreakStatement)  || 
+				(pStatement instanceof IASTReturnStatement)	||
+				(pStatement instanceof IASTGotoStatement) 	||
+				(pStatement instanceof IASTContinueStatement);
+	}
+	
+	private void joinVertices(CFGNode pToRemove, CFGNode pNewNode) {
+		if (this.returns.contains(pToRemove)) {
+			this.returns.remove(pToRemove);
+			this.returns.add(pNewNode);
+		}
+		
+		for (Entry<String, CFGNode> node : this.gotos) {
+			if (node.getValue().equals(pToRemove))
+				node.setValue(pNewNode);
+		}
+		
+		this.graph.removeVertex(pToRemove);
+	}
 	
 	/**
 	 * Links the given output to the given input in the CFG
 	 * @param pOut From which nodes start the edges
 	 * @param pIn In which nodes arrive the edges
 	 */
-	private void setOutput(List<CFGNode> pOut, List<CFGNode> pIn, Object pLabel) {
+	private void setOutput(List<CFGNode> pOut, List<CFGNode> pIn, Class<? extends LabeledEdge> pLabel) {
 		for (CFGNode out : pOut) 
-			for (CFGNode in : pIn) {
-				LabeledEdge edge = this.graph.addEdge(out, in);
-				edge.setLabel(pLabel);
-			}
+			for (CFGNode in : pIn)
+				this.setOutput(out, in, pLabel);
+	}
+	
+	/**
+	 * Links the given output to the given input in the CFG
+	 * @param pOut From which nodes start the edges
+	 * @param pIn In which nodes arrive the edges
+	 */
+	private void setOutput(List<CFGNode> pOut, List<CFGNode> pIn, LabeledEdge pEdge) {
+		for (CFGNode out : pOut) 
+			for (CFGNode in : pIn)
+				this.setOutput(out, in, pEdge);
 	}
 	
 	/**
@@ -540,11 +644,9 @@ public class CFGVisitor extends ASTVisitor {
 	 * @param pOut From which node start the edges
 	 * @param pIn In which nodes arrive the edges
 	 */
-	private void setOutput(CFGNode pOut, List<CFGNode> pIn, Object pLabel) {
-		for (CFGNode in: pIn) {
-			LabeledEdge edge = this.graph.addEdge(pOut, in);
-			edge.setLabel(pLabel);
-		}
+	private void setOutput(CFGNode pOut, List<CFGNode> pIn, Class<? extends LabeledEdge> pLabel) {
+		for (CFGNode in: pIn)
+			this.setOutput(pOut, in, pLabel);
 	}
 	
 	/**
@@ -552,10 +654,22 @@ public class CFGVisitor extends ASTVisitor {
 	 * @param pOut From which nodes start the edges
 	 * @param pIn In which node arrive the edges
 	 */
-	private void setOutput(List<CFGNode> pOut, CFGNode pIn, Object pLabel) {
-		for (CFGNode out: pOut) {
-			LabeledEdge edge = this.graph.addEdge(out, pIn);
-			edge.setLabel(pLabel);
+	private void setOutput(List<CFGNode> pOut, CFGNode pIn, Class<? extends LabeledEdge> pLabel) {
+		for (CFGNode out: pOut)
+			this.setOutput(out, pIn, pLabel);
+	}
+	
+	/**
+	 * Links the given output to the given input in the CFG
+	 * @param pOut From which node start the edges
+	 * @param pIn In which node arrive the edges
+	 */
+	private void setOutput(CFGNode pOut, CFGNode pIn, Class<? extends LabeledEdge> pLabel) {
+		try {
+			LabeledEdge edge = pLabel.newInstance();
+			this.graph.addEdge(pOut, pIn, edge);
+		} catch (IllegalAccessException e) {
+		} catch (InstantiationException e) {
 		}
 	}
 	
@@ -564,8 +678,7 @@ public class CFGVisitor extends ASTVisitor {
 	 * @param pOut From which node start the edges
 	 * @param pIn In which node arrive the edges
 	 */
-	private void setOutput(CFGNode pOut, CFGNode pIn, Object pLabel) {
-			LabeledEdge edge = this.graph.addEdge(pOut, pIn);
-			edge.setLabel(pLabel);
+	private void setOutput(CFGNode pOut, CFGNode pIn, LabeledEdge pEdge) {
+		this.graph.addEdge(pOut, pIn, pEdge);
 	}
 }

@@ -76,6 +76,14 @@ public class SubGraph {
 	}
 	
 	/**
+	 * Removes all output nodes
+	 * @param pGraph
+	 */
+	public void resetOutput() {
+		this.output.clear();
+	}
+	
+	/**
 	 * Adds a CFGNode to the list of cases nodes of the sub-graph.
 	 * @param pNode Node to be added
 	 */
@@ -155,6 +163,18 @@ public class SubGraph {
 		this.inheritContinue(pGraph);
 		this.inheritBreak(pGraph);
 		this.inheritCase(pGraph);
+	}
+	
+	public void joinVertices(CFGNode pToRemove, CFGNode pNewVertex) {
+		if (this.breaks.contains(pToRemove)) {
+			this.breaks.remove(pToRemove);
+			this.breaks.add(pNewVertex);
+		}
+		
+		if (this.continues.contains(pToRemove)) {
+			this.continues.remove(pToRemove);
+			this.continues.add(pNewVertex);
+		}
 	}
 	
 	/**
