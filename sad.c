@@ -1,12 +1,16 @@
-int sad(int a, int b, int c) {
-	while (1) {
-		if (a == 0)
-			continue;
-		a++;
-		--b;
-		if (b == -1)
-			break;
-	}
+#include "ocelot.h"
 
-	return a;
+void main(SSLContext *ctx, SSLSignatureAndHashAlgorithm sigAlg, SSLBuffer exchangeParams, SSLBuffer signature, size_t *actSigLen)
+{
+	main(a, b, c);
+	int i;
+	int z;
+    while (1) {
+    	switch (i) {
+    	case 0:
+    		break;
+    	default:
+    		exit(0);
+    	}
+    }
 }
