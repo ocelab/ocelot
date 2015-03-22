@@ -21,6 +21,7 @@ import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.*;
+import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 import org.jgraph.JGraph;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -96,12 +97,13 @@ public class Main extends JFrame {
 		String code = Utils.readFile(pSourceFile);
 		CFG graph = new CFG();
 		
-		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray());
+		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray()).copy();
 		InstrumentatorVisitor visitor = new InstrumentatorVisitor();
 		
 		translationUnit.accept(visitor);
 		
-		System.out.println(translationUnit.getRawSignature());
+		ASTWriter writer = new ASTWriter();
+		System.out.println(writer.write(translationUnit));
 				
 		this.graph = graph;
 	}
