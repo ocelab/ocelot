@@ -19,7 +19,7 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *
 jint _f_ocelot_intval(JNIEnv*, jobject);
 jdouble _f_ocelot_doubleval(JNIEnv*, jobject);
 
-#define OCELOT_GETA(i) (*env)->GetObjectArrayElement(env, arguments, i)
+#define OCELOT_ARG(i) (*env)->GetObjectArrayElement(env, arguments, i)
 #define OCELOT_INT(object) _f_ocelot_intval(env, object)
 #define OCELOT_DOUBLE(object) _f_ocelot_doubleval(env, object)
 

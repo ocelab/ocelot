@@ -40,37 +40,71 @@ double _f_ocelot_get_fcall() {
 }
 
 double _f_ocelot_eq_numeric(double op1, double op2) {
-	return op2-op1;
-}
-double _f_ocelot_eq_pointer(void* op1, void* op2) {
-	return op2-op1;
+	double k = abs(op1 - op2);
+	double result;
+	if (k == 0.0D)
+		result = 0.0D;
+	else
+		result = k+OCELOT_K;
+
+	return result;
 }
 
 double _f_ocelot_gt_numeric(double op1, double op2) {
-	printf("%f - %f ", op1, op2);
-	return op2-op1;
-}
-double _f_ocelot_gt_pointer(void* op1, void* op2) {
-	return op2-op1;
+	double result;
+	if (op2 - op1 < 0.0D) {
+		result = 0.0D;
+	} else {
+		result = (op2 - op1) + OCELOT_K;
+	}
+	return result;
 }
 
 double _f_ocelot_ge_numeric(double op1, double op2) {
-	return op2-op1;
-}
-double _f_ocelot_ge_pointer(void* op1, void* op2) {
-	return op2-op1;
+	double result;
+	if (op2 - op1 <= 0.0D) {
+		result = 0.0D;
+	} else {
+		result = (op2 - op1) + OCELOT_K;
+	}
+
+	return result;
 }
 
 double _f_ocelot_neq_numeric(double op1, double op2) {
-	return op2-op1;
+	double k = abs(op1 - op2);
+	double result;
+
+	if (k != 0.0)
+		result = 0;
+	else
+		result = OCELOT_K;
+
+	return result;
+}
+
+double _f_ocelot_eq_pointer(void* op1, void* op2) {
+	return 0;
+}
+double _f_ocelot_gt_pointer(void* op1, void* op2) {
+	return 0;
+}
+double _f_ocelot_ge_pointer(void* op1, void* op2) {
+	return 0;
 }
 double _f_ocelot_neq_pointer(void* op1, void* op2) {
-	return op2-op1;
+	return 0;
 }
 
 double _f_ocelot_and(double op1, double op2) {
-	return op2+op1;
+	if (op1 > op2)
+		return op1;
+	else
+		return op2;
 }
 double _f_ocelot_or(double op1, double op2) {
-	return op2+op1;
+	if (op1 < op2)
+			return op1;
+		else
+			return op2;
 }

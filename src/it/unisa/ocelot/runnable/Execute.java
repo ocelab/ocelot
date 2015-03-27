@@ -13,10 +13,9 @@ public class Execute {
 		EventsHandler h = new EventsHandler();
 		
 		Object[] arguments = new Object[4];
-		arguments[0] = new Integer(12);
-		arguments[1] = new Integer(12);
-		arguments[2] = new Integer(12);
-		arguments[3] = new Integer(12);
+		arguments[0] = new Integer(3);
+		arguments[1] = new Integer(4);
+		arguments[2] = new Integer(54);
 		
 		bridge.getEvents(h, arguments);
 		

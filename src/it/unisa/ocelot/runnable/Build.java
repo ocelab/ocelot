@@ -25,14 +25,16 @@ import it.unisa.ocelot.util.Utils;
  */
 public class Build {
 	public static void main(String[] args) throws Exception {
-		System.out.println("Instrumenting C file...");
+		System.out.print("Instrumenting C file... ");
 		instrument();
+		System.out.println("Done!");
 		
-		System.out.println("Defining test function call...");
+		System.out.print("Defining test function call... ");
 		enrichJNICall();
+		System.out.println("Done!");
 		
 		
-		System.out.println("Building makefile...");
+		System.out.print("Building makefile... ");
 		JNIMakefileGenerator generator = null; 
 		String os = System.getProperty("os.name");
 		
@@ -48,8 +50,9 @@ public class Build {
 			System.err.println("Your operative system \"" + os + "\" is not supported");
 			System.exit(-1);
 		}
+		System.out.println("Done!");
 		
-		System.out.println("Building library...");
+		System.out.print("Building library... ");
 		generator.generate();
 		
 		Process proc = Runtime.getRuntime().exec(new String[] {"make", "--directory=jni"});
@@ -64,6 +67,9 @@ public class Build {
 			System.out.println("ABORTED. An error occurred: " + result);
 		}
 		
+		System.out.println("Done!");
+		
+		System.out.println("\nEverything done.");
 	}
 	
 	public static void instrument() throws Exception {
@@ -77,17 +83,17 @@ public class Build {
 		ASTWriter writer = new ASTWriter();
 		String outputCode = writer.write(translationUnit);
 		
-		Utils.writeFile("jni/main.c", outputCode);
-		Utils.writeFile("jni/main.h", Utils.readFile("testobject/main.h"));
+		Utils.writeFile("jni/main.c", "#include \"main.h\"\n" + outputCode);
+		Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
 	}
 	
 	public static void enrichJNICall() throws IOException {
 		String metaJNI = Utils.readFile("jni/CBridge.c");
 		
 		metaJNI = "#include \"CBridge.h\"\n" + 
-				"#define EXECUTE_OCELOT_TEST int a1 = OCELOT_INT(OCELOT_GETA(0));\\\n"+
-				"int a2 = OCELOT_INT(OCELOT_GETA(1));\\\n" +
-				"int a3 = OCELOT_INT(OCELOT_GETA(2));\\\n" +
+				"#define EXECUTE_OCELOT_TEST int a1 = OCELOT_INT(OCELOT_ARG(0));\\\n"+
+				"int a2 = OCELOT_INT(OCELOT_ARG(1));\\\n" +
+				"int a3 = OCELOT_INT(OCELOT_ARG(2));\\\n" +
 				"OCELOT_TESTFUNCTION (&a1, &a2, &a3);\n\n" + metaJNI;
 		
 		Utils.writeFile("jni/EN_CBridge.c", metaJNI);

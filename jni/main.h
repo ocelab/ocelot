@@ -1,3 +1,4 @@
+#include "ocelot.h"
 //#include <glib-object.h>
 
 #ifndef _Included_MAINTEST

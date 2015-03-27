@@ -1,3 +1,4 @@
+#include "main.h"
 void _f_ocelot_testfunction(int* red, int* green, int* blue);
 
 void _f_ocelot_testfunction(int* red, int* green, int* blue)

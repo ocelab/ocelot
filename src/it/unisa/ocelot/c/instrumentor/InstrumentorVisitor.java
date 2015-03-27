@@ -268,8 +268,6 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	public int visit(IASTStatement statement) {
-		
-		System.out.println(statement.getClass().toString());
 		if (statement instanceof IASTIfStatement)
 			this.visit((IASTIfStatement)statement);
 		else if (statement instanceof IASTSwitchStatement)

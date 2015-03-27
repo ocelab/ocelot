@@ -1,5 +1,15 @@
 #include <glib.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifndef _Included_OcelotHeader
+#define _Included_OcelotHeader
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define OCELOT_K 0.5
 
 typedef struct {
 	int choice;
@@ -24,22 +34,27 @@ double _f_ocelot_reg_fcall_pointer(void* fcall);
  */
 double _f_ocelot_get_fcall();
 
-double _f_ocelot_eq_numeric(double op1, double op2);
-double _f_ocelot_eq_pointer(void* op1, void* op2);
+double _f_ocelot_eq_numeric(double,double);
+double _f_ocelot_eq_pointer(void*, void*);
 
-double _f_ocelot_gt_numeric(double op1, double op2);
-double _f_ocelot_gt_pointer(void* op1, void* op2);
+double _f_ocelot_gt_numeric(double,double);
+double _f_ocelot_gt_pointer(void*, void*);
 
-double _f_ocelot_ge_numeric(double op1, double op2);
-double _f_ocelot_ge_pointer(void* op1, void* op2);
+double _f_ocelot_ge_numeric(double,double);
+double _f_ocelot_ge_pointer(void*, void*);
 
-double _f_ocelot_neq_numeric(double op1, double op2);
-double _f_ocelot_neq_pointer(void* op1, void* op2);
+double _f_ocelot_neq_numeric(double,double);
+double _f_ocelot_neq_pointer(void*, void*);
 
-double _f_ocelot_and(double op1, double op2);
-double _f_ocelot_or(double op1, double op2);
+double _f_ocelot_and(double, double);
+double _f_ocelot_or(double, double);
 
-double _f_ocelot_istrue(double op);
+double _f_ocelot_istrue(double);
 
 GArray *_v_ocelot_events;
 GArray *_v_ocelot_fcalls;
+
+#ifdef __cplusplus
+}
+#endif
+#endif

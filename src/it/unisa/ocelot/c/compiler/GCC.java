@@ -56,7 +56,6 @@ public class GCC implements Compiler {
 		it.unisa.ocelot.c.compiler.Compiler gcc = new GCC();
 		
 		String codeString = gcc.preprocess(new File(pSourceFilename));
-		System.out.println(codeString);
 		FileContent fc = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
 		String[] includeSearchPaths = new String[0];
