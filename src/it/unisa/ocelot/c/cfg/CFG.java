@@ -1,4 +1,4 @@
-package it.unisa.ocelot.cfg;
+package it.unisa.ocelot.c.cfg;
 
 import org.jgrapht.graph.ListenableDirectedGraph;
 

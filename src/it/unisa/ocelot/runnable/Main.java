@@ -1,27 +1,35 @@
 package it.unisa.ocelot.runnable;
-import it.unisa.ocelot.cfg.CFG;
-import it.unisa.ocelot.cfg.CFGVisitor;
-import it.unisa.ocelot.cfg.CFGNode;
-import it.unisa.ocelot.cfg.LabeledEdge;
-import it.unisa.ocelot.instrumentator.InstrumentatorVisitor;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.CFGVisitor;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
 import it.unisa.ocelot.util.Utils;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.util.*;
 
 import javax.swing.JFrame;
 
+import org.anarres.cpp.CppReader;
+import org.anarres.cpp.Preprocessor;
+import org.anarres.cpp.Token;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.cdt.core.dom.ast.*;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
-import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
 import org.eclipse.cdt.core.index.IIndex;
+import org.eclipse.cdt.core.index.IIndexFileLocation;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.*;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
+import org.eclipse.core.runtime.CoreException;
 import org.jgraph.JGraph;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -36,7 +44,7 @@ import antlr_parser.CParser.CompilationUnitContext;
 
 public class Main extends JFrame {
 	public static void main(String[] args) throws Exception {
-		Main main1 = new Main(args[0], 1,2);
+		Main main1 = new Main("testobject/main.c", 1, 2);
 			
 		main1.setVisible(true);
 	}
@@ -78,7 +86,7 @@ public class Main extends JFrame {
 		String code = Utils.readFile(pSourceFile);
 		CFG graph = new CFG();
 		
-		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray());
+		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), pSourceFile);
 		CFGVisitor visitor = new CFGVisitor(graph);
 		
 		translationUnit.accept(visitor);
@@ -97,27 +105,14 @@ public class Main extends JFrame {
 		String code = Utils.readFile(pSourceFile);
 		CFG graph = new CFG();
 		
-		IASTTranslationUnit translationUnit = Main.parse(code.toCharArray()).copy();
-		InstrumentatorVisitor visitor = new InstrumentatorVisitor();
+		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), pSourceFile).copy();
+		InstrumentorVisitor visitor = new InstrumentorVisitor();
 		
 		translationUnit.accept(visitor);
 		
 		ASTWriter writer = new ASTWriter();
 		System.out.println(writer.write(translationUnit));
-				
+		System.exit(0);
 		this.graph = graph;
-	}
-	
-	private static IASTTranslationUnit parse(char[] code) throws Exception {
-		FileContent fc = FileContent.create("/Path/ToResolveIncludePaths.cpp", code);
-		Map<String, String> macroDefinitions = new HashMap<String, String>();
-		String[] includeSearchPaths = new String[0];
-		IScannerInfo si = new ScannerInfo(macroDefinitions, includeSearchPaths);
-		IncludeFileContentProvider ifcp = IncludeFileContentProvider.getEmptyFilesProvider();
-		IIndex idx = null;
-		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
-		IParserLogService log = new DefaultLogService();
-		
-		return GCCLanguage.getDefault().getASTTranslationUnit(fc, si, ifcp, idx, options, log);
 	}
 }

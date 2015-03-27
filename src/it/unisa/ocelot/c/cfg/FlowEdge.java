@@ -1,26 +1,27 @@
-package it.unisa.ocelot.cfg;
+package it.unisa.ocelot.c.cfg;
 
 import it.unisa.ocelot.simulator.ExecutionEvent;
+
 
 /**
  * This class represents an edge with a label. The label could an object of any kind.
  * @author simone
  *
  */
-public class TrueEdge extends LabeledEdge {
-	private static final long serialVersionUID = 5916153862577936206L;
+public class FlowEdge extends LabeledEdge {
+	private static final long serialVersionUID = -6097816767281519267L;
 	
-	public TrueEdge() {
-		super(true);
+	public FlowEdge() {
+		super("");
 	}
-	
+
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
-		return pEvent.choise == 1;
+		return true;
 	}
 
 	@Override
 	public boolean needsEvent() {
-		return true;
+		return false;
 	}
 }

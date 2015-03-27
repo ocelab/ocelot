@@ -1,4 +1,4 @@
-package it.unisa.ocelot.cfg;
+package it.unisa.ocelot.c.cfg;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,13 +1,7 @@
 //#include <glib-object.h>
+#include "main.h"
 
-#define gint int
-#define gdouble double
-
-#define MAX(a, b) (a > b ? a : b)
-#define ROUND(h) (int)h
-
-void
-gimp_rgb_to_hsl_int (gint *red,
+void OCELOT_TESTFUNCTION (gint *red,
                      gint *green,
                      gint *blue)
 {
@@ -22,13 +16,13 @@ gimp_rgb_to_hsl_int (gint *red,
 
   if (r > g)
     {
-      max = MAX (r, b);
-      min = MIN (g, b);
+      max = OCELOT_MAX (r, b);
+      min = OCELOT_MIN (g, b);
     }
   else
     {
-      max = MAX (g, b);
-      min = MIN (r, b);
+      max = OCELOT_MAX (g, b);
+      min = OCELOT_MIN (r, b);
     }
 
   l = (max + min) / 2.0;
@@ -62,7 +56,7 @@ gimp_rgb_to_hsl_int (gint *red,
         h -= 255;
     }
 
-  *red   = ROUND (h);
-  *green = ROUND (s);
-  *blue  = ROUND (l);
+  *red   = OCELOT_ROUND (h);
+  *green = OCELOT_ROUND (s);
+  *blue  = OCELOT_ROUND (l);
 }

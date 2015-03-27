@@ -3,9 +3,9 @@ package it.unisa.ocelot.simulator;
 import java.util.List;
 import java.util.Set;
 
-import it.unisa.ocelot.cfg.CFG;
-import it.unisa.ocelot.cfg.CFGNode;
-import it.unisa.ocelot.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
 
 /**
  * Simulates the execution of the program on the CFG in order to calculate the distance metrics and, 

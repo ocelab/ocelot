@@ -1,4 +1,4 @@
-package it.unisa.ocelot.cfg;
+package it.unisa.ocelot.c.cfg;
 
 import it.unisa.ocelot.simulator.ExecutionEvent;
 
@@ -38,7 +38,7 @@ public class CaseEdge extends LabeledEdge {
 	
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
-		return pEvent.choise == this.uniqueID;
+		return pEvent.choice == this.uniqueID;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package it.unisa.ocelot.cfg;
+package it.unisa.ocelot.c.cfg;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 
 import org.jgrapht.graph.DefaultEdge;
