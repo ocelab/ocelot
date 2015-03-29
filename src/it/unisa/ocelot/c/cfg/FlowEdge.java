@@ -24,4 +24,9 @@ public class FlowEdge extends LabeledEdge {
 	public boolean needsEvent() {
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return "FlowEdge";
+	}
 }

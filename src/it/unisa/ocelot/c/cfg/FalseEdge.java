@@ -17,6 +17,9 @@ public class FalseEdge extends LabeledEdge {
 
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
+		if (pEvent == null)
+			return false;
+		
 		return pEvent.choice == 0;
 	}
 

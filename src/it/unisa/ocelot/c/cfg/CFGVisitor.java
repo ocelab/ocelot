@@ -32,7 +32,7 @@ import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 public class CFGVisitor extends ASTVisitor {
-	private ListenableDirectedGraph<CFGNode, LabeledEdge> graph;
+	private CFG graph;
 	private Map<String, CFGNode> labels;
 	private List<Entry<String, CFGNode>> gotos;
 	private List<CFGNode> returns;
@@ -102,6 +102,7 @@ public class CFGVisitor extends ASTVisitor {
 			CFGNode.reset();
 			CFGNode startingNode = new CFGNode();
 			this.graph.addVertex(startingNode);
+			this.graph.setStart(startingNode);
 			IASTFunctionDefinition function = (IASTFunctionDefinition)name;
 			
 			function.getBody().accept(this);
@@ -109,6 +110,7 @@ public class CFGVisitor extends ASTVisitor {
 			
 			CFGNode endingNode = new CFGNode();
 			this.graph.addVertex(endingNode);
+			this.graph.setEnd(endingNode);
 			
 			this.setOutput(startingNode, body.getInput(), FlowEdge.class);
 			this.setOutput(body.getOutput(), endingNode, FlowEdge.class);
@@ -304,6 +306,7 @@ public class CFGVisitor extends ASTVisitor {
 		SubGraph result = new SubGraph();
 		
 		CFGNode expression = new CFGNode(pStatement.getControllerExpression());
+		expression.setSwitch(true);
 		this.graph.addVertex(expression);
 		
 		pStatement.getBody().accept(this);
@@ -542,7 +545,6 @@ public class CFGVisitor extends ASTVisitor {
 	 */
 	@Override
 	public int visit(IASTStatement statement) {
-		System.out.println(statement.getClass().toString());
 		if (statement instanceof IASTCompoundStatement)
 			this.visit((IASTCompoundStatement)statement);
 		else if (statement instanceof IASTDeclarationStatement)

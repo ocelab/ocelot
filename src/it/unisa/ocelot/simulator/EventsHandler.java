@@ -14,6 +14,14 @@ public class EventsHandler {
 		this.events.add(new ExecutionEvent(pChoice, pDistanceTrue, pDistanceFalse));
 	}
 	
+	public void addCase(int pChoice, double pDistance, boolean isChosen) {
+		this.events.add(new CaseExecutionEvent(pChoice, pDistance, isChosen));
+	}
+	
+	public List<ExecutionEvent> getEvents() {
+		return events;
+	}
+	
 	@Override
 	public String toString() {
 		return this.events.toString();

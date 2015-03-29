@@ -1,62 +1,79 @@
-//#include <glib-object.h>
-#include "main.h"
-
-void OCELOT_TESTFUNCTION (gint *red,
-                     gint *green,
-                     gint *blue)
+#define gint int
+#define gdouble double
+#define ROUND(x) (int)x
+void
+gimp_hsv_to_rgb_int (gint *hue,
+                     gint *saturation,
+                     gint *value)
 {
-  gint    r, g, b;
-  gdouble h, s, l;
-  gint    min, max;
-  gint    delta;
+  gdouble h, s, v, h_temp;
+  gdouble f, p, q, t;
+  gint i;
 
-  r = *red;
-  g = *green;
-  b = *blue;
-
-  if (r > g)
+  if (*saturation == 0)
     {
-      max = OCELOT_MAX (r, b);
-      min = OCELOT_MIN (g, b);
+      *hue        = *value;
+      *saturation = *value;
+      *value      = *value;
     }
   else
     {
-      max = OCELOT_MAX (g, b);
-      min = OCELOT_MIN (r, b);
-    }
+      h = *hue;
+      s = *saturation / 255.0;
+      v = *value      / 255.0;
 
-  l = (max + min) / 2.0;
-
-  if (max == min)
-    {
-      s = 0.0;
-      h = 0.0;
-    }
-  else
-    {
-      delta = (max - min);
-
-      if (l < 128)
-        s = 255 * (gdouble) delta / (gdouble) (max + min);
+      if (h == 360)
+        h_temp = 0;
       else
-        s = 255 * (gdouble) delta / (gdouble) (511 - max - min);
+        h_temp = h;
 
-      if (r == max)
-        h = (g - b) / (gdouble) delta;
-      else if (g == max)
-        h = 2 + (b - r) / (gdouble) delta;
-      else
-        h = 4 + (r - g) / (gdouble) delta;
+      h_temp = h_temp / 60.0;
+      i = floor (h_temp);
+      f = h_temp - i;
+      p = v * (1.0 - s);
+      q = v * (1.0 - (s * f));
+      t = v * (1.0 - (s * (1.0 - f)));
 
-      h = h * 42.5;
+      switch (i)
+        {
+        case 0:
+          *hue        = ROUND (v * 255.0);
+          *saturation = ROUND (t * 255.0);
+          *value      = ROUND (p * 255.0);
+          break;
 
-      if (h < 0)
-        h += 255;
-      else if (h > 255)
-        h -= 255;
+        case 1:
+          *hue        = ROUND (q * 255.0);
+          *saturation = ROUND (v * 255.0);
+          *value      = ROUND (p * 255.0);
+          break;
+
+        case 2:
+          *hue        = ROUND (p * 255.0);
+          *saturation = ROUND (v * 255.0);
+          *value      = ROUND (t * 255.0);
+          break;
+
+        case 3:
+          *hue        = ROUND (p * 255.0);
+          *saturation = ROUND (q * 255.0);
+          *value      = ROUND (v * 255.0);
+          break;
+
+        case 4:
+          *hue        = ROUND (t * 255.0);
+          *saturation = ROUND (p * 255.0);
+          *value      = ROUND (v * 255.0);
+          break;
+
+        case 5:
+          *hue        = ROUND (v * 255.0);
+          *saturation = ROUND (p * 255.0);
+          *value      = ROUND (q * 255.0);
+          break;
+
+        default:
+        	break;
+        }
     }
-
-  *red   = OCELOT_ROUND (h);
-  *green = OCELOT_ROUND (s);
-  *blue  = OCELOT_ROUND (l);
 }

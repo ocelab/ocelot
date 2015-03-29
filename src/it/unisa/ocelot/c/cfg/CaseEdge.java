@@ -31,6 +31,10 @@ public class CaseEdge extends LabeledEdge {
 		}
 	}
 	
+	public static int retrieveUniqueId(String pLabel) {
+		return index.get(pLabel);
+	}
+	
 	public CaseEdge(String pLabel) {
 		super(pLabel);
 		this.uniqueID = CaseEdge.getUniqueID(pLabel);
@@ -38,6 +42,9 @@ public class CaseEdge extends LabeledEdge {
 	
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
+		if (pEvent == null)
+			return false;
+		
 		return pEvent.choice == this.uniqueID;
 	}
 

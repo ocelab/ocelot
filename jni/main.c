@@ -1,49 +1,69 @@
 #include "main.h"
-void _f_ocelot_testfunction(int* red, int* green, int* blue);
-
-void _f_ocelot_testfunction(int* red, int* green, int* blue)
+void gimp_hsv_to_rgb_int(int* hue, int* saturation, int* value)
 {
-    int r, g, b;
-    double h, s, l;
-    int min, max;
-    int delta;
-    r = *red;
-    g = *green;
-    b = *blue;
-    if (_f_ocelot_trace(r > g, _f_ocelot_gt_numeric((double)r, (double)g), _f_ocelot_ge_numeric((double)g, (double)r))){
-        max = (r > b ? r : b);
-        min = (g < b ? g : b);
+    double h, s, v, h_temp;
+    double f, p, q, t;
+    int i;
+    if (_f_ocelot_trace(*saturation == 0, _f_ocelot_eq_numeric(*saturation, 0), _f_ocelot_neq_numeric(*saturation, 0))){
+        *hue = *value;
+        *saturation = *value;
+        *value = *value;
     }else{
-        max = (g > b ? g : b);
-        min = (r < b ? r : b);
-    }
-    l = (max + min) / 2.0;
-    if (_f_ocelot_trace(max == min, _f_ocelot_eq_numeric((double)max, (double)min), _f_ocelot_neq_numeric((double)max, (double)min))){
-        s = 0.0;
-        h = 0.0;
-    }else{
-        delta = (max - min);
-        if (_f_ocelot_trace(l < 128, _f_ocelot_gt_numeric((double)128, (double)l), _f_ocelot_ge_numeric((double)l, (double)128)))
-            s = 255 * (double)delta / (double)(max + min);
+        h = *hue;
+        s = *saturation / 255.0;
+        v = *value / 255.0;
+        if (_f_ocelot_trace(h == 360, _f_ocelot_eq_numeric(h, 360), _f_ocelot_neq_numeric(h, 360)))
+            h_temp = 0;
         else
-            s = 255 * (double)delta / (double)(511 - max - min);
+            h_temp = h;
 
-        if (_f_ocelot_trace(r == max, _f_ocelot_eq_numeric((double)r, (double)max), _f_ocelot_neq_numeric((double)r, (double)max)))
-            h = (g - b) / (double)delta;
-        else
-            if (_f_ocelot_trace(g == max, _f_ocelot_eq_numeric((double)g, (double)max), _f_ocelot_neq_numeric((double)g, (double)max)))
-                h = 2 + (b - r) / (double)delta;
-            else
-                h = 4 + (r - g) / (double)delta;
-
-        h = h * 42.5;
-        if (_f_ocelot_trace(h < 0, _f_ocelot_gt_numeric((double)0, (double)h), _f_ocelot_ge_numeric((double)h, (double)0)))
-            h += 255;
-        else
-            if (_f_ocelot_trace(h > 255, _f_ocelot_gt_numeric((double)h, (double)255), _f_ocelot_ge_numeric((double)255, (double)h)))
-                h -= 255;
-    }
-    *red = (int)h;
-    *green = (int)s;
-    *blue = (int)l;
+        h_temp = h_temp / 60.0;
+        i = floor(h_temp);
+        f = h_temp - i;
+        p = v * (1.0 - s);
+        q = v * (1.0 - (s * f));
+        t = v * (1.0 - (s * (1.0 - f)));
+        {
+            _f_ocelot_trace_case(5, _f_ocelot_eq_numeric(i, 0), i == 0);
+            _f_ocelot_trace_case(0, _f_ocelot_eq_numeric(i, 1), i == 1);
+            _f_ocelot_trace_case(1, _f_ocelot_eq_numeric(i, 2), i == 2);
+            _f_ocelot_trace_case(2, _f_ocelot_eq_numeric(i, 3), i == 3);
+            _f_ocelot_trace_case(3, _f_ocelot_eq_numeric(i, 4), i == 4);
+            _f_ocelot_trace_case(4, _f_ocelot_eq_numeric(i, 5), i == 5);
+            _f_ocelot_trace_case(6, _f_ocelot_and(_f_ocelot_istrue(1), _f_ocelot_and(_f_ocelot_neq_numeric(i, 0), _f_ocelot_and(_f_ocelot_neq_numeric(i, 1), _f_ocelot_and(_f_ocelot_neq_numeric(i, 2), _f_ocelot_and(_f_ocelot_neq_numeric(i, 3), _f_ocelot_and(_f_ocelot_neq_numeric(i, 4), _f_ocelot_and(_f_ocelot_neq_numeric(i, 5), _f_ocelot_istrue(1)))))))), 1 && i != 0 && i != 1 && i != 2 && i != 3 && i != 4 && i != 5 && 1);
+            switch (i){
+                case 0:
+                    *hue = (int)v * 255.0;
+                    *saturation = (int)t * 255.0;
+                    *value = (int)p * 255.0;
+                    break;
+                case 1:
+                    *hue = (int)q * 255.0;
+                    *saturation = (int)v * 255.0;
+                    *value = (int)p * 255.0;
+                    break;
+                case 2:
+                    *hue = (int)p * 255.0;
+                    *saturation = (int)v * 255.0;
+                    *value = (int)t * 255.0;
+                    break;
+                case 3:
+                    *hue = (int)p * 255.0;
+                    *saturation = (int)q * 255.0;
+                    *value = (int)v * 255.0;
+                    break;
+                case 4:
+                    *hue = (int)t * 255.0;
+                    *saturation = (int)p * 255.0;
+                    *value = (int)v * 255.0;
+                    break;
+                case 5:
+                    *hue = (int)v * 255.0;
+                    *saturation = (int)p * 255.0;
+                    *value = (int)q * 255.0;
+                    break;
+                default:
+                    break;
+            }
+        }}
 }

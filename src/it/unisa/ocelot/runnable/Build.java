@@ -26,11 +26,11 @@ import it.unisa.ocelot.util.Utils;
 public class Build {
 	public static void main(String[] args) throws Exception {
 		System.out.print("Instrumenting C file... ");
-		instrument();
+		String callMacro = instrument();
 		System.out.println("Done!");
 		
 		System.out.print("Defining test function call... ");
-		enrichJNICall();
+		enrichJNICall(callMacro);
 		System.out.println("Done!");
 		
 		
@@ -72,7 +72,7 @@ public class Build {
 		System.out.println("\nEverything done.");
 	}
 	
-	public static void instrument() throws Exception {
+	public static String instrument() throws Exception {
 		String code = Utils.readFile("testobject/main.c");
 		
 		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), "testobject/main.c").copy();
@@ -85,16 +85,16 @@ public class Build {
 		
 		Utils.writeFile("jni/main.c", "#include \"main.h\"\n" + outputCode);
 		Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
+		
+		return visitor.getCallMacro();
 	}
 	
-	public static void enrichJNICall() throws IOException {
+	public static void enrichJNICall(String pCallMacro) throws IOException {
 		String metaJNI = Utils.readFile("jni/CBridge.c");
 		
-		metaJNI = "#include \"CBridge.h\"\n" + 
-				"#define EXECUTE_OCELOT_TEST int a1 = OCELOT_INT(OCELOT_ARG(0));\\\n"+
-				"int a2 = OCELOT_INT(OCELOT_ARG(1));\\\n" +
-				"int a3 = OCELOT_INT(OCELOT_ARG(2));\\\n" +
-				"OCELOT_TESTFUNCTION (&a1, &a2, &a3);\n\n" + metaJNI;
+		metaJNI = "#include \"CBridge.h\"\n" +
+				pCallMacro + "\n\n" + 
+				metaJNI;
 		
 		Utils.writeFile("jni/EN_CBridge.c", metaJNI);
 	}

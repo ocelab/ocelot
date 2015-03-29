@@ -19,6 +19,7 @@ public class CFGNode {
 	
 	private int id;
 	private List<IASTNode> nodes;
+	private boolean isSwitch;
 	
 	static {
 		lastId = -1;
@@ -130,6 +131,14 @@ public class CFGNode {
 		return false;
 	}
 	
+	public boolean isSwitch() {
+		return isSwitch;
+	}
+	
+	public void setSwitch(boolean isSwitch) {
+		this.isSwitch = isSwitch;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof CFGNode))
@@ -138,6 +147,10 @@ public class CFGNode {
 		CFGNode node = (CFGNode)obj;
 		
 		return node.nodes.equals(this.nodes);
+	}
+	
+	public boolean strongEquals(CFGNode pNode) {
+		return pNode.id == this.id;
 	}
 	
 	@Override

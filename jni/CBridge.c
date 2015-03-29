@@ -19,6 +19,7 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 
 	//Gets the "add" method of the EventHandler class
 	jmethodID addMethod = (*env)->GetMethodID(env, class, "add", "(IDD)V");
+	jmethodID addCaseMethod = (*env)->GetMethodID(env, class, "addCase", "(IDZ)V");
 
 	_f_ocelot_init();
 
@@ -27,7 +28,11 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	int i;
 	for (i = 0; i < _v_ocelot_events->len; i++) {
 		_T_ocelot_event event = g_array_index(_v_ocelot_events, _T_ocelot_event, i);
-		(*env)->CallVoidMethod(env, eventHandler, addMethod, event.choice, event.distanceTrue, event.distanceFalse);
+		if (event.kind == OCELOT_KIND_STDEV) {
+			(*env)->CallVoidMethod(env, eventHandler, addMethod, event.choice, event.distanceTrue, event.distanceFalse);
+		} else {
+			(*env)->CallVoidMethod(env, eventHandler, addCaseMethod, event.choice, event.distanceTrue, (jboolean)event.distanceFalse);
+		}
 	}
 }
 

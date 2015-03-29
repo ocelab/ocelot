@@ -1,5 +1,6 @@
 package it.unisa.ocelot.simulator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class Simulator {
 	private CFG cfg;
 	private List<ExecutionEvent> events;
 	private SimulatorListener listener;
+	private int currentEventIndex;
 	
 	public Simulator(CFG pCFG, List<ExecutionEvent> pEvents) {
 		this.cfg = pCFG;
@@ -30,26 +32,67 @@ public class Simulator {
 	}
 	
 	public void simulate() {
+		this.reset();
+		ExecutionEvent currentEvent = this.getNextEvent();
+		
 		CFGNode currentNode = cfg.getStart();
-		ExecutionEvent currentEvent = this.events.get(0);
-		int currentEventIndex = 0;
-		while (!currentNode.equals(cfg.getEnd())) {
+		
+		while (!currentNode.strongEquals(cfg.getEnd())) {
 			this.listener.onNodeVisit(currentNode);
 			Set<LabeledEdge> edges = cfg.outgoingEdgesOf(currentNode);
 			
+			List<ExecutionEvent> caseEvents = null;
+			if (currentNode.isSwitch()) {
+				currentEvent = null;
+				caseEvents = new ArrayList<ExecutionEvent>();
+				ExecutionEvent currentCaseEvent;
+				
+				this.rewind(1);
+				for (int i = 0; i < edges.size(); i++) {
+					currentCaseEvent = this.getNextEvent();
+					
+					caseEvents.add(currentCaseEvent);
+					if (((CaseExecutionEvent)currentCaseEvent).isChosen())
+						currentEvent = currentCaseEvent;
+					
+				}
+				
+			}
+			
 			for (LabeledEdge edge : edges) {
 				if (!edge.needsEvent()) {
-					this.listener.onEdgeVisit(edge, null);
+					this.listener.onEdgeVisit(edge);
 					currentNode = this.cfg.getEdgeTarget(edge);
-					currentEvent = this.events.get(currentEventIndex++);
+					//currentEvent = this.getNextEvent();
 				} else {
 					if (edge.matchesExecution(currentEvent)) {
-						this.listener.onEdgeVisit(edge, currentEvent);
+						
+						if (currentNode.isSwitch())
+							this.listener.onEdgeVisit(edge, currentEvent, caseEvents);
+						else
+							this.listener.onEdgeVisit(edge, currentEvent);
 						currentNode = this.cfg.getEdgeTarget(edge);
-						currentEvent = this.events.get(currentEventIndex++);
+						
+						currentEvent = this.getNextEvent();
 					}
 				}
 			}
 		}
+	}
+	
+	private void reset() {
+		this.currentEventIndex = -1;
+	}
+	
+	private ExecutionEvent getNextEvent() {
+		this.currentEventIndex++;
+		if (this.currentEventIndex < this.events.size())
+			return this.events.get(this.currentEventIndex);
+		else
+			return null;
+	}
+	
+	private void rewind(int number) {
+		this.currentEventIndex -= number;
 	}
 }

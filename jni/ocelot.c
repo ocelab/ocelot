@@ -7,13 +7,25 @@ void _f_ocelot_init() {
 
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 	_T_ocelot_event event;
-
+	event.kind = OCELOT_KIND_STDEV;
 	event.choice = result;
 	event.distanceTrue = distanceTrue;
 	event.distanceFalse = distanceFalse;
 	g_array_append_val(_v_ocelot_events, event);
 
 	return result;
+}
+
+int _f_ocelot_trace_case(int branch, double distanceTrue, int isChosen) {
+	_T_ocelot_event_case event;
+	event.kind = OCELOT_KIND_CASEV;
+	event.choice = branch;
+	event.distance = distanceTrue;
+	event.chosen = (double)isChosen;
+
+	g_array_append_val(_v_ocelot_events, event);
+
+	return 0;
 }
 
 double _f_ocelot_reg_fcall_numeric(double fcall) {
@@ -97,14 +109,26 @@ double _f_ocelot_neq_pointer(void* op1, void* op2) {
 }
 
 double _f_ocelot_and(double op1, double op2) {
-	if (op1 > op2)
-		return op1;
-	else
-		return op2;
+	return op1+op2;
 }
+
 double _f_ocelot_or(double op1, double op2) {
 	if (op1 < op2)
 			return op1;
 		else
 			return op2;
+}
+
+double _f_ocelot_istrue(double flag) {
+	if (flag == 1.0D)
+		return 0;
+	else
+		return OCELOT_K;
+}
+
+double _f_ocelot_isfalse(double flag) {
+	if (flag == 0.0D)
+		return 0;
+	else
+		return OCELOT_K;
 }

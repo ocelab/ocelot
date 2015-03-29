@@ -20,8 +20,8 @@ jint _f_ocelot_intval(JNIEnv*, jobject);
 jdouble _f_ocelot_doubleval(JNIEnv*, jobject);
 
 #define OCELOT_ARG(i) (*env)->GetObjectArrayElement(env, arguments, i)
-#define OCELOT_INT(object) _f_ocelot_intval(env, object)
-#define OCELOT_DOUBLE(object) _f_ocelot_doubleval(env, object)
+#define OCELOT_int(object) _f_ocelot_intval(env, object)
+#define OCELOT_double(object) _f_ocelot_doubleval(env, object)
 
 #ifdef __cplusplus
 }
