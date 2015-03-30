@@ -12,7 +12,7 @@ public class MacOSXMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String getJavaHome() {
-		return "System/Library/Frameworks/JavaVM.framework";
+		return "/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home/include/";
 	}
 
 	@Override
@@ -22,12 +22,12 @@ public class MacOSXMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String[] getGlib2Paths() {
-		return new String[] {"/usr/lib/x86_64-linux-gnu/glib-2.0/include", "$(SYSTEM_INCLUDE)/glib-2.0"};
+		return new String[] {"/usr/local/Cellar/glib/2.42.1/include/glib-2.0/", "/usr/local/Cellar/glib/2.42.1/lib/glib-2.0/include/"};
 	}
 
 	@Override
 	public String[] getJavaPaths() {
-		return new String[] {"$(JAVA_HOME)/Headers"};
+		return new String[] {"$(JAVA_HOME)", "$(JAVA_HOME)darwin"};
 	}
 
 	@Override

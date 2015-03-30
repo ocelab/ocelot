@@ -40,7 +40,7 @@ public class Build {
 		
 		if (os.contains("win"))
 			generator = buildWindows();
-		else if (os.contains("mac"))
+		else if (os.contains("Mac"))
 			generator = buildMac();
 		else if (os.contains("nix") || os.contains("nux") || os.contains("aix"))
 			generator = buildLinux();

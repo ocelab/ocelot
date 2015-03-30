@@ -54,8 +54,8 @@ double _f_ocelot_get_fcall() {
 double _f_ocelot_eq_numeric(double op1, double op2) {
 	double k = abs(op1 - op2);
 	double result;
-	if (k == 0.0D)
-		result = 0.0D;
+	if (k == 0.0)
+		result = 0.0;
 	else
 		result = k+OCELOT_K;
 
@@ -64,8 +64,8 @@ double _f_ocelot_eq_numeric(double op1, double op2) {
 
 double _f_ocelot_gt_numeric(double op1, double op2) {
 	double result;
-	if (op2 - op1 < 0.0D) {
-		result = 0.0D;
+	if (op2 - op1 < 0.0) {
+		result = 0.0;
 	} else {
 		result = (op2 - op1) + OCELOT_K;
 	}
@@ -74,8 +74,8 @@ double _f_ocelot_gt_numeric(double op1, double op2) {
 
 double _f_ocelot_ge_numeric(double op1, double op2) {
 	double result;
-	if (op2 - op1 <= 0.0D) {
-		result = 0.0D;
+	if (op2 - op1 <= 0.0) {
+		result = 0.0;
 	} else {
 		result = (op2 - op1) + OCELOT_K;
 	}
@@ -120,14 +120,14 @@ double _f_ocelot_or(double op1, double op2) {
 }
 
 double _f_ocelot_istrue(double flag) {
-	if (flag == 1.0D)
+	if (flag == 1.0)
 		return 0;
 	else
 		return OCELOT_K;
 }
 
 double _f_ocelot_isfalse(double flag) {
-	if (flag == 0.0D)
+	if (flag == 0.0)
 		return 0;
 	else
 		return OCELOT_K;
