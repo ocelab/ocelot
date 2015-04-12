@@ -36,15 +36,7 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	}
 }
 
-jint _f_ocelot_intval(JNIEnv *env, jobject object) {
-	jclass class = (*env)->FindClass(env, "java/lang/Integer");
-
-	jmethodID intValue = (*env)->GetMethodID(env, class, "intValue", "()I");
-
-	return (*env)->CallIntMethod(env, object, intValue);
-}
-
-jdouble _f_ocelot_doubleval(JNIEnv* env, jobject object) {
+jdouble _f_ocelot_numval(JNIEnv* env, jobject object) {
 	jclass class = (*env)->FindClass(env, "java/lang/Double");
 
 	jmethodID doubleValue = (*env)->GetMethodID(env, class, "doubleValue", "()D");

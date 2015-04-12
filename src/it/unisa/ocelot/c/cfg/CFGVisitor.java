@@ -58,6 +58,8 @@ public class CFGVisitor extends ASTVisitor {
 			this.setOutput(entry.getValue(), this.labels.get(entry.getKey()), FlowEdge.class);
 		}
 		
+		this.setOutput(this.returns, this.graph.getEnd(), FlowEdge.class);
+		
 		List<CFGNode> toRemove = new ArrayList<CFGNode>();
 		for (CFGNode node : this.graph.vertexSet()) {
 			Set<LabeledEdge> edges = this.graph.outgoingEdgesOf(node);

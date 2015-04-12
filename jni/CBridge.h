@@ -16,12 +16,10 @@ extern "C" {
  * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;)V
  */
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jobjectArray);
-jint _f_ocelot_intval(JNIEnv*, jobject);
-jdouble _f_ocelot_doubleval(JNIEnv*, jobject);
+jdouble _f_ocelot_numval(JNIEnv*, jobject);
 
 #define OCELOT_ARG(i) (*env)->GetObjectArrayElement(env, arguments, i)
-#define OCELOT_int(object) _f_ocelot_intval(env, object)
-#define OCELOT_double(object) _f_ocelot_doubleval(env, object)
+#define OCELOT_numeric(object) _f_ocelot_numval(env, object)
 
 #ifdef __cplusplus
 }

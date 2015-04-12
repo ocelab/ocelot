@@ -4,7 +4,11 @@ package it.unisa.ocelot.runnable;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.index.IIndexFileSet;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 
 import it.unisa.ocelot.c.compiler.GCC;
@@ -76,6 +80,7 @@ public class Build {
 		String code = Utils.readFile("testobject/main.c");
 		
 		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), "testobject/main.c").copy();
+		IASTPreprocessorStatement[] macros =  translationUnit.getAllPreprocessorStatements();
 		InstrumentorVisitor visitor = new InstrumentorVisitor();
 		
 		translationUnit.accept(visitor);
@@ -83,8 +88,20 @@ public class Build {
 		ASTWriter writer = new ASTWriter();
 		String outputCode = writer.write(translationUnit);
 		
-		Utils.writeFile("jni/main.c", "#include \"main.h\"\n" + outputCode);
-		Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
+		String result = "";
+		for (IASTPreprocessorStatement macro : macros) {
+			if (macro instanceof IASTPreprocessorIncludeStatement) {
+				IASTPreprocessorIncludeStatement include = (IASTPreprocessorIncludeStatement)macro;
+				if (include.isSystemInclude())
+					result += macro.getRawSignature()+"\n";
+			} else
+				result += macro.getRawSignature() + "\n";
+		}
+		result += "#include \"ocelot.h\"\n";
+		result += outputCode;
+		
+		Utils.writeFile("jni/main.c", result);
+		//Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
 		
 		return visitor.getCallMacro();
 	}

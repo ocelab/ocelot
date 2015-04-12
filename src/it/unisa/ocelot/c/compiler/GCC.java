@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.compiler;
 
+import it.unisa.ocelot.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import org.eclipse.cdt.core.parser.IParserLogService;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
+import org.eclipse.cdt.core.parser.tests.scanner.FileCodeReaderFactory;
 
 public class GCC implements Compiler {
 
@@ -55,12 +58,13 @@ public class GCC implements Compiler {
 	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {
 		it.unisa.ocelot.c.compiler.Compiler gcc = new GCC();
 		
-		String codeString = gcc.preprocess(new File(pSourceFilename));
+		//String codeString = gcc.preprocess(new File(pSourceFilename));
+		String codeString = Utils.readFile(pSourceFilename);
 		FileContent fc = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
 		String[] includeSearchPaths = new String[0];
 		IScannerInfo si = new ScannerInfo(macroDefinitions, includeSearchPaths);
-		IncludeFileContentProvider ifcp = IncludeFileContentProvider.getEmptyFilesProvider();
+		IncludeFileContentProvider ifcp = FileCodeReaderFactory.getInstance();
 		
 		IIndex idx = null;
 		int options = ILanguage.OPTION_IS_SOURCE_UNIT;

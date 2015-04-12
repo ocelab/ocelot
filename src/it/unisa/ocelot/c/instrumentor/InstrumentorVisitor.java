@@ -38,6 +38,9 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
+import org.eclipse.cdt.core.dom.ast.IFunction;
+import org.eclipse.cdt.core.dom.ast.IFunctionType;
+import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
@@ -49,6 +52,10 @@ import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTIdExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTLiteralExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTName;
+import org.eclipse.cdt.internal.core.dom.parser.c.CBasicType;
+import org.eclipse.cdt.internal.core.dom.parser.c.CPointerType;
+import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
+import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 
 public class InstrumentorVisitor extends ASTVisitor {
@@ -214,7 +221,11 @@ public class InstrumentorVisitor extends ASTVisitor {
 				IASTExpression[] arguments = new IASTExpression[1];
 				arguments[0] = expression; 
 						
-				IASTExpression result = makeFunctionCall("_f_ocelot_istrue", arguments);
+				IASTExpression result;
+				if (!pNegation)
+					result = makeFunctionCall("_f_ocelot_istrue", arguments);
+				else
+					result = makeFunctionCall("_f_ocelot_isfalse", arguments);
 				return result;
 			}
 		} else if (expression instanceof IASTFunctionCallExpression) { 
@@ -241,7 +252,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 			IASTExpression[] arguments = new IASTExpression[1];
 			arguments[0] = expression; 
 			
-			IType type = expression.getExpressionType();
+			IType type = getType(expression);
 			if (type instanceof IBasicType)
 				return makeFunctionCall("_f_ocelot_reg_fcall_numeric", arguments);
 			else if (type instanceof ICPointerType)
@@ -367,30 +378,30 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	public void visit(IASTWhileStatement statement) {
-		IASTExpression[] instrArgs = new IASTExpression[2];
+		IASTExpression[] instrArgs = new IASTExpression[3];
 		instrArgs[0] = this.transformOriginalExpression(statement.getCondition().copy());
-		statement.getCondition().accept(this);
-		instrArgs[1] = this.lastExpression;
+		instrArgs[1] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), false, false);
+		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
 		statement.setCondition(instrFunction);
 	}
 	
 	public void visit(IASTDoStatement statement) {
-		IASTExpression[] instrArgs = new IASTExpression[2];
+		IASTExpression[] instrArgs = new IASTExpression[3];
 		instrArgs[0] = this.transformOriginalExpression(statement.getCondition().copy());
-		statement.getCondition().accept(this);
-		instrArgs[1] = this.lastExpression;
+		instrArgs[1] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), false, false);
+		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
 		statement.setCondition(instrFunction);
 	}
 	
 	public void visit(IASTForStatement statement) {
-		IASTExpression[] instrArgs = new IASTExpression[2];
+		IASTExpression[] instrArgs = new IASTExpression[3];
 		instrArgs[0] = this.transformOriginalExpression(statement.getConditionExpression().copy());
-		statement.getConditionExpression().accept(this);
-		instrArgs[1] = this.lastExpression;
+		instrArgs[1] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), false, false);
+		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
 		statement.setConditionExpression(instrFunction);
@@ -457,8 +468,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		IASTExpression operand1 = pExpression.getOperand1();
 		IASTExpression operand2 = pExpression.getOperand2();
 		
-		IType op1Type = operand1.getExpressionType();
-		IType op2Type = operand2.getExpressionType();
+		IType op1Type = getType(operand1);
+		IType op2Type = getType(operand2);
 		
 		IASTExpression[] operationArgs = new IASTExpression[2];
 		operationArgs[0] = this.castToDouble(this.transformDistanceExpression(operand1, false, true));
@@ -506,12 +517,33 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	private IASTExpression castToDouble(IASTExpression pExpression) {
-		//TODO Really cast to double.
 		//IASTCastExpression cast = new CASTCastExpression(new CASTTypeId(null, new CASTDeclarator(new CASTName("double".toCharArray()))), pExpression);
 		
 		return pExpression;
 	}
 	
+	private IType getType(IASTExpression pExpression) {
+		return getType(pExpression.getExpressionType());
+	}
+	
+	private IType getType(IType type) {
+		while (type instanceof CTypedef) {
+			CTypedef tdef = (CTypedef)type;
+			
+			type = tdef.getType();
+		}
+		
+		return type;
+	}
+	
+	/*
+	 * NOTE:
+	 * Assuming that all the structures are compose by either pointers or not pointers.
+	 * If a field is a pointer, it will be assumed that this is of a C basic type.
+	 * TODO Make sure that also in case of non basic C types this method works properly
+	 * For example, Ocelot won't work if there is a structure with a field with type pointer
+	 * to another struct, because it won't initialize the parameters of the pointed structure
+	 */
 	@Override
 	public int visit(IASTDeclaration declaration) {
 		if (declaration instanceof CASTFunctionDefinition) {
@@ -521,23 +553,56 @@ public class InstrumentorVisitor extends ASTVisitor {
 			String[] callParameters = new String[declarator.getParameters().length];
 			String macro = "";
 			macro += "#define EXECUTE_OCELOT_TEST ";
-			int argn = 0;
-			for (IASTParameterDeclaration param : declarator.getParameters()) {
-				String type = param.getDeclSpecifier().getRawSignature();
+			
+			IFunction functionType = null;
+			try {
+				functionType = (IFunction)((CASTFunctionDefinition) declaration).getScope().getParent().getBinding(declarator.getName(), true);
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+			
+			int outputArgument = 0;
+			int inputArgument = 0;
+			
+			IParameter[] parameters = functionType.getParameters();
+			for (int i = 0; i < declarator.getParameters().length; i++) {
+				IASTParameterDeclaration param = declarator.getParameters()[i];
+				String typeString = param.getDeclSpecifier().getRawSignature();
+				IType type = getType(parameters[i].getType());
+				
 				int pointers = param.getDeclarator().getRawSignature().length() - param.getDeclarator().getRawSignature().replaceAll("\\*", "").length();
 				
-				macro += type;//Type
-				macro += " __arg" +argn; //Name
-				macro += " = OCELOT_" + type + "(OCELOT_ARG(" + argn + "));\\\n"; //Assign
+				if (type instanceof CStructure) {
+					macro += typeString; //Type
+					macro += " __arg"+inputArgument+";\\\n";
+					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
+					List<StructNode> basics = tree.getBasicVariables();
+					for (StructNode var : basics) {
+						String fieldType = var.type.toString().replaceAll("\\*", "");
+						macro += fieldType;
+						macro += " __str"+inputArgument;
+						macro += " = (" + fieldType +")OCELOT_numeric(OCELOT_ARG(" + inputArgument + "));\\\n"; //Assign
+						
+						macro += var.getCompleteName() + " = " + (var.isPointer() ? "&" : "") + "__str" + inputArgument + ";\\\n";
+						
+						inputArgument++;
+					}
+					
+				} else {
+					macro += typeString;//Type
+					macro += " __arg" +outputArgument; //Name
+					macro += " = OCELOT_numeric(OCELOT_ARG(" + inputArgument + "));\\\n"; //Assign
+					
+					inputArgument++;
+				}
 				
-				callParameters[argn] = StringUtils.repeat('&', pointers) + "__arg" + argn;
-				argn++;
+				callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
+				outputArgument++;
 			}
 			macro += "OCELOT_TESTFUNCTION (" +StringUtils.join(callParameters, ",") + ");";
 			
 			this.callMacro = macro;
 		}
-		// TODO Auto-generated method stub
 		return super.visit(declaration);
 	}
 	

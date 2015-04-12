@@ -1,8 +1,12 @@
 #include "CBridge.h"
-#define EXECUTE_OCELOT_TEST int __arg0 = OCELOT_int(OCELOT_ARG(0));\
-int __arg1 = OCELOT_int(OCELOT_ARG(1));\
-int __arg2 = OCELOT_int(OCELOT_ARG(2));\
-OCELOT_TESTFUNCTION (&__arg0,&__arg1,&__arg2);
+#define EXECUTE_OCELOT_TEST GimpColor __arg0;\
+int  __str0 = (int )OCELOT_numeric(OCELOT_ARG(0));\
+__arg0.red = &__str0;\
+int  __str1 = (int )OCELOT_numeric(OCELOT_ARG(1));\
+__arg0.green = &__str1;\
+int  __str2 = (int )OCELOT_numeric(OCELOT_ARG(2));\
+__arg0.blue = &__str2;\
+OCELOT_TESTFUNCTION (__arg0);
 
 /*
  * ATTENTION:
@@ -42,15 +46,7 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	}
 }
 
-jint _f_ocelot_intval(JNIEnv *env, jobject object) {
-	jclass class = (*env)->FindClass(env, "java/lang/Integer");
-
-	jmethodID intValue = (*env)->GetMethodID(env, class, "intValue", "()I");
-
-	return (*env)->CallIntMethod(env, object, intValue);
-}
-
-jdouble _f_ocelot_doubleval(JNIEnv* env, jobject object) {
+jdouble _f_ocelot_numval(JNIEnv* env, jobject object) {
 	jclass class = (*env)->FindClass(env, "java/lang/Double");
 
 	jmethodID doubleValue = (*env)->GetMethodID(env, class, "doubleValue", "()D");

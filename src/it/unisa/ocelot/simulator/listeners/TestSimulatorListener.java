@@ -1,7 +1,9 @@
-package it.unisa.ocelot.simulator;
+package it.unisa.ocelot.simulator.listeners;
 
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.simulator.ExecutionEvent;
+import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.List;
 

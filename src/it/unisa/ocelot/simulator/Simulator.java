@@ -17,7 +17,7 @@ import it.unisa.ocelot.c.cfg.LabeledEdge;
 public class Simulator {
 	private CFG cfg;
 	private List<ExecutionEvent> events;
-	private SimulatorListener listener;
+	private List<SimulatorListener> listeners;
 	private int currentEventIndex;
 	
 	public Simulator(CFG pCFG, List<ExecutionEvent> pEvents) {
@@ -25,10 +25,16 @@ public class Simulator {
 		this.events = pEvents;
 		if (this.events.size() == 0)
 			this.events.add(null); //It is useless, but it prevents ArrayIndexOutOfBound in "simulate"
+		this.listeners = new ArrayList<SimulatorListener>();
 	}
 	
 	public void setListener(SimulatorListener pListener) {
-		this.listener = pListener;
+		this.listeners.clear();
+		this.listeners.add(pListener);
+	}
+	
+	public void addListener(SimulatorListener pListener) {
+		this.listeners.add(pListener);
 	}
 	
 	public void simulate() {
@@ -38,7 +44,8 @@ public class Simulator {
 		CFGNode currentNode = cfg.getStart();
 		
 		while (!currentNode.strongEquals(cfg.getEnd())) {
-			this.listener.onNodeVisit(currentNode);
+			for (SimulatorListener listener : this.listeners)
+				listener.onNodeVisit(currentNode);
 			Set<LabeledEdge> edges = cfg.outgoingEdgesOf(currentNode);
 			
 			List<ExecutionEvent> caseEvents = null;
@@ -59,25 +66,35 @@ public class Simulator {
 				
 			}
 			
+			boolean newEvent = false;
 			for (LabeledEdge edge : edges) {
 				if (!edge.needsEvent()) {
-					this.listener.onEdgeVisit(edge);
+					for (SimulatorListener listener : this.listeners)
+						listener.onEdgeVisit(edge);
 					currentNode = this.cfg.getEdgeTarget(edge);
 					//currentEvent = this.getNextEvent();
 				} else {
 					if (edge.matchesExecution(currentEvent)) {
 						
 						if (currentNode.isSwitch())
-							this.listener.onEdgeVisit(edge, currentEvent, caseEvents);
+							for (SimulatorListener listener : this.listeners)
+								listener.onEdgeVisit(edge, currentEvent, caseEvents);
 						else
-							this.listener.onEdgeVisit(edge, currentEvent);
+							for (SimulatorListener listener : this.listeners)
+								listener.onEdgeVisit(edge, currentEvent);
 						currentNode = this.cfg.getEdgeTarget(edge);
-						
-						currentEvent = this.getNextEvent();
+						newEvent = true;
 					}
 				}
 			}
+			
+			if (newEvent)
+				currentEvent = this.getNextEvent();
 		}
+	}
+	
+	public boolean isSimulationCorrect() {
+		return this.currentEventIndex == this.events.size();
 	}
 	
 	private void reset() {

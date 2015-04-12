@@ -16,6 +16,7 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	
 	private CFGNode start;
 	private CFGNode end;
+	private CFGNode target;
 	
 	/**
 	 * Creates an empty CFG
@@ -54,5 +55,13 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 */
 	public CFGNode getEnd() {
 		return end;
+	}
+	
+	public void setTarget(CFGNode target) {
+		this.target = target;
+	}
+	
+	public CFGNode getTarget() {
+		return target;
 	}
 }

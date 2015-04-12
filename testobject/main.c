@@ -1,79 +1,64 @@
-#define gint int
-#define gdouble double
-#define ROUND(x) (int)x
-void
-gimp_hsv_to_rgb_int (gint *hue,
-                     gint *saturation,
-                     gint *value)
-{
-  gdouble h, s, v, h_temp;
-  gdouble f, p, q, t;
-  gint i;
+#include "main.h"
 
-  if (*saturation == 0)
+#define MAX(a, b) (a > b ? a : b)
+#define MIN(a, b) (a < b ? a : b)
+#define ROUND(a) (int)a
+
+void
+gimp_rgb_to_hsv_int (GimpColor color)
+{
+  gdouble  r, g, b;
+  gdouble  h, s, v;
+  gint     min;
+  gdouble  delta;
+
+  r = *color.red;
+  g = *color.green;
+  b = *color.blue;
+
+  if (r > g)
     {
-      *hue        = *value;
-      *saturation = *value;
-      *value      = *value;
+      v = MAX (r, b);
+      min = MIN (g, b);
     }
   else
     {
-      h = *hue;
-      s = *saturation / 255.0;
-      v = *value      / 255.0;
-
-      if (h == 360)
-        h_temp = 0;
-      else
-        h_temp = h;
-
-      h_temp = h_temp / 60.0;
-      i = floor (h_temp);
-      f = h_temp - i;
-      p = v * (1.0 - s);
-      q = v * (1.0 - (s * f));
-      t = v * (1.0 - (s * (1.0 - f)));
-
-      switch (i)
-        {
-        case 0:
-          *hue        = ROUND (v * 255.0);
-          *saturation = ROUND (t * 255.0);
-          *value      = ROUND (p * 255.0);
-          break;
-
-        case 1:
-          *hue        = ROUND (q * 255.0);
-          *saturation = ROUND (v * 255.0);
-          *value      = ROUND (p * 255.0);
-          break;
-
-        case 2:
-          *hue        = ROUND (p * 255.0);
-          *saturation = ROUND (v * 255.0);
-          *value      = ROUND (t * 255.0);
-          break;
-
-        case 3:
-          *hue        = ROUND (p * 255.0);
-          *saturation = ROUND (q * 255.0);
-          *value      = ROUND (v * 255.0);
-          break;
-
-        case 4:
-          *hue        = ROUND (t * 255.0);
-          *saturation = ROUND (p * 255.0);
-          *value      = ROUND (v * 255.0);
-          break;
-
-        case 5:
-          *hue        = ROUND (v * 255.0);
-          *saturation = ROUND (p * 255.0);
-          *value      = ROUND (q * 255.0);
-          break;
-
-        default:
-        	break;
-        }
+      v = MAX (g, b);
+      min = MIN (r, b);
     }
+
+  delta = v - min;
+
+  if (v == 0.0)
+    s = 0.0;
+  else
+    s = delta / v;
+
+  if (s == 0.0)
+    {
+      h = 0.0;
+    }
+  else
+    {
+      if (r == v)
+        h = 60.0 * (g - b) / delta;
+      else if (g == v)
+        h = 120 + 60.0 * (b - r) / delta;
+      else
+        h = 240 + 60.0 * (r - g) / delta;
+
+      if (h < 0.0)
+        h += 360.0;
+
+      if (h > 360.0)
+        h -= 360.0;
+    }
+
+  *color.red   = ROUND (h);
+  *color.green = ROUND (s * 255.0);
+  *color.blue  = ROUND (v);
+
+  /* avoid the ambiguity of returning different values for the same color */
+  if (*color.red == 360)
+    *color.red = 0;
 }

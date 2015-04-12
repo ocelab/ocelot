@@ -153,6 +153,12 @@ public class CFGNode {
 		return pNode.id == this.id;
 	}
 	
+	public CFGNodeNavigator navigate(CFG cfg) {
+		CFGNodeNavigator navigator = new CFGNodeNavigator(cfg, this);
+		
+		return navigator;
+	}
+	
 	@Override
 	public String toString() {
 		String result = "" + this.id + ": ";
