@@ -1,10 +1,16 @@
 package it.unisa.ocelot.simulator;
 
+import it.unisa.ocelot.c.cfg.LabeledEdge;
+
 public class CaseExecutionEvent extends ExecutionEvent {
 	public boolean chosen;
 	
 	public CaseExecutionEvent(int choice, double distanceTrue, boolean chosen) {
-		super(choice, distanceTrue, 0.0D);
+		this(null, choice, distanceTrue, chosen);
+	}
+	
+	public CaseExecutionEvent(LabeledEdge pEdge, int choice, double distanceTrue, boolean chosen) {
+		super(pEdge, choice, distanceTrue, 0.0D);
 		
 		this.chosen = chosen;
 	}
@@ -17,7 +23,7 @@ public class CaseExecutionEvent extends ExecutionEvent {
 	public String toString() {
 		String res = "{\n" + 
 				"\tBranchID: " + this.choice + "\n" +
-				"\tDistanceTrue: " + this.distanceFalse + "\n" +
+				"\tDistanceTrue: " + this.distanceTrue + "\n" +
 				"\tChosen: " + this.chosen +
 				"\n}";
 		return res;

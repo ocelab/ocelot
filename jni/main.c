@@ -9,12 +9,11 @@ typedef int gint;
 typedef double gdouble;
 typedef struct 
 {
-    gint* red;
-    gint* green;
-    gint* blue;
+    gint *red;
+    gint *green;
+    gint *blue;
 } GimpColor;
-void OCELOT_TESTFUNCTION(GimpColor);
-
+void gimp_rgb_to_hsv_int(GimpColor);
 void gimp_rgb_to_hsv_int(GimpColor color)
 {
     gdouble r, g, b;
@@ -24,42 +23,45 @@ void gimp_rgb_to_hsv_int(GimpColor color)
     r = *color.red;
     g = *color.green;
     b = *color.blue;
-    if (r > g)
-    {
-      v = MAX (r, b);
-      min = MIN (g, b);
-    }
-  else
-    {
-      v = MAX (g, b);
-      min = MIN (r, b);
+    if(_f_ocelot_trace(r > g, _f_ocelot_gt_numeric(r, g), _f_ocelot_ge_numeric(g, r))){
+        v = (r > b ? r : b);
+        min = (g < b ? g : b);
+    }else{
+        v = (g > b ? g : b);
+        min = (r < b ? r : b);
     }
     delta = v - min;
-    if (_f_ocelot_trace(v == 0.0, _f_ocelot_eq_numeric(v, 0.0), _f_ocelot_neq_numeric(v, 0.0)))
+    if(_f_ocelot_trace(v == 0.0, _f_ocelot_eq_numeric(v, 0.0), _f_ocelot_neq_numeric(v, 0.0)))
         s = 0.0;
+
     else
         s = delta / v;
 
-    if (_f_ocelot_trace(s == 0.0, _f_ocelot_eq_numeric(s, 0.0), _f_ocelot_neq_numeric(s, 0.0))){
+    if(_f_ocelot_trace(s == 0.0, _f_ocelot_eq_numeric(s, 0.0), _f_ocelot_neq_numeric(s, 0.0))){
         h = 0.0;
     }else{
-        if (_f_ocelot_trace(r == v, _f_ocelot_eq_numeric(r, v), _f_ocelot_neq_numeric(r, v)))
+        if(_f_ocelot_trace(r == v, _f_ocelot_eq_numeric(r, v), _f_ocelot_neq_numeric(r, v)))
             h = 60.0 * (g - b) / delta;
+
         else
-            if (_f_ocelot_trace(g == v, _f_ocelot_eq_numeric(g, v), _f_ocelot_neq_numeric(g, v)))
+            if(_f_ocelot_trace(g == v, _f_ocelot_eq_numeric(g, v), _f_ocelot_neq_numeric(g, v)))
                 h = 120 + 60.0 * (b - r) / delta;
+
             else
                 h = 240 + 60.0 * (r - g) / delta;
 
-        if (_f_ocelot_trace(h < 0.0, _f_ocelot_gt_numeric(0.0, h), _f_ocelot_ge_numeric(h, 0.0)))
+
+        if(_f_ocelot_trace(h < 0.0, _f_ocelot_gt_numeric(0.0, h), _f_ocelot_ge_numeric(h, 0.0)))
             h += 360.0;
 
-        if (_f_ocelot_trace(h > 360.0, _f_ocelot_gt_numeric(h, 360.0), _f_ocelot_ge_numeric(360.0, h)))
+        if(_f_ocelot_trace(h > 360.0, _f_ocelot_gt_numeric(h, 360.0), _f_ocelot_ge_numeric(360.0, h)))
             h -= 360.0;
+
     }
-    *color.red   = ROUND (h);
-    *color.green = ROUND (s * 255.0);
-    *color.blue  = ROUND (v);
-    if (_f_ocelot_trace(*color.red == 360, _f_ocelot_eq_numeric(*color.red, 360), _f_ocelot_neq_numeric(*color.red, 360)))
+    *color.red = (int)h;
+    *color.green = (int)s * 255.0;
+    *color.blue = (int)v;
+    if(_f_ocelot_trace(*color.red == 360, _f_ocelot_eq_numeric(*color.red, 360), _f_ocelot_neq_numeric(*color.red, 360)))
         *color.red = 0;
+
 }

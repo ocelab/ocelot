@@ -9,7 +9,7 @@ import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.ApproachLevelListener;
+import it.unisa.ocelot.simulator.listeners.BDALListener;
 import it.unisa.ocelot.simulator.listeners.CoverageSimulatorListener;
 import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
 import it.unisa.ocelot.util.Utils;
@@ -26,8 +26,8 @@ public class Execute {
 		EventsHandler h = new EventsHandler();
 		
 		Object[] arguments = new Object[4];
-		arguments[0] = new Integer(3); //10
-		arguments[1] = new Integer(12); //10
+		arguments[0] = new Integer(2); //10
+		arguments[1] = new Integer(33); //10
 		arguments[2] = new Integer(4);  //5
 		
 		bridge.getEvents(h, arguments);
@@ -39,11 +39,11 @@ public class Execute {
 		
 		CoverageSimulatorListener listener = new CoverageSimulatorListener(cfg);
 		
-		ApproachLevelListener approachLevelListener = new ApproachLevelListener(cfg);
+		BDALListener bdalListener = new BDALListener(cfg);
 		
 		simulator.addListener(new TestSimulatorListener());
 		simulator.addListener(listener);
-		simulator.addListener(approachLevelListener);
+		simulator.addListener(bdalListener);
 		
 		System.out.println("Simulating with " + StringUtils.join(arguments, " "));
 		System.out.println("------------------------------");
@@ -53,7 +53,8 @@ public class Execute {
 		System.out.println("Branch coverage: " + listener.getBranchCoverage());
 		System.out.println("Block coverage: " + listener.getBlockCoverage());
 		System.out.println("------------------------------");
-		System.out.println("Approach level: " + approachLevelListener.getApproachLevel());
+		System.out.println("Approach level: " + bdalListener.getApproachLevel());
+		System.out.println("Branch distance: " + bdalListener.getBranchDistance());
 		System.out.println("------------------------------");
 		if (simulator.isSimulationCorrect())
 			System.out.println("Simulation correct!");

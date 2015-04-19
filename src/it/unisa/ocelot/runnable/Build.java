@@ -9,9 +9,12 @@ import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.index.IIndexFileSet;
+import org.eclipse.cdt.internal.core.dom.rewrite.ASTModificationStore;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
 import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.c.compiler.writer.ChangeGeneratorWriterVisitor;
 import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
@@ -85,7 +88,8 @@ public class Build {
 		
 		translationUnit.accept(visitor);
 		
-		ASTWriter writer = new ASTWriter();
+		it.unisa.ocelot.c.compiler.writer.ASTWriter writer = new it.unisa.ocelot.c.compiler.writer.ASTWriter();
+				
 		String outputCode = writer.write(translationUnit);
 		
 		String result = "";

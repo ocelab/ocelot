@@ -202,8 +202,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 				else
 					return realExpression;
 			}
-				
-			
+
 		} else if (expression instanceof IASTUnaryExpression) {
 			IASTUnaryExpression realExpression = (IASTUnaryExpression)expression;
 			if (realExpression.getOperator() == IASTUnaryExpression.op_not) {
@@ -278,6 +277,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
+		ASTWriter wr = new ASTWriter();
+		System.out.println(wr.write(statement));
 		statement.setConditionExpression(instrFunction);
 	}
 	
@@ -297,7 +298,6 @@ public class InstrumentorVisitor extends ASTVisitor {
 		
 		CASTBinaryExpression currentDefaultExpression = defaultExpression;
 		
-		int identifier = 0;
 		for (IASTStatement aCase : caseStatements) {
 			IASTExpression distanceCalculation;
 			String label;
@@ -338,7 +338,6 @@ public class InstrumentorVisitor extends ASTVisitor {
 			arguments[2] = distanceCalculation.copy();
 			
 			substitute.addStatement(new CASTExpressionStatement(makeFunctionCall("_f_ocelot_trace_case", arguments)));
-			identifier++;
 		}
 		
 		IASTNode parent = statement.getParent();

@@ -55,12 +55,14 @@ public class Simulator {
 				ExecutionEvent currentCaseEvent;
 				
 				this.rewind(1);
-				for (int i = 0; i < edges.size(); i++) {
+				for (LabeledEdge edge : edges) {
 					currentCaseEvent = this.getNextEvent();
 					
 					caseEvents.add(currentCaseEvent);
-					if (((CaseExecutionEvent)currentCaseEvent).isChosen())
+					if (((CaseExecutionEvent)currentCaseEvent).isChosen()) {
 						currentEvent = currentCaseEvent;
+						currentEvent.setEdge(edge);
+					}
 					
 				}
 				
@@ -75,6 +77,7 @@ public class Simulator {
 					//currentEvent = this.getNextEvent();
 				} else {
 					if (edge.matchesExecution(currentEvent)) {
+						currentEvent.setEdge(edge);
 						
 						if (currentNode.isSwitch())
 							for (SimulatorListener listener : this.listeners)

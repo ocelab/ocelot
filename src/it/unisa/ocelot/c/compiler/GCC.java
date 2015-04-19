@@ -49,16 +49,10 @@ public class GCC implements Compiler {
 		} catch (IOException e) {
 			System.err.println("Unknown error. Could not execute \"" + pCommand + "\"");
 			return "";
-		//} catch (InterruptedException e) {
-		//	System.err.println("Unknown error. Could not execute \"" + pCommand + "\"");
-		//	return "";
 		}
 	}
 	
-	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {
-		it.unisa.ocelot.c.compiler.Compiler gcc = new GCC();
-		
-		//String codeString = gcc.preprocess(new File(pSourceFilename));
+	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {		
 		String codeString = Utils.readFile(pSourceFilename);
 		FileContent fc = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
