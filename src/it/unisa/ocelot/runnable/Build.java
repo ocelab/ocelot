@@ -5,16 +5,10 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
-import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.index.IIndexFileSet;
-import org.eclipse.cdt.internal.core.dom.rewrite.ASTModificationStore;
-import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
-import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
 import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.c.compiler.writer.ChangeGeneratorWriterVisitor;
 import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;

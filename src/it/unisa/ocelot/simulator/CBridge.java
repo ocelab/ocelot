@@ -1,5 +1,5 @@
 package it.unisa.ocelot.simulator;
 
 public class CBridge {
-	public native void getEvents(EventsHandler pHandler, Object[] arguments);
+	public native synchronized void getEvents(EventsHandler pHandler, Object[] arguments);
 }

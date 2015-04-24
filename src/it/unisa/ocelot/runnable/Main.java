@@ -87,7 +87,7 @@ public class Main extends JFrame {
 		CFG graph = new CFG();
 		
 		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph);
+		CFGVisitor visitor = new CFGVisitor(graph, "");
 		
 		translationUnit.accept(visitor);
 		

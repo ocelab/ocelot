@@ -29,6 +29,7 @@ import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 public class CFGVisitor extends ASTVisitor {
@@ -37,13 +38,16 @@ public class CFGVisitor extends ASTVisitor {
 	private List<Entry<String, CFGNode>> gotos;
 	private List<CFGNode> returns;
 	private Stack<SubGraph> ioHandlers;
+	private String functionName;
 	
 	/**
 	 * Creates a visitor of the C syntax tree able to generate its Control Flow Graph.  
 	 * @param pGraph Graph which will contain the result
 	 */
-	public CFGVisitor(CFG pGraph) {
+	public CFGVisitor(CFG pGraph, String pFunctionName) {
 		this.graph = pGraph;
+		this.functionName = pFunctionName;
+		
 		this.labels = new HashMap<String, CFGNode>();
 		this.gotos = new ArrayList<Entry<String, CFGNode>>();
 		this.returns = new ArrayList<CFGNode>();
@@ -100,12 +104,17 @@ public class CFGVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTDeclaration name) {
-		if (name instanceof IASTFunctionDefinition) {
+		if (name instanceof CASTFunctionDefinition) {
+			IASTFunctionDefinition function = (CASTFunctionDefinition)name;
+			
+			if (!function.getDeclarator().getName().getRawSignature().equals(this.functionName))
+				return PROCESS_SKIP;
+			
 			CFGNode.reset();
 			CFGNode startingNode = new CFGNode();
 			this.graph.addVertex(startingNode);
 			this.graph.setStart(startingNode);
-			IASTFunctionDefinition function = (IASTFunctionDefinition)name;
+			
 			
 			function.getBody().accept(this);
 			SubGraph body = this.ioHandlers.pop();

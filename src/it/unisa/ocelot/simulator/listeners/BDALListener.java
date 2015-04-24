@@ -64,14 +64,15 @@ public class BDALListener implements SimulatorListener {
 		return shortestPath;
 	}
 	
-	public double getBranchDistance() {
+	public double getNormalizedBranchDistance() {
 		if (getApproachLevel() == 0)
 			return 0D;
 		
+		double distance;
 		if (nearestEvents.size() == 1) {
 			ExecutionEvent event = nearestEvents.get(0);
 			
-			return Math.max(event.distanceFalse, event.distanceTrue);
+			distance = Math.max(event.distanceFalse, event.distanceTrue);
 		} else {
 			double minDistance = Double.MAX_VALUE;
 			
@@ -81,7 +82,9 @@ public class BDALListener implements SimulatorListener {
 					minDistance = caseEvent.distanceTrue;
 			}
 			
-			return minDistance;
+			distance =  minDistance;
 		}
+		
+		return distance/(distance+1);
 	}
 }

@@ -1,76 +1,58 @@
 package it.unisa.ocelot.runnable;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import it.unisa.ocelot.c.genetic.TargetCoverageExperiment;
 
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGVisitor;
-import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.BDALListener;
-import it.unisa.ocelot.simulator.listeners.CoverageSimulatorListener;
-import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
-import it.unisa.ocelot.util.Utils;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
+import jmetal.experiments.Settings;
+
+import org.apache.commons.io.output.TeeOutputStream;
 
 public class Execute {
+	private static final String OUTPUT_PATH = "./outputs/";
+	private static final String EXP_PATH = "./experiments/";
+	
+	private static final String SOURCE_FILENAME = "testobject/main.c";
+	private static final String SOURCE_TESTFUNCTION = "gimp_rgb_to_hsv_int";
+	private static final Class[] SOURCE_PARAMETERS = new Class[] {Double.class, Double.class, Double.class};
+	
 	static {
 		System.loadLibrary("Test");
 	}
 	
 	public static void main(String[] args) throws Exception {
-		CFG cfg = buildCFG("testobject/main.c");
-		
-		CBridge bridge = new CBridge();
-		EventsHandler h = new EventsHandler();
-		
-		Object[] arguments = new Object[4];
-		arguments[0] = new Integer(2); //10
-		arguments[1] = new Integer(33); //10
-		arguments[2] = new Integer(4);  //5
-		
-		bridge.getEvents(h, arguments);
-		
-		cfg.setTarget(cfg.getStart().navigate(cfg).goFlow().goFlow().goFalse().goFlow().goFlow().goFalse().goFlow().goFalse().goTrue().node());
-		System.out.println("Target node:" + cfg.getTarget().toString());
-		
-		Simulator simulator = new Simulator(cfg, h.getEvents());
-		
-		CoverageSimulatorListener listener = new CoverageSimulatorListener(cfg);
-		
-		BDALListener bdalListener = new BDALListener(cfg);
-		
-		simulator.addListener(new TestSimulatorListener());
-		simulator.addListener(listener);
-		simulator.addListener(bdalListener);
-		
-		System.out.println("Simulating with " + StringUtils.join(arguments, " "));
-		System.out.println("------------------------------");
-		simulator.simulate();
-		System.out.println("------------------------------");
-		
-		System.out.println("Branch coverage: " + listener.getBranchCoverage());
-		System.out.println("Block coverage: " + listener.getBlockCoverage());
-		System.out.println("------------------------------");
-		System.out.println("Approach level: " + bdalListener.getApproachLevel());
-		System.out.println("Branch distance: " + bdalListener.getBranchDistance());
-		System.out.println("------------------------------");
-		if (simulator.isSimulationCorrect())
-			System.out.println("Simulation correct!");
-		else
-			System.out.println("Simulation error!");
-	}
-	
-	public static CFG buildCFG(String pSourceFile) throws Exception {
-		String code = Utils.readFile(pSourceFile);
-		CFG graph = new CFG();
-		
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph);
-		
-		translationUnit.accept(visitor);
-		
-		return graph;
+		File outputDirectory = new File(OUTPUT_PATH);
+        outputDirectory.mkdirs();
+        FileOutputStream fos = new FileOutputStream(OUTPUT_PATH + "exp_res.txt");
+        TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
+        PrintStream ps = new PrintStream(myOut);
+        System.setOut(ps);
+        
+        TargetCoverageExperiment exp = new TargetCoverageExperiment();
+
+        exp.experimentName_ = "TargetCoverage";
+        exp.algorithmNameList_ = new String[]{"PGGA"};
+        exp.problemList_ = new String[]{"TestCoverage"};
+
+        exp.paretoFrontFile_ = new String[2];
+
+        exp.indicatorList_ = new String[]{"HV", "SPREAD", "EPSILON"};
+
+        int numberOfAlgorithms = exp.algorithmNameList_.length;
+
+        exp.experimentBaseDirectory_ = EXP_PATH;
+
+        exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
+
+        exp.independentRuns_ = 20;
+        
+        exp.sourceFilename = SOURCE_FILENAME;
+        exp.functionName = SOURCE_TESTFUNCTION;
+        exp.parametersTypes = SOURCE_PARAMETERS;
+        
+        exp.initExperiment();
+        exp.runExperiment(1);
 	}
 }

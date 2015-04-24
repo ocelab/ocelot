@@ -77,12 +77,6 @@ public class InstrumentorVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTTranslationUnit tu) {
-		/* Simulates the generation of a CFG in order to correctly retrieve the "case" unique ids.
-		 * The resulting CFG will never be used.
-		 * TODO define a lightweight visitor able to initialize the "case" unique ids only correctly.
-		 */
-		tu.accept(new CFGVisitor(new CFG()));
-		
 		return super.visit(tu);
 	}
 		
@@ -548,6 +542,12 @@ public class InstrumentorVisitor extends ASTVisitor {
 		if (declaration instanceof CASTFunctionDefinition) {
 			CASTFunctionDefinition function = (CASTFunctionDefinition)declaration;
 			CASTFunctionDeclarator declarator = (CASTFunctionDeclarator)function.getDeclarator();
+			
+			/* Simulates the generation of a CFG in order to correctly retrieve the "case" unique ids.
+			 * The resulting CFG will never be used.
+			 * TODO define a lightweight visitor able to initialize the "case" unique ids only correctly.
+			 */
+			function.getBody().accept(new CFGVisitor(new CFG(), declarator.getName().getRawSignature()));
 			
 			String[] callParameters = new String[declarator.getParameters().length];
 			String macro = "";
