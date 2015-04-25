@@ -56,7 +56,8 @@ public class GCC implements Compiler {
 		String codeString = Utils.readFile(pSourceFilename);
 		FileContent fc = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
-		String[] includeSearchPaths = new String[0];
+		String[] includeSearchPaths = new String[1];
+		includeSearchPaths[0] = "include";
 		IScannerInfo si = new ScannerInfo(macroDefinitions, includeSearchPaths);
 		IncludeFileContentProvider ifcp = FileCodeReaderFactory.getInstance();
 		

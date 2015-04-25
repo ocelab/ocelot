@@ -99,7 +99,7 @@ public class Build {
 		result += outputCode;
 		
 		Utils.writeFile("jni/main.c", result);
-		//Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
+		Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
 		
 		return visitor.getCallMacro();
 	}

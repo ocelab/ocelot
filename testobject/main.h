@@ -1,14 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#define OCELOT_TESTFUNCTION gimp_rgb_to_hsv_int
-typedef int gint;
-typedef double gdouble;
+#define OCELOT_TESTFUNCTION cliparc
 
-typedef struct {
-	gint* red;
-	gint* green;
-	gint* blue;
-} GimpColor;
-
-void OCELOT_TESTFUNCTION (GimpColor);
+int OCELOT_TESTFUNCTION (double, double, double);

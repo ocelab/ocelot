@@ -2,10 +2,12 @@ package it.unisa.ocelot.runnable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.utils.coff.Exe;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
 import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
@@ -14,24 +16,29 @@ import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
 import it.unisa.ocelot.util.Utils;
 
 public class SimpleExecute {
+	private static final String CONFIG_FILENAME = "config.properties";
+	
 	static {
 		System.loadLibrary("Test");
 	}
 	
 	public static void main(String[] args) throws Exception {
-		CFG cfg = buildCFG("testobject/main.c", "gimp_rgb_to_hsv_int");
+		ConfigManager.setFilename(CONFIG_FILENAME);
+		ConfigManager config = ConfigManager.getInstance();
+		
+		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
 		
 		CBridge bridge = new CBridge();
 		EventsHandler h = new EventsHandler();
 		
 		Object[] arguments = new Object[3];
-		arguments[0] = new Double(241.1424550962836); 
-		arguments[1] = new Double(36.57038315462082); 
-		arguments[2] = new Double(78.69643293389497);  
+		arguments[0] = new Double(1.161398658674857E308); 
+		arguments[1] = new Double(7.530191945167586E307); 
+		arguments[2] = new Double(1.3332740923137621E308);  
 		
 		bridge.getEvents(h, arguments);
 		
-		cfg.setTarget(cfg.getStart().navigate(cfg).goFlow().goFlow().goFalse().goFlow().goFlow().goFalse().goFlow().goFalse().goTrue().node());
+		cfg.setTarget(config.getTestTarget(cfg));
 		System.out.println("Target node:" + cfg.getTarget().toString());
 		
 		Simulator simulator = new Simulator(cfg, h.getEvents());

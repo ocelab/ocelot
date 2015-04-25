@@ -11,27 +11,21 @@ import java.util.Stack;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
-import org.eclipse.cdt.core.dom.ast.IASTBreakStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
-import org.eclipse.cdt.core.dom.ast.IASTLabelStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
+import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTNullStatement;
-import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -39,8 +33,8 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
 import org.eclipse.cdt.core.dom.ast.IFunction;
-import org.eclipse.cdt.core.dom.ast.IFunctionType;
 import org.eclipse.cdt.core.dom.ast.IParameter;
+import org.eclipse.cdt.core.dom.ast.IScope;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
@@ -50,10 +44,9 @@ import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionCallExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTIdExpression;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTKnRFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTLiteralExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTName;
-import org.eclipse.cdt.internal.core.dom.parser.c.CBasicType;
-import org.eclipse.cdt.internal.core.dom.parser.c.CPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
 import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
@@ -538,38 +531,76 @@ public class InstrumentorVisitor extends ASTVisitor {
 	 * to another struct, because it won't initialize the parameters of the pointed structure
 	 */
 	@Override
-	public int visit(IASTDeclaration declaration) {
-		if (declaration instanceof CASTFunctionDefinition) {
-			CASTFunctionDefinition function = (CASTFunctionDefinition)declaration;
-			CASTFunctionDeclarator declarator = (CASTFunctionDeclarator)function.getDeclarator();
+	public int visit(IASTDeclaration pDeclaration) {
+		if (pDeclaration instanceof CASTFunctionDefinition) {
+			CASTFunctionDefinition function = (CASTFunctionDefinition)pDeclaration;
+			
+			IASTName functionName;
+			String[] parametersTypes;
+			String[] parametersNames;
+			if (function.getDeclarator() instanceof CASTFunctionDeclarator) {
+				CASTFunctionDeclarator declarator = (CASTFunctionDeclarator)function.getDeclarator();
+				
+				functionName = declarator.getName();
+				parametersTypes = new String[declarator.getParameters().length];
+				parametersNames = new String[declarator.getParameters().length];
+				
+				for (int i = 0; i < declarator.getParameters().length; i++) {
+					parametersTypes[i] = declarator.getParameters()[i].getDeclSpecifier().getRawSignature();
+					parametersNames[i] = declarator.getParameters()[i].getDeclarator().getRawSignature();
+				}
+				
+			} else if (function.getDeclarator() instanceof CASTKnRFunctionDeclarator) {
+				CASTKnRFunctionDeclarator declarator = (CASTKnRFunctionDeclarator)function.getDeclarator();
+				
+				functionName = declarator.getName();
+				parametersTypes = new String[declarator.getParameterNames().length];
+				parametersNames = new String[declarator.getParameterNames().length];
+				
+				for (int i = 0; i < declarator.getParameterNames().length; i++) {
+					IASTName paramName = declarator.getParameterNames()[i];
+					IASTDeclarator declaration = declarator.getDeclaratorForParameterName(paramName);
+					String type;
+					if (declaration != null)
+						type = ((IASTSimpleDeclaration)declaration.getParent()).getDeclSpecifier().getRawSignature();
+					else
+						type = "int";
+					
+					parametersNames[i] = paramName.getRawSignature();
+					parametersTypes[i] = type;
+				}
+			} else {
+				throw new RuntimeException("Unable to instrument this type of function: " + function.getDeclarator().getClass().toString());
+			}
 			
 			/* Simulates the generation of a CFG in order to correctly retrieve the "case" unique ids.
 			 * The resulting CFG will never be used.
 			 * TODO define a lightweight visitor able to initialize the "case" unique ids only correctly.
 			 */
-			function.getBody().accept(new CFGVisitor(new CFG(), declarator.getName().getRawSignature()));
+			function.getBody().accept(new CFGVisitor(new CFG(), functionName.getRawSignature()));
 			
-			String[] callParameters = new String[declarator.getParameters().length];
+			String[] callParameters = new String[parametersTypes.length];
 			String macro = "";
 			macro += "#define EXECUTE_OCELOT_TEST ";
 			
 			IFunction functionType = null;
 			try {
-				functionType = (IFunction)((CASTFunctionDefinition) declaration).getScope().getParent().getBinding(declarator.getName(), true);
+				IScope scope = function.getScope().getParent();
+				
+				functionType = (IFunction)scope.getBinding(functionName, true);
 			} catch (Exception e) {
-				System.out.println(e);
+				throw new RuntimeException("An error occurred while getting the signature of " + functionName.getRawSignature());
 			}
 			
 			int outputArgument = 0;
 			int inputArgument = 0;
 			
 			IParameter[] parameters = functionType.getParameters();
-			for (int i = 0; i < declarator.getParameters().length; i++) {
-				IASTParameterDeclaration param = declarator.getParameters()[i];
-				String typeString = param.getDeclSpecifier().getRawSignature();
+			for (int i = 0; i < parametersTypes.length; i++) {
+				String typeString = parametersTypes[i];
 				IType type = getType(parameters[i].getType());
 				
-				int pointers = param.getDeclarator().getRawSignature().length() - param.getDeclarator().getRawSignature().replaceAll("\\*", "").length();
+				int pointers = parametersNames[i].length() - parametersNames[i].replaceAll("\\*", "").length();
 				
 				if (type instanceof CStructure) {
 					macro += typeString; //Type
@@ -602,7 +633,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 			
 			this.callMacro = macro;
 		}
-		return super.visit(declaration);
+		return super.visit(pDeclaration);
 	}
 	
 	public String getCallMacro() {

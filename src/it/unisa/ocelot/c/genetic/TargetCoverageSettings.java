@@ -1,11 +1,12 @@
 package it.unisa.ocelot.c.genetic;
 
+import it.unisa.ocelot.conf.ConfigManager;
+
 import java.util.HashMap;
 import java.util.Properties;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
-import jmetal.core.Problem;
 import jmetal.experiments.Settings;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
 import jmetal.operators.crossover.CrossoverFactory;
@@ -16,56 +17,50 @@ import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 
 public class TargetCoverageSettings extends Settings {
-	public int populationSize_;
-    public int maxEvaluations_;
-
-    public double mutationProbability_;
-    public double crossoverProbability_;
-
-    public int threads_;
-    
-    private Properties defaultProperties;
+    private int populationSize;
+    private int maxEvaluations;
+    private double mutationProbability;
+    private double crossoverProbability;
+    private int threads;
     
 	public TargetCoverageSettings(TargetCoverageProblem pProblem) {
 		super();
 		
-		pProblem.setTarget(pProblem.getCFG().getStart().navigate(pProblem.getCFG()).goFlow().goFlow().goFalse().goFlow().goFlow().goFalse().goFlow().goFalse().goTrue().node());
-		
 		this.problem_ = pProblem;
-		
-		populationSize_ = 100;
-        maxEvaluations_ = 25000;
-        mutationProbability_ = 1.0 / problem_.getNumberOfVariables();
-        crossoverProbability_ = 0.9;
-        threads_ = 1;
-        
-        defaultProperties = new Properties();
-		
-		defaultProperties.setProperty("populationSize", String.valueOf(populationSize_));
-		defaultProperties.setProperty("maxEvaluations", String.valueOf(maxEvaluations_));
-		defaultProperties.setProperty("crossoverProbability", String.valueOf(crossoverProbability_));
-		defaultProperties.setProperty("mutationProbability", String.valueOf(mutationProbability_));
-		defaultProperties.setProperty("threads", String.valueOf(threads_));
+				
+		populationSize = 100;
+        maxEvaluations = 25000;
+        mutationProbability = 1.0 / problem_.getNumberOfVariables();
+        crossoverProbability = 0.9;
+        threads = 1;
 	}
 	
-	@Override
-	public Algorithm configure() throws JMException {		
-		return configure(defaultProperties);
+	public TargetCoverageSettings(TargetCoverageProblem pProblem, ConfigManager pConfig) {
+		this(pProblem);
+		
+		try {
+			populationSize = pConfig.getPopulationSize();
+		} catch (NumberFormatException e) {}
+		
+		try {
+			maxEvaluations = pConfig.getMaxEvolutions();
+		} catch (NumberFormatException e) {}
+		
+		try {
+			crossoverProbability = pConfig.getCrossoverProbability();
+		} catch (NumberFormatException e) {}
+		
+		try {
+			threads = pConfig.getThreads();
+		} catch (NumberFormatException e) {}
 	}
 	
-	public Algorithm configure(Properties configuration) throws JMException {
+	public Algorithm configure() throws JMException {
         Algorithm algorithm;
         Operator selection;
         Operator crossover;
         Operator mutation;
         
-        // Algorithm parameters
-        int populationSize = Integer.parseInt(configuration.getProperty("populationSize", String.valueOf(this.populationSize_)));
-        int maxEvaluations = Integer.parseInt(configuration.getProperty("maxEvaluations", String.valueOf(this.maxEvaluations_)));
-        double crossoverProbability = Double.parseDouble(configuration.getProperty("crossoverProbability", String.valueOf(this.crossoverProbability_)));
-        double mutationProbability = Double.parseDouble(configuration.getProperty("mutationProbability", String.valueOf(this.mutationProbability_)));
-        int threads = Integer.parseInt(configuration.getProperty("threads", String.valueOf(this.threads_)));
-
         HashMap<String, Double> parameters;
 
         IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
