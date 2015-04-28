@@ -178,12 +178,12 @@ public class ASTWriterVisitor extends CPPASTVisitor {
 	@Override
 	public int visit(IASTStatement statement) {
 		writeLeadingComments(statement);
-		if(macroHandler.isStatementWithMixedLocation(statement) && !(statement instanceof IASTCompoundStatement)){
+		/*if(macroHandler.isStatementWithMixedLocation(statement) && !(statement instanceof IASTCompoundStatement)){
 			return statementWriter.writeMixedStatement(statement);
 		}
 		if(macroHandler.checkisMacroExpansionNode(statement)) {
 			return ASTVisitor.PROCESS_SKIP;
-		}
+		}*/
 		return statementWriter.writeStatement(statement, true);
 	}
 

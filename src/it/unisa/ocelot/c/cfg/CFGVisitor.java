@@ -30,7 +30,6 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
-import org.jgrapht.graph.ListenableDirectedGraph;
 
 public class CFGVisitor extends ASTVisitor {
 	private CFG graph;

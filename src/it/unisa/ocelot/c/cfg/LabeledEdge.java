@@ -10,6 +10,8 @@ import org.jgrapht.graph.DefaultEdge;
  *
  */
 public abstract class LabeledEdge extends DefaultEdge {
+	private static final long serialVersionUID = -1013876340016911304L;
+	
 	private Object label;
 	
 	/**

@@ -2,15 +2,12 @@ package it.unisa.ocelot.c.compiler;
 
 import it.unisa.ocelot.util.Utils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
 import org.eclipse.cdt.core.index.IIndex;
@@ -52,19 +49,23 @@ public class GCC implements Compiler {
 		}
 	}
 	
-	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {		
+	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename, String[] pIncludePaths) 
+			throws Exception {		
 		String codeString = Utils.readFile(pSourceFilename);
-		FileContent fc = FileContent.create(pSourceFilename, codeString.toCharArray());
+		FileContent fileContent = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
-		String[] includeSearchPaths = new String[1];
-		includeSearchPaths[0] = "include";
-		IScannerInfo si = new ScannerInfo(macroDefinitions, includeSearchPaths);
-		IncludeFileContentProvider ifcp = FileCodeReaderFactory.getInstance();
+		IScannerInfo scannerInfo = new ScannerInfo(macroDefinitions, pIncludePaths);
+		IncludeFileContentProvider includeContentProvider = FileCodeReaderFactory.getInstance();
 		
-		IIndex idx = null;
+		IIndex index = null;
 		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
 		IParserLogService log = new DefaultLogService();
 		
-		return GCCLanguage.getDefault().getASTTranslationUnit(fc, si, ifcp, idx, options, log);
+		return GCCLanguage.getDefault().getASTTranslationUnit(
+				fileContent, scannerInfo, includeContentProvider, index, options, log);
+	}
+	
+	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {		
+		return getTranslationUnit(code, pSourceFilename, new String[0]);
 	}
 }

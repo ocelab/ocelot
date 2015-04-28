@@ -3,7 +3,6 @@ package it.unisa.ocelot.c.genetic;
 import it.unisa.ocelot.conf.ConfigManager;
 
 import java.util.HashMap;
-import java.util.Properties;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;

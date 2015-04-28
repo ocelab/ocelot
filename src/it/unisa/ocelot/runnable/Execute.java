@@ -10,10 +10,8 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.util.Utils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Properties;
 
 import jmetal.experiments.Settings;
 
@@ -22,31 +20,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 public class Execute {
-	private static final String OUTPUT_PATH = "./outputs/";
-	private static final String EXP_PATH = "./experiments/";
-	
 	private static final String CONFIG_FILENAME = "config.properties";
 	
 	static {
 		System.loadLibrary("Test");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		ConfigManager config = ConfigManager.getInstance();
-        
-        
-        //Loads all the configuration file information
-        /*
-        String testFilename = properties.getProperty("test.filename");
-        String testFunction = properties.getProperty("test.function");
-        String testParameters = properties.getProperty("test.parameters");
-        String testTarget = properties.getProperty("test.target");
-        String indipendentRuns = properties.getProperty("experiment.runs", "20");
-        
-        String experimentOutput = properties.getProperty("experiment.output.folder", OUTPUT_PATH);
-        String experimentResults = properties.getProperty("experiment.results.folder", EXP_PATH);
-        */
         
         //Sets up the output file
 		File outputDirectory = new File(config.getOutputFolder());
@@ -84,6 +67,19 @@ public class Execute {
         
         exp.initExperiment();
         exp.runExperiment(1);
+        
+        if (config.getPrintResults()) {
+        	String path = config.getResultsFolder() + "data/PGGA/TestCoverage/";
+        	String fun = Utils.readFile(path + "FUN.0").trim();
+        	String params = Utils.readFile(path + "VAR.0").trim();
+        	
+        	System.out.print("Fitness function: " + fun + ". ");
+        	if (fun.equals("0.0"))
+        		System.out.println("Target covered!");
+        	else
+        		System.out.println("Target not covered...");
+        	System.out.println("Parameters found: " + params);
+        }
 	}
 	
 	public static CFG buildCFG(String pSourceFile, String pFunctionName)
@@ -116,18 +112,5 @@ public class Execute {
 		}
 		
 		return navigator.node();
-	}
-	
-	public static Class<Object>[] getParameters(String pParameters) {
-		String[] types = StringUtils.split(pParameters, ",");
-        Class[] parameterTypes = new Class[types.length];
-        for (int i = 0; i < parameterTypes.length; i++) {
-        	if (types[i].equalsIgnoreCase("integer"))
-        		parameterTypes[i] = Integer.class;
-        	else
-        		parameterTypes[i] = Double.class;
-        }
-        
-        return parameterTypes;
 	}
 }

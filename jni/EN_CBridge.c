@@ -1,8 +1,14 @@
 #include "CBridge.h"
-#define EXECUTE_OCELOT_TEST int __arg0 = OCELOT_numeric(OCELOT_ARG(0));\
-int __arg1 = OCELOT_numeric(OCELOT_ARG(1));\
-int __arg2 = OCELOT_numeric(OCELOT_ARG(2));\
-OCELOT_TESTFUNCTION (__arg0,__arg1,__arg2);
+#define EXECUTE_OCELOT_TEST double __arg0 = OCELOT_numeric(OCELOT_ARG(0));\
+double __arg1 = OCELOT_numeric(OCELOT_ARG(1));\
+double __arg2 = OCELOT_numeric(OCELOT_ARG(2));\
+double __arg3 = OCELOT_numeric(OCELOT_ARG(3));\
+double __arg4 = OCELOT_numeric(OCELOT_ARG(4));\
+int __arg5 = OCELOT_numeric(OCELOT_ARG(5));\
+int __arg6 = OCELOT_numeric(OCELOT_ARG(6));\
+int __arg7 = OCELOT_numeric(OCELOT_ARG(7));\
+int __arg8 = OCELOT_numeric(OCELOT_ARG(8));\
+OCELOT_TESTFUNCTION (__arg0,__arg1,__arg2,__arg3,__arg4,__arg5,__arg6,__arg7,__arg8);
 
 /*
  * ATTENTION:

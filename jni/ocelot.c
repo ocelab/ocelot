@@ -8,7 +8,7 @@ void _f_ocelot_init() {
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 	_T_ocelot_event event;
 	event.kind = OCELOT_KIND_STDEV;
-	event.choice = result;
+	event.choice = (result == 0 ? 0 : 1);
 	event.distanceTrue = distanceTrue;
 	event.distanceFalse = distanceFalse;
 	g_array_append_val(_v_ocelot_events, event);
@@ -52,7 +52,7 @@ double _f_ocelot_get_fcall() {
 }
 
 double _f_ocelot_eq_numeric(double op1, double op2) {
-	double k = abs(op1 - op2);
+	double k = ABS(op1 - op2);
 	double result;
 	if (k == 0.0)
 		result = 0.0;
@@ -84,7 +84,7 @@ double _f_ocelot_ge_numeric(double op1, double op2) {
 }
 
 double _f_ocelot_neq_numeric(double op1, double op2) {
-	double k = abs(op1 - op2);
+	double k = ABS(op1 - op2);
 	double result;
 
 	if (k != 0.0)
@@ -120,15 +120,18 @@ double _f_ocelot_or(double op1, double op2) {
 }
 
 double _f_ocelot_istrue(double flag) {
-	if (flag == 1.0)
+	if (flag != 0.0)
 		return 0;
 	else
 		return OCELOT_K;
 }
 
 double _f_ocelot_isfalse(double flag) {
+	double k = ABS(flag);
 	if (flag == 0.0)
 		return 0;
-	else
+	else if (flag == 1.0)
 		return OCELOT_K;
+	else
+		return k;
 }

@@ -1,7 +1,5 @@
 package it.unisa.ocelot.simulator;
 
-import it.unisa.ocelot.c.cfg.LabeledEdge;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -9,9 +9,6 @@ import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import jmetal.encodings.variable.Int;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 

@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.antlr.v4.tool.ast.RangeAST;
+import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 
 public class ConfigManager {
@@ -15,6 +17,10 @@ public class ConfigManager {
 	private static String filename;
 	
 	private Properties properties;
+	
+	static {
+		setFilename("config.properties");
+	}
 	
 	public static void setFilename(String pFilename) {
 		filename = pFilename;
@@ -49,7 +55,9 @@ public class ConfigManager {
 	}
 	
 	public String getTestFilename() {
-		return this.properties.getProperty("test.filename");
+		String basedir = this.getTestBasedir();
+		
+		return basedir + "/" + this.properties.getProperty("test.filename");
 	}
 	
 	public String getTestFunction() {
@@ -57,7 +65,7 @@ public class ConfigManager {
 	}
 	
 	public CFGNode getTestTarget(CFG pCfg) {
-		String targetString = this.properties.getProperty("test.target");
+		String targetString = this.properties.getProperty("test.target", "");
 		
 		CFGNodeNavigator navigator = pCfg.getStart().navigate(pCfg);
 		
@@ -76,13 +84,14 @@ public class ConfigManager {
 		return navigator.node();
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Class[] getTestParameters() {
-		String parametersString = this.properties.getProperty("test.parameters");
+		String parametersString = this.properties.getProperty("test.parameters.types", "");
 		
 		String[] types = StringUtils.split(parametersString, ",");
         Class[] parameterTypes = new Class[types.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-        	if (types[i].equalsIgnoreCase("integer"))
+        	if (types[i].startsWith("int"))
         		parameterTypes[i] = Integer.class;
         	else
         		parameterTypes[i] = Double.class;
@@ -91,8 +100,67 @@ public class ConfigManager {
         return parameterTypes;
 	}
 	
+	public Range<Double>[] getTestRanges() {
+		String rangesString = this.properties.getProperty("test.parameters.ranges", "");
+		if (rangesString == "")
+			return null;
+		
+		String[] ranges = StringUtils.split(rangesString, " ");
+		Range<Double>[] result = new Range[ranges.length];
+		
+		for (int i = 0; i < ranges.length; i++) {
+			String rangeString = ranges[i];
+			String[] rangeParts = StringUtils.split(rangeString, ":");
+			double from = Double.parseDouble(rangeParts[0]);
+			double to = Double.parseDouble(rangeParts[1]);
+			result[i] = Range.between(from, to);
+		}
+		
+        return result;
+	}
+
+	public String[] getTestIncludePaths() {
+		String includeStrings = this.properties.getProperty("test.includes", "");
+		String[] includes = StringUtils.split(includeStrings, ",");
+		String basedir = this.getTestBasedir();
+		
+		for (int i = 0; i < includes.length; i++) {
+			if (!includes[i].startsWith("/"))
+				includes[i] = basedir  + includes[i];
+		}
+		
+		return includes;
+	}
+	
 	public String getOutputFolder() {
 		return this.properties.getProperty("experiment.output.folder");
+	}
+	
+	public Object[] getTestArguments() {
+		String argsString = this.properties.getProperty("test.simple");
+		String[] args = StringUtils.split(argsString, " ");
+		
+		Class[] types = this.getTestParameters();
+		Object[] arguments = new Object[types.length];
+		
+		for (int i = 0; i < types.length; i++) {
+			Double dValue = new Double(Double.parseDouble(args[i]));
+			if (types[i] == Integer.class) {
+				arguments[i] = new Integer(dValue.intValue());
+			} else if (types[i] == Double.class) {
+				arguments[i] = dValue;
+			}
+		}
+		
+		return arguments;
+	}
+	
+	public boolean getPrintResults() {
+		String print = this.properties.getProperty("experiment.results.print", "false");
+		if (print.equalsIgnoreCase("true"))
+			return true;
+		else
+			return false;
 	}
 	
 	public String getResultsFolder() {
@@ -101,5 +169,9 @@ public class ConfigManager {
 	
 	public int getExperimentRuns() {
 		return Integer.parseInt(this.properties.getProperty("experiment.runs", "1"));
+	}
+	
+	public String getTestBasedir() {
+		return this.properties.getProperty("test.basedir", "./");
 	}
 }

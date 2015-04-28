@@ -1,7 +1,7 @@
 package it.unisa.ocelot.c.genetic;
 
 
-import java.util.Properties;
+import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.conf.ConfigManager;
@@ -23,7 +23,14 @@ public class TargetCoverageExperiment extends Experiment {
 	public void algorithmSettings(String problemName, int problemId,
 			Algorithm[] algorithm) throws ClassNotFoundException {		
 		try {
-			TargetCoverageProblem problem = new TargetCoverageProblem(this.cfg, this.parametersTypes);
+			Range<Double>[] ranges = config.getTestRanges();
+			
+			TargetCoverageProblem problem;
+			if (ranges != null)
+				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes, ranges);
+			else
+				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes);
+			
 			TargetCoverageSettings settings = new TargetCoverageSettings(problem, config); 
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {

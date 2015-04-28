@@ -2,7 +2,6 @@ package it.unisa.ocelot.runnable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.utils.coff.Exe;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
@@ -31,10 +30,7 @@ public class SimpleExecute {
 		CBridge bridge = new CBridge();
 		EventsHandler h = new EventsHandler();
 		
-		Object[] arguments = new Object[3];
-		arguments[0] = new Double(1.161398658674857E308); 
-		arguments[1] = new Double(7.530191945167586E307); 
-		arguments[2] = new Double(1.3332740923137621E308);  
+		Object[] arguments = config.getTestArguments();
 		
 		bridge.getEvents(h, arguments);
 		

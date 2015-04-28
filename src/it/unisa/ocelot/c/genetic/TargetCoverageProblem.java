@@ -22,7 +22,8 @@ public class TargetCoverageProblem extends Problem {
 	private CFG cfg;
 	private Class<Object>[] parameters;
 
-	public TargetCoverageProblem(CFG pCfg, Class<Object>[] pParameters, Range<Double>[] pRanges)
+	@SuppressWarnings("rawtypes")
+	public TargetCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
 			throws Exception {
 
 		this.cfg = pCfg;
@@ -38,12 +39,17 @@ public class TargetCoverageProblem extends Problem {
 		lowerLimit_ = new double[numberOfVariables_];
 		upperLimit_ = new double[numberOfVariables_];
 		for (int i = 0; i < numberOfVariables_; i++) {
-			if (pRanges != null && pRanges[i] != null) {
+			if (pRanges != null && pRanges.length > i && pRanges[i] != null) {
 				lowerLimit_[i] = pRanges[i].getMinimum();
 				upperLimit_[i] = pRanges[i].getMaximum();
 			} else {
-				lowerLimit_[i] = Double.MIN_VALUE;
-				upperLimit_[i] = Double.MAX_VALUE;
+				if (pParameters[i] == Integer.class) {
+					lowerLimit_[i] = Integer.MIN_VALUE;
+					upperLimit_[i] = Integer.MAX_VALUE;
+				} else {
+					lowerLimit_[i] = Double.MIN_VALUE;
+					upperLimit_[i] = Double.MAX_VALUE;
+				}
 			}
 		}
 

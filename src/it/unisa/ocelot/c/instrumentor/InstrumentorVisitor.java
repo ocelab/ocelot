@@ -8,69 +8,78 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
-import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
-import org.eclipse.cdt.core.dom.ast.IFunction;
-import org.eclipse.cdt.core.dom.ast.IParameter;
-import org.eclipse.cdt.core.dom.ast.IScope;
+import org.eclipse.cdt.core.dom.ast.IEnumeration;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompoundStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTExpressionStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionCallExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTIdExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTKnRFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTLiteralExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTName;
-import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
 import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 
 public class InstrumentorVisitor extends ASTVisitor {
-	private IASTExpression lastExpression;
 	private Stack<List<IASTStatement>> switchExpressions;
-	private String callMacro;
+	private String functionName;
 	
-	public InstrumentorVisitor() {
+	public InstrumentorVisitor(String pInstrumentFunction) {
 		this.shouldVisitExpressions = true;
 		this.shouldVisitStatements = true;
 		this.shouldVisitDeclarations = true;
 		this.shouldVisitDeclarators = true;
 		this.shouldVisitTranslationUnit = true;
 		
-		this.callMacro = "";
+		this.functionName = pInstrumentFunction;
 		
 		this.switchExpressions = new Stack<List<IASTStatement>>();
 	}
 	
 	@Override
 	public int visit(IASTTranslationUnit tu) {
+		/* Simulates the generation of a CFG in order to correctly retrieve the "case" unique ids.
+		 * The resulting CFG will never be used.
+		 * TODO define a lightweight visitor able to initialize the "case" unique ids only correctly.
+		 */
+		tu.accept(new CFGVisitor(new CFG(), this.functionName));
+		
 		return super.visit(tu);
+	}
+	
+	public int visit(IASTDeclaration name) {
+		super.visit(name);
+		if (name instanceof CASTFunctionDefinition) {
+			IASTFunctionDefinition function = (CASTFunctionDefinition)name;
+			
+			if (!function.getDeclarator().getName().getRawSignature().equals(this.functionName))
+				return PROCESS_SKIP;
+		}
+		
+		return PROCESS_CONTINUE;
 	}
 		
 	public IASTExpression transformEquals(IASTBinaryExpression pExpression, boolean pNegation, boolean pTransPerformed) {
@@ -253,7 +262,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTExpression expression) {
-		this.lastExpression = this.transformDistanceExpression(expression, false, false);
+		this.transformDistanceExpression(expression, false, false);
 		return PROCESS_SKIP;
 	}
 	
@@ -462,7 +471,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		operationArgs[1] = this.castToDouble(this.transformDistanceExpression(operand2, false, true));
 		
 		IASTFunctionCallExpression operationFunction;
-		if (op1Type instanceof IBasicType && op2Type instanceof IBasicType) {
+		if (op1Type instanceof IBasicType && op2Type instanceof IBasicType ||
+				op1Type instanceof IEnumeration && op2Type instanceof IEnumeration) {
 			operationFunction = makeFunctionCall("_f_ocelot_" + pOperator+ "_numeric", operationArgs);
 		} else if (op1Type instanceof ICPointerType && op2Type instanceof ICPointerType) {
 			operationFunction = makeFunctionCall("_f_ocelot_" + pOperator+ "_pointer", operationArgs);
@@ -520,123 +530,5 @@ public class InstrumentorVisitor extends ASTVisitor {
 		}
 		
 		return type;
-	}
-	
-	/*
-	 * NOTE:
-	 * Assuming that all the structures are compose by either pointers or not pointers.
-	 * If a field is a pointer, it will be assumed that this is of a C basic type.
-	 * TODO Make sure that also in case of non basic C types this method works properly
-	 * For example, Ocelot won't work if there is a structure with a field with type pointer
-	 * to another struct, because it won't initialize the parameters of the pointed structure
-	 */
-	@Override
-	public int visit(IASTDeclaration pDeclaration) {
-		if (pDeclaration instanceof CASTFunctionDefinition) {
-			CASTFunctionDefinition function = (CASTFunctionDefinition)pDeclaration;
-			
-			IASTName functionName;
-			String[] parametersTypes;
-			String[] parametersNames;
-			if (function.getDeclarator() instanceof CASTFunctionDeclarator) {
-				CASTFunctionDeclarator declarator = (CASTFunctionDeclarator)function.getDeclarator();
-				
-				functionName = declarator.getName();
-				parametersTypes = new String[declarator.getParameters().length];
-				parametersNames = new String[declarator.getParameters().length];
-				
-				for (int i = 0; i < declarator.getParameters().length; i++) {
-					parametersTypes[i] = declarator.getParameters()[i].getDeclSpecifier().getRawSignature();
-					parametersNames[i] = declarator.getParameters()[i].getDeclarator().getRawSignature();
-				}
-				
-			} else if (function.getDeclarator() instanceof CASTKnRFunctionDeclarator) {
-				CASTKnRFunctionDeclarator declarator = (CASTKnRFunctionDeclarator)function.getDeclarator();
-				
-				functionName = declarator.getName();
-				parametersTypes = new String[declarator.getParameterNames().length];
-				parametersNames = new String[declarator.getParameterNames().length];
-				
-				for (int i = 0; i < declarator.getParameterNames().length; i++) {
-					IASTName paramName = declarator.getParameterNames()[i];
-					IASTDeclarator declaration = declarator.getDeclaratorForParameterName(paramName);
-					String type;
-					if (declaration != null)
-						type = ((IASTSimpleDeclaration)declaration.getParent()).getDeclSpecifier().getRawSignature();
-					else
-						type = "int";
-					
-					parametersNames[i] = paramName.getRawSignature();
-					parametersTypes[i] = type;
-				}
-			} else {
-				throw new RuntimeException("Unable to instrument this type of function: " + function.getDeclarator().getClass().toString());
-			}
-			
-			/* Simulates the generation of a CFG in order to correctly retrieve the "case" unique ids.
-			 * The resulting CFG will never be used.
-			 * TODO define a lightweight visitor able to initialize the "case" unique ids only correctly.
-			 */
-			function.getBody().accept(new CFGVisitor(new CFG(), functionName.getRawSignature()));
-			
-			String[] callParameters = new String[parametersTypes.length];
-			String macro = "";
-			macro += "#define EXECUTE_OCELOT_TEST ";
-			
-			IFunction functionType = null;
-			try {
-				IScope scope = function.getScope().getParent();
-				
-				functionType = (IFunction)scope.getBinding(functionName, true);
-			} catch (Exception e) {
-				throw new RuntimeException("An error occurred while getting the signature of " + functionName.getRawSignature());
-			}
-			
-			int outputArgument = 0;
-			int inputArgument = 0;
-			
-			IParameter[] parameters = functionType.getParameters();
-			for (int i = 0; i < parametersTypes.length; i++) {
-				String typeString = parametersTypes[i];
-				IType type = getType(parameters[i].getType());
-				
-				int pointers = parametersNames[i].length() - parametersNames[i].replaceAll("\\*", "").length();
-				
-				if (type instanceof CStructure) {
-					macro += typeString; //Type
-					macro += " __arg"+inputArgument+";\\\n";
-					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
-					List<StructNode> basics = tree.getBasicVariables();
-					for (StructNode var : basics) {
-						String fieldType = var.type.toString().replaceAll("\\*", "");
-						macro += fieldType;
-						macro += " __str"+inputArgument;
-						macro += " = (" + fieldType +")OCELOT_numeric(OCELOT_ARG(" + inputArgument + "));\\\n"; //Assign
-						
-						macro += var.getCompleteName() + " = " + (var.isPointer() ? "&" : "") + "__str" + inputArgument + ";\\\n";
-						
-						inputArgument++;
-					}
-					
-				} else {
-					macro += typeString;//Type
-					macro += " __arg" +outputArgument; //Name
-					macro += " = OCELOT_numeric(OCELOT_ARG(" + inputArgument + "));\\\n"; //Assign
-					
-					inputArgument++;
-				}
-				
-				callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-				outputArgument++;
-			}
-			macro += "OCELOT_TESTFUNCTION (" +StringUtils.join(callParameters, ",") + ");";
-			
-			this.callMacro = macro;
-		}
-		return super.visit(pDeclaration);
-	}
-	
-	public String getCallMacro() {
-		return callMacro;
 	}
 }

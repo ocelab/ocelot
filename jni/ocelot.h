@@ -13,6 +13,10 @@ extern "C" {
 #define OCELOT_KIND_STDEV 1
 #define OCELOT_KIND_CASEV 2
 
+#ifndef ABS
+#define ABS(x) (x < 0 ? -x : x)
+#endif
+
 typedef struct {
 	int kind;
 	int choice;

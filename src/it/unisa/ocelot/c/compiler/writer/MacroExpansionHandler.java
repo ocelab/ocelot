@@ -38,19 +38,17 @@ public class MacroExpansionHandler {
 	}
 
 	protected boolean isStatementWithMixedLocation(IASTStatement node) {
-		/*
 		if(node.getNodeLocations().length > 1) {
 			for (IASTNodeLocation loc : node.getNodeLocations()) {
 				if (loc instanceof IASTMacroExpansionLocation) {
 					return true;
 				}
 			}
-		}*/
+		}
 		return false;
 	}
 
 	protected boolean macroExpansionAlreadyPrinted(IASTNode node) {
-		/*
 		IASTNodeLocation[] locs = node.getNodeLocations();
 		if(locs.length ==1) {
 			if (locs[0] instanceof IASTMacroExpansionLocation) {
@@ -59,12 +57,11 @@ public class MacroExpansionHandler {
 					return true;
 				}
 			}
-		}*/
+		}
 		return false;
 	}
 
 	protected boolean checkisMacroExpansionNode(IASTNode node, boolean write) {
-		/*
 		IASTNodeLocation[] locs = node.getNodeLocations();
 		if (locs != null && locs.length ==1) {
 			if (locs[0] instanceof IASTMacroExpansionLocation) {
@@ -80,7 +77,7 @@ public class MacroExpansionHandler {
 				return true;
 
 			}
-		}*/
+		}
 		return false;
 	}
 	

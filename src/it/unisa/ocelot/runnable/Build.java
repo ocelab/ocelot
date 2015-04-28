@@ -10,9 +10,11 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
 import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
+import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.util.Utils;
 
 /**
@@ -25,16 +27,23 @@ import it.unisa.ocelot.util.Utils;
  *
  */
 public class Build {
+	public static ConfigManager config;
+	
 	public static void main(String[] args) throws Exception {
+		config = ConfigManager.getInstance();
+		
+		//Insturments the code and copies it in main.c
 		System.out.print("Instrumenting C file... ");
 		String callMacro = instrument();
 		System.out.println("Done!");
 		
+		//Adds extra macros in CBridge.c
 		System.out.print("Defining test function call... ");
 		enrichJNICall(callMacro);
 		System.out.println("Done!");
 		
 		
+		//Builds the makefile OS specific
 		System.out.print("Building makefile... ");
 		JNIMakefileGenerator generator = null; 
 		String os = System.getProperty("os.name");
@@ -53,6 +62,7 @@ public class Build {
 		}
 		System.out.println("Done!");
 		
+		//Builds the library
 		System.out.print("Building library... ");
 		generator.generate();
 		
@@ -74,13 +84,21 @@ public class Build {
 	}
 	
 	public static String instrument() throws Exception {
-		String code = Utils.readFile("testobject/main.c");
+		String code = Utils.readFile(config.getTestFilename());
 		
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), "testobject/main.c").copy();
+		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
+				code.toCharArray(),
+				config.getTestFilename(),
+				config.getTestIncludePaths()).copy();
+		
 		IASTPreprocessorStatement[] macros =  translationUnit.getAllPreprocessorStatements();
-		InstrumentorVisitor visitor = new InstrumentorVisitor();
 		
-		translationUnit.accept(visitor);
+		InstrumentorVisitor instrumentor = new InstrumentorVisitor(config.getTestFunction());
+		MacroDefinerVisitor macroDefiner = new MacroDefinerVisitor(config.getTestFunction());
+		
+		//NOTE: macroDefine MUST preceed instrumentor in visit
+		translationUnit.accept(macroDefiner);
+		translationUnit.accept(instrumentor);
 		
 		it.unisa.ocelot.c.compiler.writer.ASTWriter writer = new it.unisa.ocelot.c.compiler.writer.ASTWriter();
 				
@@ -99,9 +117,17 @@ public class Build {
 		result += outputCode;
 		
 		Utils.writeFile("jni/main.c", result);
-		Utils.writeFile("jni/main.h", "#include \"ocelot.h\"\n" + Utils.readFile("testobject/main.h"));
 		
-		return visitor.getCallMacro();
+		String mainHeader = "";
+		mainHeader += "#include \"ocelot.h\"\n";
+		mainHeader += "#include <stdio.h>\n";
+		mainHeader += "#include <math.h>\n";
+
+		mainHeader += "#define OCELOT_TESTFUNCTION " + config.getTestFunction() + "\n";
+
+		Utils.writeFile("jni/main.h", mainHeader);
+		
+		return macroDefiner.getCallMacro();
 	}
 	
 	public static void enrichJNICall(String pCallMacro) throws IOException {
