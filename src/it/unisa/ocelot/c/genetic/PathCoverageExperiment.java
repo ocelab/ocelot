@@ -31,6 +31,7 @@ public class PathCoverageExperiment extends Experiment {
 			else
 				problem = new PathCoverageProblem(this.cfg, this.parametersTypes);
 			
+			problem.setDebug(config.getDebug());
 			problem.setTarget(config.getTestTargetPath(this.cfg));
 			
 			PathCoverageSettings settings = new PathCoverageSettings(problem, config);

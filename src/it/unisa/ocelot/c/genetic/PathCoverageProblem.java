@@ -1,5 +1,6 @@
 package it.unisa.ocelot.c.genetic;
 
+import java.util.Arrays;
 import java.util.List;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -27,12 +28,14 @@ public class PathCoverageProblem extends Problem {
 	private Class<Object>[] parameters;
 	private List<LabeledEdge> target;
 
+	private boolean debug;
+
 	@SuppressWarnings("rawtypes")
-	public PathCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
-			throws Exception {
+	public PathCoverageProblem(CFG pCfg, Class[] pParameters,
+			Range<Double>[] pRanges) throws Exception {
 
 		this.cfg = pCfg;
-		
+
 		numberOfVariables_ = pParameters.length;
 		numberOfObjectives_ = 1;
 		numberOfConstraints_ = 0;
@@ -60,9 +63,8 @@ public class PathCoverageProblem extends Problem {
 
 		this.parameters = pParameters;
 	}
-	
-	public PathCoverageProblem(CFG pCfg,
-			Class<Object>[] pParameters)
+
+	public PathCoverageProblem(CFG pCfg, Class<Object>[] pParameters)
 			throws Exception {
 		this(pCfg, pParameters, null);
 	}
@@ -90,7 +92,11 @@ public class PathCoverageProblem extends Problem {
 		CBridge bridge = new CBridge();
 
 		EventsHandler handler = new EventsHandler();
-		PathDistanceListener listener = new PathDistanceListener(this.cfg, this.target);
+		PathDistanceListener listener = new PathDistanceListener(this.cfg,
+				this.target);
+
+		if (debug)
+			System.out.println(Arrays.toString(variables));
 
 		bridge.getEvents(handler, arguments);
 
@@ -100,8 +106,10 @@ public class PathCoverageProblem extends Problem {
 
 		simulator.simulate();
 
-		solution.setObjective(0, listener.getPathDistance()
-				+ listener.getNormalizedBranchDistance());
+		solution.setObjective(
+				0,
+				listener.getPathDistance()
+						+ listener.getNormalizedBranchDistance());
 	}
 
 	private Object getInstance(double pValue, Class<Object> pType) {
@@ -112,5 +120,9 @@ public class PathCoverageProblem extends Problem {
 		}
 
 		return new Double(pValue);
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 }
