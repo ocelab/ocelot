@@ -21,6 +21,7 @@ public class TargetCoverageSettings extends Settings {
     private double mutationProbability;
     private double crossoverProbability;
     private int threads;
+    private boolean debug;
     
 	public TargetCoverageSettings(TargetCoverageProblem pProblem) {
 		super();

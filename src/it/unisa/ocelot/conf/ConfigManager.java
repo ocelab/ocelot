@@ -184,4 +184,8 @@ public class ConfigManager {
 	public String getTestBasedir() {
 		return this.properties.getProperty("test.basedir", "./");
 	}
+
+	public boolean getDebug() {
+		return this.properties.getProperty("test.debug", "false").equalsIgnoreCase("true");
+	}
 }

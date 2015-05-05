@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.genetic;
 
+import java.util.Arrays;
+
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
@@ -7,6 +9,7 @@ import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.BDALListener;
+import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
 
 import org.apache.commons.lang3.Range;
 
@@ -21,6 +24,8 @@ public class TargetCoverageProblem extends Problem {
 
 	private CFG cfg;
 	private Class<Object>[] parameters;
+
+	private boolean debug;
 
 	@SuppressWarnings("rawtypes")
 	public TargetCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
@@ -87,6 +92,9 @@ public class TargetCoverageProblem extends Problem {
 		EventsHandler handler = new EventsHandler();
 		BDALListener bdalListener = new BDALListener(cfg);
 
+		if (debug)
+			System.out.println(Arrays.toString(variables));
+		
 		bridge.getEvents(handler, arguments);
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
@@ -107,5 +115,9 @@ public class TargetCoverageProblem extends Problem {
 		}
 
 		return new Double(pValue);
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 }

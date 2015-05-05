@@ -31,6 +31,8 @@ public class TargetCoverageExperiment extends Experiment {
 			else
 				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes);
 			
+			problem.setDebug(config.getDebug());
+			
 			TargetCoverageSettings settings = new TargetCoverageSettings(problem, config); 
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {
