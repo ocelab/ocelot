@@ -1,17 +1,28 @@
 package it.unisa.ocelot.c.cfg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CFGNodeNavigator {
 	private CFG cfg;
 	private CFGNode currentNode;
+	private List<LabeledEdge> edges;
 	
 	public CFGNodeNavigator(CFG pCFG, CFGNode pNode) {
 		this.cfg = pCFG;
 		this.currentNode = pNode;
+		this.edges = new ArrayList<LabeledEdge>();
 	}
 	
 	public CFGNodeNavigator goFlow() {
+		LabeledEdge flowEdge = null;
 		for (LabeledEdge edge : this.cfg.outgoingEdgesOf(this.currentNode)) {
-			this.currentNode = this.cfg.getEdgeTarget(edge);
+			flowEdge = edge;
+		}
+		
+		if (flowEdge != null) {
+			this.currentNode = this.cfg.getEdgeTarget(flowEdge);
+			this.edges.add(flowEdge);
 		}
 		
 		return this;
@@ -19,8 +30,10 @@ public class CFGNodeNavigator {
 	
 	public CFGNodeNavigator goTrue() {
 		for (LabeledEdge edge : this.cfg.outgoingEdgesOf(this.currentNode)) {
-			if (edge instanceof TrueEdge)
+			if (edge instanceof TrueEdge) {
 				this.currentNode = this.cfg.getEdgeTarget(edge);
+				this.edges.add(edge);
+			}
 		}
 		
 		return this;
@@ -28,8 +41,10 @@ public class CFGNodeNavigator {
 	
 	public CFGNodeNavigator goFalse() {
 		for (LabeledEdge edge : this.cfg.outgoingEdgesOf(this.currentNode)) {
-			if (edge instanceof FalseEdge)
+			if (edge instanceof FalseEdge) {
 				this.currentNode = this.cfg.getEdgeTarget(edge);
+				this.edges.add(edge);
+			}
 		}
 		
 		return this;
@@ -39,16 +54,30 @@ public class CFGNodeNavigator {
 		for (LabeledEdge edge : this.cfg.outgoingEdgesOf(this.currentNode)) {
 			if (edge instanceof CaseEdge) {
 				CaseEdge caseEdge = (CaseEdge)edge;
-				if (caseEdge.getLabel().toString().equals(pLabel))
+				if (caseEdge.getLabel().toString().equals(pLabel)) {
 					this.currentNode = this.cfg.getEdgeTarget(edge);
+					this.edges.add(caseEdge);
+				}
 			}
 		}
 		
 		return this;
 	}
 	
+	/**
+	 * Returns the node navigated
+	 * @return
+	 */
 	public CFGNode node() {
 		return this.currentNode;
+	}
+	
+	/**
+	 * Returns the path navigated
+	 * @return
+	 */
+	public List<LabeledEdge> path() {
+		return this.edges;
 	}
 }
 //cfg.getStart().goFlow().goFlow().goFalse().node()

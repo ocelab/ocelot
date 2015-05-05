@@ -3,9 +3,11 @@ package it.unisa.ocelot.conf;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import org.antlr.v4.tool.ast.RangeAST;
@@ -64,7 +66,7 @@ public class ConfigManager {
 		return this.properties.getProperty("test.function");
 	}
 	
-	public CFGNode getTestTarget(CFG pCfg) {
+	private CFGNodeNavigator getTestTargetNavigator(CFG pCfg) {
 		String targetString = this.properties.getProperty("test.target", "");
 		
 		CFGNodeNavigator navigator = pCfg.getStart().navigate(pCfg);
@@ -81,7 +83,15 @@ public class ConfigManager {
 				navigator = navigator.goCase(target);
 		}
 		
-		return navigator.node();
+		return navigator;
+	}
+	
+	public CFGNode getTestTarget(CFG pCfg) {
+		return getTestTargetNavigator(pCfg).node();
+	}
+	
+	public List<LabeledEdge> getTestTargetPath(CFG pCfg) {
+		return getTestTargetNavigator(pCfg).path();
 	}
 	
 	@SuppressWarnings("rawtypes")
