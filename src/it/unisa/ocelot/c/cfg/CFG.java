@@ -17,6 +17,8 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	private CFGNode start;
 	private CFGNode end;
 	private CFGNode target;
+	@SuppressWarnings("rawtypes")
+	private Class[] parameterTypes;
 	
 	/**
 	 * Creates an empty CFG
@@ -64,4 +66,16 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	public CFGNode getTarget() {
 		return target;
 	}
+
+	@SuppressWarnings("rawtypes")
+	public Class[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public void setParameterTypes(Class[] parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
+	
+	
 }

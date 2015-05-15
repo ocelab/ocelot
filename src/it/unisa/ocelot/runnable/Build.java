@@ -33,7 +33,7 @@ public class Build {
 		config = ConfigManager.getInstance();
 		
 		//Insturments the code and copies it in main.c
-		System.out.print("Instrumenting C file... ");
+		System.out.print("Instrumenting C file... \n");
 		String callMacro = instrument();
 		System.out.println("Done!");
 		

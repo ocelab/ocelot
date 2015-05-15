@@ -21,67 +21,72 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 public class Execute {
 	private static final String CONFIG_FILENAME = "config.properties";
-	
+
 	static {
 		System.loadLibrary("Test");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		ConfigManager config = ConfigManager.getInstance();
-        
-        //Sets up the output file
+
+		// Sets up the output file
 		File outputDirectory = new File(config.getOutputFolder());
-        outputDirectory.mkdirs();
-        FileOutputStream fos = new FileOutputStream(config.getOutputFolder() + "exp_res.txt");
-        TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
-        PrintStream ps = new PrintStream(myOut);
-        System.setOut(ps);
-        
-        //Builds the CFG and sets the target
-        CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
-        CFGNode target = config.getTestTarget(cfg);
-        cfg.setTarget(target);
-        
-        //Sets the parameters types of the function
-        Class<Object>[] parameterTypes = config.getTestParameters();
-        
-        TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg, config, parameterTypes);
+		outputDirectory.mkdirs();
+		FileOutputStream fos = new FileOutputStream(config.getOutputFolder()
+				+ "exp_res.txt");
+		TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
+		PrintStream ps = new PrintStream(myOut);
+		System.setOut(ps);
 
-        exp.experimentName_ = "TargetCoverage";
-        exp.algorithmNameList_ = new String[]{"PGGA"};
-        exp.problemList_ = new String[]{"TestCoverage"};
+		// Builds the CFG and sets the target
+		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
+		CFGNode target = config.getTestTarget(cfg);
+		cfg.setTarget(target);
 
-        exp.paretoFrontFile_ = new String[2];
+		// Sets the parameters types of the function
+//		Class<Object>[] parameterTypes = config.getTestParameters();
 
-        exp.indicatorList_ = new String[]{"HV", "SPREAD", "EPSILON"};
+		TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
+				config, cfg.getParameterTypes());
 
-        int numberOfAlgorithms = exp.algorithmNameList_.length;
+		// TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
+		// config, parameterTypes);
 
-        exp.experimentBaseDirectory_ = config.getResultsFolder();
+		exp.experimentName_ = "TargetCoverage";
+		exp.algorithmNameList_ = new String[] { "PGGA" };
+		exp.problemList_ = new String[] { "TestCoverage" };
 
-        exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
+		exp.paretoFrontFile_ = new String[2];
 
-        exp.independentRuns_ = config.getExperimentRuns();
-        
-        exp.initExperiment();
-        exp.runExperiment(1);
-        
-        if (config.getPrintResults()) {
-        	String path = config.getResultsFolder() + "data/PGGA/TestCoverage/";
-        	String fun = Utils.readFile(path + "FUN.0").trim();
-        	String params = Utils.readFile(path + "VAR.0").trim();
-        	
-        	System.out.print("Fitness function: " + fun + ". ");
-        	if (fun.equals("0.0"))
-        		System.out.println("Target covered!");
-        	else
-        		System.out.println("Target not covered...");
-        	System.out.println("Parameters found: " + params);
-        }
+		exp.indicatorList_ = new String[] { "HV", "SPREAD", "EPSILON" };
+
+		int numberOfAlgorithms = exp.algorithmNameList_.length;
+
+		exp.experimentBaseDirectory_ = config.getResultsFolder();
+
+		exp.algorithmSettings_ = new Settings[numberOfAlgorithms];
+
+		exp.independentRuns_ = config.getExperimentRuns();
+
+		exp.initExperiment();
+		exp.runExperiment(1);
+
+		if (config.getPrintResults()) {
+			String path = config.getResultsFolder() + "data/PGGA/TestCoverage/";
+			String fun = Utils.readFile(path + "FUN.0").trim();
+			String params = Utils.readFile(path + "VAR.0").trim();
+
+			System.out.print("Fitness function: " + fun + ". ");
+			if (fun.equals("0.0"))
+				System.out.println("Target covered!");
+			else
+				System.out.println("Target not covered...");
+			System.out.println("Parameters found: " + params);
+		}
 	}
-	
+
 	public static CFG buildCFG(String pSourceFile, String pFunctionName)
 			throws Exception {
 		String code = Utils.readFile(pSourceFile);
@@ -95,10 +100,10 @@ public class Execute {
 
 		return graph;
 	}
-	
+
 	public static CFGNode getTarget(CFG pCfg, String pTarget) {
 		CFGNodeNavigator navigator = pCfg.getStart().navigate(pCfg);
-		
+
 		String[] targets = StringUtils.split(pTarget, ",");
 		for (String target : targets) {
 			if (target.equalsIgnoreCase("flow"))
@@ -110,7 +115,7 @@ public class Execute {
 			else
 				navigator = navigator.goCase(target);
 		}
-		
+
 		return navigator.node();
 	}
 }
