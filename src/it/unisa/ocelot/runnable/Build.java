@@ -1,5 +1,14 @@
 package it.unisa.ocelot.runnable;
 
+import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
+import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
+import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
+import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
+import it.unisa.ocelot.c.makefile.WindowsMakefileGenerator;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.util.Utils;
 
 import java.io.IOException;
 
@@ -7,15 +16,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-
-import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
-import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
-import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
-import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
-import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.util.Utils;
 
 /**
  * This runnable class builds the library that will contain the function to test. It performs several tasks:
@@ -47,8 +47,7 @@ public class Build {
 		System.out.print("Building makefile... ");
 		JNIMakefileGenerator generator = null; 
 		String os = System.getProperty("os.name");
-		
-		if (os.contains("win"))
+		if (os.contains("Win"))
 			generator = buildWindows();
 		else if (os.contains("Mac"))
 			generator = buildMac();
@@ -66,8 +65,8 @@ public class Build {
 		System.out.print("Building library... ");
 		generator.generate();
 		
-		Process proc = Runtime.getRuntime().exec(new String[] {"make", "--directory=jni"});
-		
+		Process proc = Runtime.getRuntime().exec(new String[] {"mingw32-make", "--directory=jni"});
+				
 		System.out.println(IOUtils.toString(proc.getInputStream()));
 		
 		int result;
@@ -141,9 +140,7 @@ public class Build {
 	}
 	
 	public static JNIMakefileGenerator buildWindows() {
-		System.err.println("Sorry, we currently can't build the library for Windows.");
-		System.exit(-1);
-		return null;
+		return new WindowsMakefileGenerator();
 	}
 	
 	public static JNIMakefileGenerator buildMac() {
