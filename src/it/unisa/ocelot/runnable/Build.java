@@ -65,7 +65,11 @@ public class Build {
 		System.out.print("Building library... ");
 		generator.generate();
 		
-		Process proc = Runtime.getRuntime().exec(new String[] {"mingw32-make", "--directory=jni"});
+		Process proc;
+		if (os.contains("Win") || os.contains("win"))
+			proc = Runtime.getRuntime().exec(new String[] {"mingw32-make", "--directory=jni"});
+		else
+			proc = Runtime.getRuntime().exec(new String[] {"make", "--directory=jni"});
 				
 		System.out.println(IOUtils.toString(proc.getInputStream()));
 		
