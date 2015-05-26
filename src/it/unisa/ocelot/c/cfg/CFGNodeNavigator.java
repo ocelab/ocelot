@@ -79,5 +79,11 @@ public class CFGNodeNavigator {
 	public List<LabeledEdge> path() {
 		return this.edges;
 	}
+
+	@Override
+	public String toString() {
+		return "CFGNodeNavigator [currentNode=" + currentNode + ", edges="
+				+ edges + "]";
+	}
 }
 //cfg.getStart().goFlow().goFlow().goFalse().node()
