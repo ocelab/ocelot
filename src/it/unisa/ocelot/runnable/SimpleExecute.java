@@ -7,10 +7,10 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
 import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.BDALListener;
 import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
 import it.unisa.ocelot.util.Utils;
 
@@ -39,7 +39,7 @@ public class SimpleExecute {
 		
 		Simulator simulator = new Simulator(cfg, h.getEvents());
 		
-		BDALListener bdalListener = new BDALListener(cfg);
+		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg);
 		
 		simulator.addListener(new TestSimulatorListener());
 		simulator.addListener(bdalListener);

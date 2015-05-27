@@ -1,4 +1,4 @@
-package it.unisa.ocelot.c.genetic;
+package it.unisa.ocelot.genetic.paths;
 
 import java.util.ArrayList;
 
