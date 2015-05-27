@@ -43,7 +43,7 @@ public class TargetCoverageSettings extends Settings {
 		} catch (NumberFormatException e) {}
 		
 		try {
-			maxEvaluations = pConfig.getMaxEvolutions();
+			maxEvaluations = pConfig.getMaxEvaluations();
 		} catch (NumberFormatException e) {}
 		
 		try {
