@@ -45,14 +45,8 @@ public class Execute {
 		CFGNode target = config.getTestTarget(cfg);
 		cfg.setTarget(target);
 
-		// Sets the parameters types of the function
-//		Class<Object>[] parameterTypes = config.getTestParameters();
-
 		TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
 				config, cfg.getParameterTypes());
-
-		// TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
-		// config, parameterTypes);
 
 		exp.experimentName_ = "TargetCoverage";
 		exp.algorithmNameList_ = new String[] { "PGGA" };

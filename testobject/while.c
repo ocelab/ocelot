@@ -9,8 +9,9 @@ int test_me(int a, int b, int c) {
 			c++;
 			b -= c;
 		} else {
-			b -= a;
+			b -= a+1;
 		}
+		b = b+1-1;
 	}
 
 	c++;
