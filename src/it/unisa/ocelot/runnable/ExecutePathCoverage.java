@@ -75,6 +75,7 @@ public class ExecutePathCoverage {
 			exp.runExperiment(1);
 
 			if (config.getPrintResults()) {
+				System.out.println(aMcCabePath.toString());
 				String path = config.getResultsFolder()
 						+ "data/PGGA/TestCoverage/";
 				String fun = Utils.readFile(path + "FUN.0").trim();

@@ -1,7 +1,7 @@
 #include <math.h>
 
 int test_me(int a, int b, int c) {
-	if (a < 0)
+	if (a < 0 || c < 0)
 		return 0;
 
 	while (b > c) {
