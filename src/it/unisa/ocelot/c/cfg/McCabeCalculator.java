@@ -7,8 +7,8 @@ import java.util.Set;
 import org.jgrapht.alg.CycleDetector;
 
 /**
- * This class is able to calculate all linearly independent McCabe paths for a
- * given control flow graph
+ * Calculate all linearly independent McCabe paths for a given control flow
+ * graph
  * 
  * @author giograno
  *
@@ -18,7 +18,9 @@ public class McCabeCalculator {
 	private CFG cfg;
 	private CFGNode startNode;
 	private CycleDetector<CFGNode, LabeledEdge> cycleGraph;
+	// paths node by node
 	private ArrayList<ArrayList<CFGNode>> mcCabePaths;
+	// paths edge by edge
 	private ArrayList<ArrayList<LabeledEdge>> mcCabeEdgePaths;
 
 	/**
@@ -34,10 +36,21 @@ public class McCabeCalculator {
 		this.mcCabePaths = new ArrayList<ArrayList<CFGNode>>();
 	}
 
-	public void getMcCabePaths() {
+	/**
+	 * Performs calculation of McCabe linearly independent paths
+	 */
+	public void calculateMcCabePaths() {
 		this.FindBasis(this.startNode, new ArrayList<CFGNode>());
 	}
 
+	/**
+	 * Traverse recursively the control flow graph calculating all basis path
+	 * 
+	 * @param node
+	 *            starting node
+	 * @param path
+	 *            empty path
+	 */
 	private void FindBasis(CFGNode node, ArrayList<CFGNode> path) {
 		// add current node to McCabe path
 		path.add(node);
@@ -68,12 +81,13 @@ public class McCabeCalculator {
 	}
 
 	/**
-	 * Calculate the vertex targeting by the default edge. Default edge is any
-	 * edge that is not a back edge or which later causes a node to have two
+	 * It calculates the vertex targeting by the default edge. Default edge is
+	 * any edge that is not a back edge or which later causes a node to have two
 	 * incoming edges˙
 	 * 
 	 * @param node
-	 * @return
+	 *            node to compute
+	 * @return the default edge for given node
 	 */
 	private CFGNode getDefaultDestination(CFGNode node) {
 		Set<LabeledEdge> currentOutgoingEdges = cfg.outgoingEdgesOf(node);
@@ -98,14 +112,26 @@ public class McCabeCalculator {
 
 	}
 
-	public ArrayList<ArrayList<CFGNode>> getMcCaArrayPath() {
+	/**
+	 * Returns all McCabe linearly independent paths, when a single path is
+	 * described by its nodes
+	 * 
+	 * @return a list of McCabe paths
+	 */
+	public ArrayList<ArrayList<CFGNode>> getMcCabeNodePaths() {
 		return this.mcCabePaths;
 	}
 
+	/**
+	 * Returns all McCabe linearly independent paths, when a single path is
+	 * described by its edges
+	 * 
+	 * @return a list of McCabe paths
+	 */
 	public ArrayList<ArrayList<LabeledEdge>> getMcCabeEdgePaths() {
-		if(mcCabeEdgePaths!=null)
+		if (mcCabeEdgePaths != null)
 			return this.mcCabeEdgePaths;
-		
+
 		mcCabeEdgePaths = new ArrayList<ArrayList<LabeledEdge>>();
 		for (ArrayList<CFGNode> nodePath : mcCabePaths) {
 			ArrayList<LabeledEdge> currentEdgePath = new ArrayList<>();
