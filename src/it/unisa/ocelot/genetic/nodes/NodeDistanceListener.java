@@ -1,4 +1,4 @@
-package it.unisa.ocelot.simulator.listeners;
+package it.unisa.ocelot.genetic.nodes;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
@@ -12,13 +12,13 @@ import java.util.List;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 
-public class BDALListener implements SimulatorListener {
+public class NodeDistanceListener implements SimulatorListener {
 	private CFG cfg;
 	private CFGNode nearest;
 	private List<ExecutionEvent> nearestEvents;
 	private int shortestPath;
 	
-	public BDALListener(CFG pCFG) {
+	public NodeDistanceListener(CFG pCFG) {
 		this.cfg = pCFG;
 		this.shortestPath = Integer.MAX_VALUE;
 		this.nearestEvents = new ArrayList<ExecutionEvent>();

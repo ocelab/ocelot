@@ -24,10 +24,19 @@ public class ConfigManager {
 		setFilename("config.properties");
 	}
 	
+	/**
+	 * Sets the filename of the configuration file. To be called before <code>getInstance</code>.
+	 * @return
+	 */
 	public static void setFilename(String pFilename) {
 		filename = pFilename;
 	}
 	
+	/**
+	 * Returns an instance of the configuration manager. Call <code>setFilename</code> before this method.
+	 * @return Instance of the manager
+	 * @throws IOException If there is an error opening the file
+	 */
 	public static ConfigManager getInstance() throws IOException {
 		if (instance == null)
 			instance = new ConfigManager();
@@ -35,33 +44,58 @@ public class ConfigManager {
 		return instance;
 	}
 	
-	public ConfigManager() throws IOException {
+	private ConfigManager() throws IOException {
 		this.properties = new Properties();
 		this.properties.load(new FileInputStream(filename));
 	}
 	
+	/**
+	 * Returns the population size for the genetic algorithm (100 if not specified)
+	 * @return
+	 */
 	public int getPopulationSize() {
 		return Integer.parseInt(this.properties.getProperty("population.size", "100"));
 	}
 	
+	/**
+	 * Returns the maximum number of evolutions for the genetic algorithm (2500 if not specified)
+	 * @return
+	 */
 	public int getMaxEvolutions() {
 		return Integer.parseInt(this.properties.getProperty("evolutions.max", "25000"));
 	}
 	
+	/**
+	 * Returns the probability of crossover for the genetic algorithm (0.9 if not specified)
+	 * @return
+	 */
 	public double getCrossoverProbability() {
 		return Double.parseDouble(this.properties.getProperty("crossover.probability", "0.9"));
 	}
 	
+	/**
+	 * Returns the number of threads for the genetic algorithm (1 if not specified)
+	 * @return
+	 */
 	public int getThreads() {
 		return Integer.parseInt(this.properties.getProperty("threads", "1"));
 	}
 	
+	/**
+	 * Returns the name of the name of the file which contains the function to be tested (required). 
+	 * It uses property "test.basedir" as base directory.  
+	 * @return
+	 */
 	public String getTestFilename() {
 		String basedir = this.getTestBasedir();
 		
 		return basedir + "/" + this.properties.getProperty("test.filename");
 	}
 	
+	/**
+	 * Returns the name of the function to be tested (required)
+	 * @return
+	 */
 	public String getTestFunction() {
 		return this.properties.getProperty("test.function");
 	}
@@ -86,15 +120,34 @@ public class ConfigManager {
 		return navigator;
 	}
 	
+	/**
+	 * Returns the target node specified in the configuration file.  
+	 * Will not be used in future.
+	 * @param pCfg Control Flow Graph
+	 * @return Target node to be reached by the genetic algorithm
+	 */
+	@Deprecated
 	public CFGNode getTestTarget(CFG pCfg) {
 		return getTestTargetNavigator(pCfg).node();
 	}
 	
+	/**
+	 * Returns the target path specified in the configuration file.  
+	 * Will not be used in future.
+	 * @param pCfg Control Flow Graph
+	 * @return Target path to be reached by the genetic algorithm
+	 */
+	@Deprecated
 	public List<LabeledEdge> getTestTargetPath(CFG pCfg) {
 		return getTestTargetNavigator(pCfg).path();
 	}
 	
+	/**
+	 * Return the types of the parameters of the function to be tested.
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
+	@Deprecated
 	public Class[] getTestParameters() {
 		String parametersString = this.properties.getProperty("test.parameters.types", "");
 		
@@ -110,6 +163,11 @@ public class ConfigManager {
         return parameterTypes;
 	}
 	
+	/**
+	 * Returns the ranges for the parameters of the function to be tested. Each range should be in the form "N:M" and
+	 * the ranges should be separated by a space " ".
+	 * @return
+	 */
 	public Range<Double>[] getTestRanges() {
 		String rangesString = this.properties.getProperty("test.parameters.ranges", "");
 		if (rangesString == "")
@@ -129,6 +187,10 @@ public class ConfigManager {
         return result;
 	}
 
+	/**
+	 * Returns the array of paths in which the include headers will be searched.
+	 * @return
+	 */
 	public String[] getTestIncludePaths() {
 		String includeStrings = this.properties.getProperty("test.includes", "");
 		String[] includes = StringUtils.split(includeStrings, ",");
@@ -142,10 +204,18 @@ public class ConfigManager {
 		return includes;
 	}
 	
+	/**
+	 * Returns the output folder.
+	 * @return
+	 */
 	public String getOutputFolder() {
 		return this.properties.getProperty("experiment.output.folder");
 	}
 	
+	/**
+	 * Returns the list of test arguments for a simple test
+	 * @return
+	 */
 	public Object[] getTestArguments() {
 		String argsString = this.properties.getProperty("test.simple");
 		String[] args = StringUtils.split(argsString, " ");
@@ -165,6 +235,10 @@ public class ConfigManager {
 		return arguments;
 	}
 	
+	/**
+	 * Returns if configuration file allows printing the solution on the standard output
+	 * @return
+	 */
 	public boolean getPrintResults() {
 		String print = this.properties.getProperty("experiment.results.print", "false");
 		if (print.equalsIgnoreCase("true"))
@@ -173,18 +247,34 @@ public class ConfigManager {
 			return false;
 	}
 	
+	/**
+	 * Returns the folder that will contain the results of the genetic algorithm calculations
+	 * @return
+	 */
 	public String getResultsFolder() {
 		return this.properties.getProperty("experiment.results.folder");
 	}
 	
+	/**
+	 * Returns the number of indipendent runs of the experiment (genetic algorithm) (1 if not specified).
+	 * @return
+	 */
 	public int getExperimentRuns() {
 		return Integer.parseInt(this.properties.getProperty("experiment.runs", "1"));
 	}
 	
+	/**
+	 * Returns the base directory from which all the filenames in the config file will start.
+	 * @return
+	 */
 	public String getTestBasedir() {
 		return this.properties.getProperty("test.basedir", "./");
 	}
 
+	/**
+	 * Returns <code>true</code> if debug is active, false otherwise.
+	 * @return
+	 */
 	public boolean getDebug() {
 		return this.properties.getProperty("test.debug", "false").equalsIgnoreCase("true");
 	}

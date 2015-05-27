@@ -1,4 +1,4 @@
-package it.unisa.ocelot.c.genetic;
+package it.unisa.ocelot.genetic.nodes;
 
 import it.unisa.ocelot.conf.ConfigManager;
 
@@ -15,14 +15,15 @@ import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 
-public class PathCoverageSettings extends Settings {
+public class TargetCoverageSettings extends Settings {
     private int populationSize;
     private int maxEvaluations;
     private double mutationProbability;
     private double crossoverProbability;
     private int threads;
+    private boolean debug;
     
-	public PathCoverageSettings(PathCoverageProblem pProblem) {
+	public TargetCoverageSettings(TargetCoverageProblem pProblem) {
 		super();
 		
 		this.problem_ = pProblem;
@@ -34,7 +35,7 @@ public class PathCoverageSettings extends Settings {
         threads = 1;
 	}
 	
-	public PathCoverageSettings(PathCoverageProblem pProblem, ConfigManager pConfig) {
+	public TargetCoverageSettings(TargetCoverageProblem pProblem, ConfigManager pConfig) {
 		this(pProblem);
 		
 		try {

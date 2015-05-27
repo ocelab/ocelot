@@ -1,4 +1,4 @@
-package it.unisa.ocelot.c.genetic;
+package it.unisa.ocelot.genetic.paths;
 
 
 import org.apache.commons.lang3.Range;

@@ -1,4 +1,4 @@
-package it.unisa.ocelot.simulator.listeners;
+package it.unisa.ocelot.genetic.paths;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
@@ -36,6 +36,8 @@ public class PathDistanceListener implements SimulatorListener {
 		
 		this.pathDistance = 0;
 		this.branchDistance = 0;
+		
+		//The index of the target path that we are analysing
 		this.current = 0;
 		this.onPath = true;
 		this.terminated = false;
@@ -61,7 +63,8 @@ public class PathDistanceListener implements SimulatorListener {
 			return;
 		
 		if (this.onPath) {
-			if (this.targetPath.size() <= current) {
+			//If the current index is out of bound, stops the procedure
+			if (current >= this.targetPath.size()) {
 				this.terminated = true;
 				return;
 			}

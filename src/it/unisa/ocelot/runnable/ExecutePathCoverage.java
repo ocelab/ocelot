@@ -5,9 +5,9 @@ import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
 import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.c.genetic.PathCoverageExperiment;
-import it.unisa.ocelot.c.genetic.TargetCoverageExperiment;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.nodes.TargetCoverageExperiment;
+import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.util.Utils;
 
 import java.io.File;
@@ -40,13 +40,12 @@ public class ExecutePathCoverage {
         PrintStream ps = new PrintStream(myOut);
         System.setOut(ps);
         
-        //Builds the CFG and sets the target
+        //Builds the CFG
         CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
-        CFGNode target = config.getTestTarget(cfg);
-        cfg.setTarget(target);
         
         //Sets the parameters types of the function
-        Class<Object>[] parameterTypes = config.getTestParameters();
+        //Class<Object>[] parameterTypes = config.getTestParameters();
+        Class<Object>[] parameterTypes = cfg.getParameterTypes();
         
         PathCoverageExperiment exp = new PathCoverageExperiment(cfg, config, parameterTypes);
 

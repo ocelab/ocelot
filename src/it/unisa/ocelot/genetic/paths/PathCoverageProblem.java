@@ -1,15 +1,16 @@
-package it.unisa.ocelot.c.genetic;
+package it.unisa.ocelot.genetic.paths;
 
 import java.util.Arrays;
+import java.util.List;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.BDALListener;
-import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
 
 import org.apache.commons.lang3.Range;
 
@@ -19,20 +20,21 @@ import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
-public class TargetCoverageProblem extends Problem {
+public class PathCoverageProblem extends Problem {
 	private static final long serialVersionUID = 1930014794768729268L;
 
 	private CFG cfg;
 	private Class<Object>[] parameters;
+	private List<LabeledEdge> target;
 
 	private boolean debug;
 
 	@SuppressWarnings("rawtypes")
-	public TargetCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
-			throws Exception {
+	public PathCoverageProblem(CFG pCfg, Class[] pParameters,
+			Range<Double>[] pRanges) throws Exception {
 
 		this.cfg = pCfg;
-		
+
 		numberOfVariables_ = pParameters.length;
 		numberOfObjectives_ = 1;
 		numberOfConstraints_ = 0;
@@ -60,9 +62,8 @@ public class TargetCoverageProblem extends Problem {
 
 		this.parameters = pParameters;
 	}
-	
-	public TargetCoverageProblem(CFG pCfg,
-			Class<Object>[] pParameters)
+
+	public PathCoverageProblem(CFG pCfg, Class<Object>[] pParameters)
 			throws Exception {
 		this(pCfg, pParameters, null);
 	}
@@ -75,8 +76,8 @@ public class TargetCoverageProblem extends Problem {
 		return cfg.getStart().navigate(cfg);
 	}
 
-	public void setTarget(CFGNode pNode) {
-		this.cfg.setTarget(pNode);
+	public void setTarget(List<LabeledEdge> pPath) {
+		this.target = pPath;
 	}
 
 	public void evaluate(Solution solution) throws JMException {
@@ -90,21 +91,24 @@ public class TargetCoverageProblem extends Problem {
 		CBridge bridge = new CBridge();
 
 		EventsHandler handler = new EventsHandler();
-		BDALListener bdalListener = new BDALListener(cfg);
+		PathDistanceListener listener = new PathDistanceListener(this.cfg,
+				this.target);
 
 		if (debug)
 			System.out.println(Arrays.toString(variables));
-		
+
 		bridge.getEvents(handler, arguments);
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 
-		simulator.addListener(bdalListener);
+		simulator.addListener(listener);
 
 		simulator.simulate();
 
-		solution.setObjective(0, bdalListener.getNormalizedBranchDistance()
-				+ bdalListener.getApproachLevel());
+		solution.setObjective(
+				0,
+				listener.getPathDistance()
+						+ listener.getNormalizedBranchDistance());
 	}
 
 	private Object getInstance(double pValue, Class<Object> pType) {
