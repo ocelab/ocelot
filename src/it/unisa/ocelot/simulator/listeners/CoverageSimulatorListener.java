@@ -7,16 +7,17 @@ import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class CoverageSimulatorListener implements SimulatorListener {
 	private CFG cfg;
-	private List<LabeledEdge> coveredEdges;
+	private Set<LabeledEdge> coveredEdges;
 	private List<CFGNode> coveredNodes;
 	public CoverageSimulatorListener(CFG pCFG) {
 		this.cfg = pCFG;
-		this.coveredEdges = new ArrayList<LabeledEdge>();
+		this.coveredEdges = new HashSet<LabeledEdge>();
 		this.coveredNodes = new ArrayList<CFGNode>();
 	}
 
@@ -40,6 +41,10 @@ public class CoverageSimulatorListener implements SimulatorListener {
 	public void onNodeVisit(CFGNode pNode) {
 		if (!this.coveredNodes.contains(pNode))
 			this.coveredNodes.add(pNode);
+	}
+	
+	public Set<LabeledEdge> getCoveredEdges() {
+		return new HashSet<LabeledEdge>(this.coveredEdges);
 	}
 	
 	public double getBranchCoverage() {
