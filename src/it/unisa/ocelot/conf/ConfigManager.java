@@ -58,11 +58,11 @@ public class ConfigManager {
 	}
 	
 	/**
-	 * Returns the maximum number of evolutions for the genetic algorithm (2500 if not specified)
+	 * Returns the maximum number of evaluations for the genetic algorithm (2500 if not specified)
 	 * @return
 	 */
-	public int getMaxEvolutions() {
-		return Integer.parseInt(this.properties.getProperty("evolutions.max", "25000"));
+	public int getMaxEvaluations() {
+		return Integer.parseInt(this.properties.getProperty("evaluations.max", "25000"));
 	}
 	
 	/**
