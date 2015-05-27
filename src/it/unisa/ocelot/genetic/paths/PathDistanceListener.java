@@ -8,7 +8,10 @@ import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -19,6 +22,7 @@ public class PathDistanceListener implements SimulatorListener {
 	private List<LabeledEdge> executionPath;
 	private List<ExecutionEvent> events;
 	private List<List<ExecutionEvent>> caseEvents;
+	private Map<LabeledEdge, Boolean> visitedEdge;
 	
 	private int current;
 	
@@ -41,6 +45,11 @@ public class PathDistanceListener implements SimulatorListener {
 		this.current = 0;
 		this.onPath = true;
 		this.terminated = false;
+		
+		this.visitedEdge = new HashMap<LabeledEdge, Boolean>();
+		
+		for (LabeledEdge edge : pPath)
+			this.visitedEdge.put(edge, false);
 	}
 
 	@Override
@@ -56,11 +65,14 @@ public class PathDistanceListener implements SimulatorListener {
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge, ExecutionEvent pEvent, List<ExecutionEvent> pCases) {
 		this.executionPath.add(pEdge);
-		events.add(pEvent);
-		caseEvents.add(pCases);
+		this.events.add(pEvent);
+		this.caseEvents.add(pCases);
 		
 		if (this.terminated)
 			return;
+		
+		if (this.targetPath.contains(pEdge))
+			this.visitedEdge.put(pEdge, true);
 		
 		if (this.onPath) {
 			//If the current index is out of bound, stops the procedure
@@ -81,11 +93,14 @@ public class PathDistanceListener implements SimulatorListener {
 				}
 				
 				this.pathDistance++;
+			} else {
+				this.visitedEdge.put(pEdge, true);
 			}
 		} else {
 			if (this.targetPath.contains(pEdge)) {
 				current = this.targetPath.indexOf(pEdge);
 				this.onPath = true;
+				this.visitedEdge.put(pEdge, true);
 			} else
 				this.pathDistance++;
 		}
@@ -98,7 +113,18 @@ public class PathDistanceListener implements SimulatorListener {
 	}
 	
 	public int getPathDistance() {
-		return this.pathDistance;
+		int distance = 0;
+		for (Entry<LabeledEdge, Boolean> entry : this.visitedEdge.entrySet()) {
+			if (!entry.getValue())
+				distance++;
+		}
+		
+		return distance;//this.pathDistance;
+	}
+	
+	public void debug() {
+		for (Entry<LabeledEdge, Boolean> entry : this.visitedEdge.entrySet())
+			System.out.println(entry.getKey().toString() + " : " + entry.getValue().toString());
 	}
 	
 	public double getNormalizedBranchDistance() {

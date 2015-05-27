@@ -1,6 +1,7 @@
 package it.unisa.ocelot.genetic.paths;
 
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.FastPgGA;
 
 import java.util.HashMap;
 
@@ -65,7 +66,7 @@ public class PathCoverageSettings extends Settings {
         IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
 
         // Creating the problem
-        algorithm = new pgGA(problem_, parallelEvaluator);
+        algorithm = new FastPgGA(problem_, parallelEvaluator);
         
         algorithm.setInputParameter("populationSize", populationSize);
         algorithm.setInputParameter("maxEvaluations", maxEvaluations);
