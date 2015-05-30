@@ -278,4 +278,8 @@ public class ConfigManager {
 	public boolean getDebug() {
 		return this.properties.getProperty("test.debug", "false").equalsIgnoreCase("true");
 	}
+	
+	public boolean getUI() {
+		return this.properties.getProperty("test.ui", "false").equalsIgnoreCase("true");
+	}
 }

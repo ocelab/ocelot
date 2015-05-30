@@ -9,7 +9,7 @@ int test_me(int a, int b, int c) {
 	if (a == 0)
 		flag = 1;
 
-	if (a == 0 && b == 0)
+	if (flag && b == 0)
 		return 2;
 	
 	return -1;

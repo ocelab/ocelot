@@ -7,7 +7,7 @@ import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.List;
 
-public class TestSimulatorListener implements SimulatorListener {
+public class NodePrinterListener implements SimulatorListener {
 
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge) {

@@ -17,11 +17,13 @@ public class NodeDistanceListener implements SimulatorListener {
 	private CFGNode nearest;
 	private List<ExecutionEvent> nearestEvents;
 	private int shortestPath;
+	private CFGNode target;
 	
-	public NodeDistanceListener(CFG pCFG) {
+	public NodeDistanceListener(CFG pCFG, CFGNode pTarget) {
 		this.cfg = pCFG;
 		this.shortestPath = Integer.MAX_VALUE;
 		this.nearestEvents = new ArrayList<ExecutionEvent>();
+		this.target = pTarget;
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class NodeDistanceListener implements SimulatorListener {
 
 	@Override
 	public void onNodeVisit(CFGNode pNode) {
-		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, pNode, this.cfg.getTarget());
+		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, pNode, this.target);
 		if (path != null && path.size() < this.shortestPath) {
 			this.nearest = pNode;
 			this.shortestPath = path.size();

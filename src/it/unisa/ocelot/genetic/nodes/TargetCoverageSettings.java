@@ -1,12 +1,14 @@
 package it.unisa.ocelot.genetic.nodes;
 
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.FastPgGA;
 
 import java.util.HashMap;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
 import jmetal.experiments.Settings;
+import jmetal.metaheuristics.fastPGA.FastPGA;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
 import jmetal.operators.crossover.CrossoverFactory;
 import jmetal.operators.mutation.MutationFactory;
@@ -66,7 +68,7 @@ public class TargetCoverageSettings extends Settings {
         IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
 
         // Creating the problem
-        algorithm = new pgGA(problem_, parallelEvaluator);
+        algorithm = new FastPgGA(problem_, parallelEvaluator);
         
         algorithm.setInputParameter("populationSize", populationSize);
         algorithm.setInputParameter("maxEvaluations", maxEvaluations);

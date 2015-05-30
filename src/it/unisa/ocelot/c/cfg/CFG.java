@@ -59,10 +59,12 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 		return end;
 	}
 	
+	@Deprecated
 	public void setTarget(CFGNode target) {
 		this.target = target;
 	}
 	
+	@Deprecated
 	public CFGNode getTarget() {
 		return target;
 	}

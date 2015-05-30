@@ -15,7 +15,7 @@ import it.unisa.ocelot.genetic.paths.PathDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
+import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
 
 public class SimpleExecutePath {
@@ -46,7 +46,7 @@ public class SimpleExecutePath {
 		
 		PathDistanceListener bdalListener = new PathDistanceListener(cfg, targetPath);
 		
-		simulator.addListener(new TestSimulatorListener());
+		simulator.addListener(new NodePrinterListener());
 		simulator.addListener(bdalListener);
 
 		System.out.println("Simulating with " + StringUtils.join(arguments, " "));

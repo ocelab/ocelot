@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
@@ -81,12 +82,9 @@ public class PathCoverageProblem extends Problem {
 	}
 
 	public void evaluate(Solution solution) throws JMException {
-		Double[] variables = ((ArrayReal) solution.getDecisionVariables()[0]).array_;
+		VariableTranslator translator = new VariableTranslator(solution.getDecisionVariables()[0]);
 
-		Object[] arguments = new Object[variables.length];
-		for (int i = 0; i < variables.length; i++) {
-			arguments[i] = this.getInstance(variables[i], this.parameters[i]);
-		}
+		Object[] arguments = translator.translateArray(this.parameters);
 
 		CBridge bridge = new CBridge();
 
@@ -95,7 +93,7 @@ public class PathCoverageProblem extends Problem {
 				this.target);
 
 		if (debug)
-			System.out.println(Arrays.toString(variables));
+			System.out.println(Arrays.toString(arguments));
 
 		bridge.getEvents(handler, arguments);
 
@@ -109,16 +107,6 @@ public class PathCoverageProblem extends Problem {
 				0,
 				listener.getPathDistance()
 						+ listener.getNormalizedBranchDistance());
-	}
-
-	private Object getInstance(double pValue, Class<Object> pType) {
-		if (pType.equals(Integer.class)) {
-			return new Integer((int) pValue);
-		} else if (pType.equals(Double.class)) {
-			return new Double(pValue);
-		}
-
-		return new Double(pValue);
 	}
 
 	public void setDebug(boolean debug) {

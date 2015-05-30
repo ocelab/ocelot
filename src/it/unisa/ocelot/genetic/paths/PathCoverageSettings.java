@@ -81,8 +81,10 @@ public class PathCoverageSettings extends Settings {
         mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
         // Selection Operator 
-        parameters = null;
-        selection = SelectionFactory.getSelectionOperator("BinaryTournament", parameters);
+        HashMap<String, Object> parametersSelection = new HashMap<String, Object>();
+        parametersSelection.put("problem", this.problem_);
+        parametersSelection.put("populationSize", populationSize);
+        selection = SelectionFactory.getSelectionOperator("BinaryTournament", parametersSelection);
 
         // Add the operators to the algorithm
         algorithm.addOperator("crossover", crossover);

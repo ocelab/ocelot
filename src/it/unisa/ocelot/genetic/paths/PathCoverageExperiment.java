@@ -2,15 +2,20 @@ package it.unisa.ocelot.genetic.paths;
 
 import java.util.ArrayList;
 
+import javax.management.JMException;
+
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.OcelotExperiment;
 import jmetal.core.Algorithm;
+import jmetal.core.Solution;
+import jmetal.core.SolutionSet;
 import jmetal.experiments.Experiment;
 
-public class PathCoverageExperiment extends Experiment {
+public class PathCoverageExperiment extends OcelotExperiment {
 	private Class<Object>[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
@@ -18,6 +23,8 @@ public class PathCoverageExperiment extends Experiment {
 
 	public PathCoverageExperiment(CFG pCfg, ConfigManager pConfig,
 			Class<Object>[] pTypes, ArrayList<LabeledEdge> targetPath) {
+		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
+		
 		this.cfg = pCfg;
 		this.config = pConfig;
 		this.parametersTypes = pTypes;
@@ -25,8 +32,7 @@ public class PathCoverageExperiment extends Experiment {
 	}
 
 	@Override
-	public void algorithmSettings(String problemName, int problemId,
-			Algorithm[] algorithm) throws ClassNotFoundException {
+	public void algorithmSettings(Algorithm[] algorithm) {
 		try {
 			Range<Double>[] ranges = config.getTestRanges();
 
@@ -51,5 +57,4 @@ public class PathCoverageExperiment extends Experiment {
 			return;
 		}
 	}
-
 }

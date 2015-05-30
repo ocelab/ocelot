@@ -11,7 +11,7 @@ import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
+import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
 
 public class SimpleExecute {
@@ -34,14 +34,13 @@ public class SimpleExecute {
 		
 		bridge.getEvents(h, arguments);
 		
-		cfg.setTarget(config.getTestTarget(cfg));
-		System.out.println("Target node:" + cfg.getTarget().toString());
+		System.out.println("Target node:" + config.getTestTarget(cfg).toString());
 		
 		Simulator simulator = new Simulator(cfg, h.getEvents());
 		
-		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg);
+		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg, config.getTestTarget(cfg));
 		
-		simulator.addListener(new TestSimulatorListener());
+		simulator.addListener(new NodePrinterListener());
 		simulator.addListener(bdalListener);
 
 		System.out.println("Simulating with " + StringUtils.join(arguments, " "));

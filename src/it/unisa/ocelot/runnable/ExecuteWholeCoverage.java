@@ -11,6 +11,7 @@ import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
+import it.unisa.ocelot.genetic.nodes.TargetCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
@@ -35,7 +36,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
-public class ExecutePathCoverage {
+public class ExecuteWholeCoverage {
 	private static final String CONFIG_FILENAME = "config.properties";
 
 	static {
@@ -61,6 +62,10 @@ public class ExecutePathCoverage {
 		
 		if (config.getUI())
 			showUI(cfg);
+		
+		System.out.println("----------------------------------------------");
+		System.out.println("PHASE 1 - McCabe");
+		System.out.println("----------------------------------------------");
 
 		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
 		mcCabeCalculator.calculateMcCabePaths();
@@ -98,8 +103,47 @@ public class ExecutePathCoverage {
 		CoverageCalculator calculator = new CoverageCalculator(cfg);
 		calculator.calculateCoverage(paramsList);
 		
+		if (calculator.getBranchCoverage() == 1.0) {
+			System.out.println("Completed!");
+			System.exit(0);
+		}
+		
+		System.out.println("----------------------------------------------");
+		System.out.println("PHASE 2 - Single targets");
+		System.out.println("----------------------------------------------");
+		
+		for (LabeledEdge uncoveredEdge : calculator.getUncoveredEdges()) {
+			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
+			TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
+			exp.initExperiment();
+			exp.basicRun();
+			
+			if (config.getPrintResults()) {
+				System.out.println(targetNode);
+				
+				double fitnessValue = exp.getFitnessValue();
+				Variable[] params = exp.getVariables();
+				VariableTranslator translator = new VariableTranslator(params[0]);
+				
+				System.out.print("Fitness function: " + fitnessValue + ". ");
+				if (fitnessValue == 0.0) {
+					System.out.println("Target covered!");
+					Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+					paramsList.add(numericParams);
+					System.out.println("Parameters found: " + Arrays.toString(numericParams));
+				} else {
+					System.out.println("Target not covered... test case discarded");
+				}
+			}
+		}
+		
+		calculator.calculateCoverage(paramsList);
+		
+		System.out.println("-------------------------------------------------------");
+		System.out.println("Total test cases: " + paramsList.size());
 		System.out.println("Branch coverage: " + calculator.getBranchCoverage());
 		System.out.println("Block coverage: " + calculator.getBlockCoverage());
+		System.out.println("-------------------------------------------------------");
 	}
 
 	public static CFG buildCFG(String pSourceFile, String pFunctionName)

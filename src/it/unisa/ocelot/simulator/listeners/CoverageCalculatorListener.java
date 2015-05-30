@@ -11,11 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CoverageSimulatorListener implements SimulatorListener {
+public class CoverageCalculatorListener implements SimulatorListener {
 	private CFG cfg;
 	private Set<LabeledEdge> coveredEdges;
 	private List<CFGNode> coveredNodes;
-	public CoverageSimulatorListener(CFG pCFG) {
+	public CoverageCalculatorListener(CFG pCFG) {
 		this.cfg = pCFG;
 		this.coveredEdges = new HashSet<LabeledEdge>();
 		this.coveredNodes = new ArrayList<CFGNode>();
@@ -45,6 +45,12 @@ public class CoverageSimulatorListener implements SimulatorListener {
 	
 	public Set<LabeledEdge> getCoveredEdges() {
 		return new HashSet<LabeledEdge>(this.coveredEdges);
+	}
+	
+	public Set<LabeledEdge> getUncoveredEdges() {
+		Set<LabeledEdge> allEdges = new HashSet<LabeledEdge>(this.cfg.edgeSet());
+		allEdges.removeAll(this.coveredEdges);
+		return allEdges;
 	}
 	
 	public double getBranchCoverage() {

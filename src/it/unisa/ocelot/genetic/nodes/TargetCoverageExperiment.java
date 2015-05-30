@@ -4,24 +4,29 @@ package it.unisa.ocelot.genetic.nodes;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.OcelotExperiment;
 import jmetal.core.Algorithm;
 import jmetal.experiments.Experiment;
 
-public class TargetCoverageExperiment extends Experiment {
+public class TargetCoverageExperiment extends OcelotExperiment {
 	private Class<Object>[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
+	private CFGNode target;
 	
-	public TargetCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes) {
+	public TargetCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, CFGNode pTarget) {
+		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
+		
 		this.cfg = pCfg;
 		this.config = pConfig;
 		this.parametersTypes = pTypes;
+		this.target = pTarget;
 	}
 	
 	@Override
-	public void algorithmSettings(String problemName, int problemId,
-			Algorithm[] algorithm) throws ClassNotFoundException {		
+	public void algorithmSettings(Algorithm[] algorithm) {		
 		try {
 			Range<Double>[] ranges = config.getTestRanges();
 			
@@ -32,6 +37,7 @@ public class TargetCoverageExperiment extends Experiment {
 				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes);
 			
 			problem.setDebug(config.getDebug());
+			problem.setTarget(this.target);
 			
 			TargetCoverageSettings settings = new TargetCoverageSettings(problem, config); 
 			algorithm[0] = settings.configure();
@@ -40,6 +46,4 @@ public class TargetCoverageExperiment extends Experiment {
 			return;
 		}
 	}
-	
-	
 }

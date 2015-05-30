@@ -43,10 +43,9 @@ public class Execute {
 		// Builds the CFG and sets the target
 		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
 		CFGNode target = config.getTestTarget(cfg);
-		cfg.setTarget(target);
 
 		TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
-				config, cfg.getParameterTypes());
+				config, cfg.getParameterTypes(), target);
 
 		exp.experimentName_ = "TargetCoverage";
 		exp.algorithmNameList_ = new String[] { "PGGA" };

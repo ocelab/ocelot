@@ -8,7 +8,7 @@ import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.TestSimulatorListener;
+import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 
 import org.apache.commons.lang3.Range;
 
@@ -23,6 +23,7 @@ public class TargetCoverageProblem extends Problem {
 
 	private CFG cfg;
 	private Class<Object>[] parameters;
+	private CFGNode target;
 
 	private boolean debug;
 
@@ -75,7 +76,7 @@ public class TargetCoverageProblem extends Problem {
 	}
 
 	public void setTarget(CFGNode pNode) {
-		this.cfg.setTarget(pNode);
+		this.target = pNode;
 	}
 
 	public void evaluate(Solution solution) throws JMException {
@@ -89,7 +90,7 @@ public class TargetCoverageProblem extends Problem {
 		CBridge bridge = new CBridge();
 
 		EventsHandler handler = new EventsHandler();
-		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg);
+		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg, target);
 
 		if (debug)
 			System.out.println(Arrays.toString(variables));
