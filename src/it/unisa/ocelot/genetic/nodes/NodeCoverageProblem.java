@@ -8,7 +8,6 @@ import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 
 import org.apache.commons.lang3.Range;
 
@@ -36,7 +35,7 @@ public class NodeCoverageProblem extends Problem {
 		numberOfVariables_ = pParameters.length;
 		numberOfObjectives_ = 1;
 		numberOfConstraints_ = 0;
-		problemName_ = "TestingPrioritizationProblem";
+		problemName_ = "NodeCoverageProblem";
 
 		solutionType_ = new ArrayRealSolutionType(this);
 

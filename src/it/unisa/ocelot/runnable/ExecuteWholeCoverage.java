@@ -1,5 +1,6 @@
 package it.unisa.ocelot.runnable;
 
+import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
@@ -13,6 +14,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
+import it.unisa.ocelot.minimization.AdditionalGreedyMinimizer;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.simulator.EventsHandler;
@@ -26,7 +28,9 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jmetal.core.Variable;
 import jmetal.experiments.Settings;
@@ -43,7 +47,6 @@ public class ExecuteWholeCoverage {
 		System.loadLibrary("Test");
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		ConfigManager config = ConfigManager.getInstance();
@@ -63,16 +66,36 @@ public class ExecuteWholeCoverage {
 		if (config.getUI())
 			showUI(cfg);
 		
-		System.out.println("----------------------------------------------");
-		System.out.println("PHASE 1 - McCabe");
-		System.out.println("----------------------------------------------");
+		CoverageCalculator calculator = new CoverageCalculator(cfg);
+		List<Object[]> paramsList = new ArrayList<Object[]>();
+		
+		System.out.println("------------------------------------------------");
+		System.out.println("PHASE 1 - McCabe								");
+		System.out.println("------------------------------------------------");
+		phase1(cfg, config, paramsList, calculator);
+		
+		calculator.calculateCoverage(paramsList);
+		if (calculator.getBranchCoverage() < 1.0) {
+			System.out.println("------------------------------------------------");
+			System.out.println("PHASE 2 - Single targets						");
+			System.out.println("------------------------------------------------");
+			phase2(cfg, config, paramsList, calculator);
+		}
 
+		System.out.println("------------------------------------------------");
+		System.out.println("PHASE 3 - Minimization (Additional greedy)		");
+		System.out.println("------------------------------------------------");
+		phase3(cfg, config, paramsList, calculator);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void phase1(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
+			throws Exception {
 		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
 		mcCabeCalculator.calculateMcCabePaths();
 		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator
 				.getMcCabeEdgePaths();
 
-		List<Object[]> paramsList = new ArrayList<Object[]>();
 		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
 			PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
 					config, cfg.getParameterTypes(), aMcCabePath);
@@ -99,19 +122,11 @@ public class ExecuteWholeCoverage {
 				System.out.println("Parameters found: " + Arrays.toString(numericParams));
 			}
 		}
-		
-		CoverageCalculator calculator = new CoverageCalculator(cfg);
-		calculator.calculateCoverage(paramsList);
-		
-		if (calculator.getBranchCoverage() == 1.0) {
-			System.out.println("Completed!");
-			System.exit(0);
-		}
-		
-		System.out.println("----------------------------------------------");
-		System.out.println("PHASE 2 - Single targets");
-		System.out.println("----------------------------------------------");
-		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void phase2(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
+			throws Exception {		
 		for (LabeledEdge uncoveredEdge : calculator.getUncoveredEdges()) {
 			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
 			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
@@ -138,9 +153,31 @@ public class ExecuteWholeCoverage {
 		}
 		
 		calculator.calculateCoverage(paramsList);
+	}
+	
+	public static void phase3(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
+			throws Exception {
+		Set<TestCase> testSuite = new HashSet<TestCase>();
+		int tcid = 0;
+		for (Object[] params : paramsList) {
+			calculator.calculateCoverage(params);
+			
+			TestCase testCase = new TestCase();
+			testCase.setId(tcid);
+			testCase.setParameters(params);
+			testCase.setCoveredEdges(calculator.getCoveredEdges());
+			testCase.setOracle(null);
+			
+			testSuite.add(testCase);
+			tcid++;
+		}
 		
-		System.out.println("-------------------------------------------------------");
-		System.out.println("Total test cases: " + paramsList.size());
+		AdditionalGreedyMinimizer minimizator = new AdditionalGreedyMinimizer();
+		Set<TestCase> minimizedTestSuite = minimizator.minimize(testSuite);
+		
+		calculator.calculateCoverage(minimizedTestSuite);
+		System.out.println("Total test cases: " + testSuite.size());
+		System.out.println("Minimized test cases: " + minimizedTestSuite.size());
 		System.out.println("Branch coverage: " + calculator.getBranchCoverage());
 		System.out.println("Block coverage: " + calculator.getBlockCoverage());
 		System.out.println("-------------------------------------------------------");

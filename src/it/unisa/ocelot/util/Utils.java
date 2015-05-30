@@ -17,30 +17,6 @@ import java.util.List;
 public class Utils {
 	private static final String ENCODING = "UTF-8";
 	public static final Debugger debugger = new Debugger();
-
-	
-	/**
-	 * Does nothing, returns pAvg!
-	 * @param pAvg
-	 * @param pMin
-	 * @param pMax
-	 * @return
-	 */
-	public static double normalize(double pAvg, double pMin, double pMax) {
-		return pAvg;
-//		if (pMax == pMin)
-//			return 0;
-//		else
-//			return (pAvg-pMin)/(pMax-pMin);
-	}
-	
-	public static double mirrorNormalize(double pAvg, double pMin, double pMax) {
-		return pAvg;
-//		if (pMax == pMin)
-//			return 0;
-//		else
-//			return 1 - (pAvg-pMin)/(pMax-pMin);
-	}
 	
 	/**
 	 * Returns the content of the file with the specified path.
