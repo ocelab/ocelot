@@ -17,7 +17,7 @@ import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 
-public class TargetCoverageSettings extends Settings {
+public class NodeCoverageSettings extends Settings {
     private int populationSize;
     private int maxEvaluations;
     private double mutationProbability;
@@ -25,7 +25,7 @@ public class TargetCoverageSettings extends Settings {
     private int threads;
     private boolean debug;
     
-	public TargetCoverageSettings(TargetCoverageProblem pProblem) {
+	public NodeCoverageSettings(NodeCoverageProblem pProblem) {
 		super();
 		
 		this.problem_ = pProblem;
@@ -37,7 +37,7 @@ public class TargetCoverageSettings extends Settings {
         threads = 1;
 	}
 	
-	public TargetCoverageSettings(TargetCoverageProblem pProblem, ConfigManager pConfig) {
+	public NodeCoverageSettings(NodeCoverageProblem pProblem, ConfigManager pConfig) {
 		this(pProblem);
 		
 		try {

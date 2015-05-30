@@ -6,7 +6,7 @@ import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
 import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.nodes.TargetCoverageExperiment;
+import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.util.Utils;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class Execute {
 		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
 		CFGNode target = config.getTestTarget(cfg);
 
-		TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg,
+		NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg,
 				config, cfg.getParameterTypes(), target);
 
 		exp.experimentName_ = "TargetCoverage";

@@ -11,7 +11,7 @@ import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
-import it.unisa.ocelot.genetic.nodes.TargetCoverageExperiment;
+import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
@@ -114,7 +114,7 @@ public class ExecuteWholeCoverage {
 		
 		for (LabeledEdge uncoveredEdge : calculator.getUncoveredEdges()) {
 			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
-			TargetCoverageExperiment exp = new TargetCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
+			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
 			exp.initExperiment();
 			exp.basicRun();
 			

@@ -10,13 +10,13 @@ import it.unisa.ocelot.genetic.OcelotExperiment;
 import jmetal.core.Algorithm;
 import jmetal.experiments.Experiment;
 
-public class TargetCoverageExperiment extends OcelotExperiment {
+public class NodeCoverageExperiment extends OcelotExperiment {
 	private Class<Object>[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
 	private CFGNode target;
 	
-	public TargetCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, CFGNode pTarget) {
+	public NodeCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, CFGNode pTarget) {
 		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
 		
 		this.cfg = pCfg;
@@ -30,16 +30,16 @@ public class TargetCoverageExperiment extends OcelotExperiment {
 		try {
 			Range<Double>[] ranges = config.getTestRanges();
 			
-			TargetCoverageProblem problem;
+			NodeCoverageProblem problem;
 			if (ranges != null)
-				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes, ranges);
+				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes, ranges);
 			else
-				problem = new TargetCoverageProblem(this.cfg, this.parametersTypes);
+				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes);
 			
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.target);
 			
-			TargetCoverageSettings settings = new TargetCoverageSettings(problem, config); 
+			NodeCoverageSettings settings = new NodeCoverageSettings(problem, config); 
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {
 			System.err.println("An error occurred while instantiating problem: " + e.getMessage());

@@ -18,7 +18,7 @@ import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
-public class TargetCoverageProblem extends Problem {
+public class NodeCoverageProblem extends Problem {
 	private static final long serialVersionUID = 1930014794768729268L;
 
 	private CFG cfg;
@@ -28,7 +28,7 @@ public class TargetCoverageProblem extends Problem {
 	private boolean debug;
 
 	@SuppressWarnings("rawtypes")
-	public TargetCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
+	public NodeCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
 			throws Exception {
 
 		this.cfg = pCfg;
@@ -61,7 +61,7 @@ public class TargetCoverageProblem extends Problem {
 		this.parameters = pParameters;
 	}
 	
-	public TargetCoverageProblem(CFG pCfg,
+	public NodeCoverageProblem(CFG pCfg,
 			Class<Object>[] pParameters)
 			throws Exception {
 		this(pCfg, pParameters, null);
