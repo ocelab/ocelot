@@ -1,4 +1,4 @@
-package it.unisa.ocelot.minimization;
+package it.unisa.ocelot.suites.minimization;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class AdditionalGreedyMinimizer implements MinimizationAlgorithm {
+public class AdditionalGreedyMinimizer implements TestSuiteMinimizer {
 	public AdditionalGreedyMinimizer() {
 	}
 	

@@ -1,6 +1,7 @@
 package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
@@ -57,7 +58,7 @@ public class ExecutePathCoverage {
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
+		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 		
 		if (config.getUI())
 			showUI(cfg);
@@ -100,20 +101,6 @@ public class ExecutePathCoverage {
 		
 		System.out.println("Branch coverage: " + calculator.getBranchCoverage());
 		System.out.println("Block coverage: " + calculator.getBlockCoverage());
-	}
-
-	public static CFG buildCFG(String pSourceFile, String pFunctionName)
-			throws Exception {
-		String code = Utils.readFile(pSourceFile);
-		CFG graph = new CFG();
-
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
-				code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph, pFunctionName);
-
-		translationUnit.accept(visitor);
-
-		return graph;
 	}
 
 	public static CFGNode getTarget(CFG pCfg, String pTarget) {

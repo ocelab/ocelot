@@ -38,22 +38,18 @@ public class PathCoverageExperiment extends OcelotExperiment {
 
 			PathCoverageProblem problem;
 			if (ranges != null)
-				problem = new PathCoverageProblem(this.cfg,
-						this.parametersTypes, ranges);
+				problem = new PathCoverageProblem(this.cfg, this.parametersTypes, ranges);
 			else
-				problem = new PathCoverageProblem(this.cfg,
-						this.parametersTypes);
+				problem = new PathCoverageProblem(this.cfg, this.parametersTypes);
 
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.targetPath);
 
-			PathCoverageSettings settings = new PathCoverageSettings(problem,
-					config);
+			PathCoverageSettings settings = new PathCoverageSettings(problem, config);
+			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {
-			System.err
-					.println("An error occurred while instantiating problem: "
-							+ e.getMessage());
+			System.err.println("An error occurred while instantiating problem: " + e.getMessage());
 			return;
 		}
 	}

@@ -1,5 +1,8 @@
 package it.unisa.ocelot.c.cfg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 /**
@@ -17,6 +20,10 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	private CFGNode start;
 	private CFGNode end;
 	private CFGNode target;
+	
+	private List<Double> constantNumbers;
+	private List<String> constantStrings;
+	
 	@SuppressWarnings("rawtypes")
 	private Class[] parameterTypes;
 	
@@ -25,6 +32,9 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 */
 	public CFG() {
 		super(LabeledEdge.class);
+		
+		this.constantNumbers = new ArrayList<Double>();
+		this.constantStrings = new ArrayList<String>();
 	}
 	
 	/**
@@ -69,15 +79,53 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 		return target;
 	}
 
+	/**
+	 * Returns the types of the parameters
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	public Class[] getParameterTypes() {
 		return parameterTypes;
 	}
 
+	/**
+	 * Sets the types of the parameters
+	 * @param parameterTypes
+	 */
 	@SuppressWarnings("rawtypes")
 	public void setParameterTypes(Class[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
-	
-	
+
+	/**
+	 * Returns a list of constant numbers (literals) found in the source code
+	 * @return
+	 */
+	public List<Double> getConstantNumbers() {
+		return constantNumbers;
+	}
+
+	/**
+	 * Sets the list of constant numbers
+	 * @param constantNumbers
+	 */
+	public void setConstantNumbers(List<Double> constantNumbers) {
+		this.constantNumbers = constantNumbers;
+	}
+
+	/**
+	 * Returns a list of constant strings found in the source code
+	 * @return
+	 */
+	public List<String> getConstantStrings() {
+		return constantStrings;
+	}
+
+	/**
+	 * Sets the list of constant strings
+	 * @param constantStrings
+	 */
+	public void setConstantStrings(List<String> constantStrings) {
+		this.constantStrings = constantStrings;
+	}
 }

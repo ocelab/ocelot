@@ -1,6 +1,7 @@
 package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
@@ -41,7 +42,7 @@ public class Execute {
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
+		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 		CFGNode target = config.getTestTarget(cfg);
 
 		NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg,
@@ -78,20 +79,6 @@ public class Execute {
 				System.out.println("Target not covered...");
 			System.out.println("Parameters found: " + params);
 		}
-	}
-
-	public static CFG buildCFG(String pSourceFile, String pFunctionName)
-			throws Exception {
-		String code = Utils.readFile(pSourceFile);
-		CFG graph = new CFG();
-
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
-				code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph, pFunctionName);
-
-		translationUnit.accept(visitor);
-
-		return graph;
 	}
 
 	public static CFGNode getTarget(CFG pCfg, String pTarget) {

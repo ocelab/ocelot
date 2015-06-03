@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.compiler.GCC;
@@ -29,7 +30,7 @@ public class SimpleExecutePath {
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		ConfigManager config = ConfigManager.getInstance();
 		
-		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
+		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 		
 		CBridge bridge = new CBridge();
 		EventsHandler h = new EventsHandler();
@@ -60,17 +61,5 @@ public class SimpleExecutePath {
 			System.out.println("Simulation correct!");
 		else
 			System.out.println("Simulation error!");
-	}
-	
-	public static CFG buildCFG(String pSourceFile, String pFunctionName) throws Exception {
-		String code = Utils.readFile(pSourceFile);
-		CFG graph = new CFG();
-		
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph, pFunctionName);
-		
-		translationUnit.accept(visitor);
-		
-		return graph;
 	}
 }

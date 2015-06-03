@@ -2,6 +2,7 @@ package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
@@ -14,13 +15,21 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
-import it.unisa.ocelot.minimization.AdditionalGreedyMinimizer;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
+import it.unisa.ocelot.suites.McCabeTestSuiteGenerator;
+import it.unisa.ocelot.suites.TestSuiteGenerator;
+import it.unisa.ocelot.suites.TestSuiteGeneratorHandler;
+import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
+import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
+import it.unisa.ocelot.suites.benchmarks.TimeBenchmarkCalculator;
+import it.unisa.ocelot.suites.minimization.AdditionalGreedyMinimizer;
+import it.unisa.ocelot.suites.minimization.TestSuiteMinimizer;
+import it.unisa.ocelot.suites.minimization.TestSuiteMinimizerHandler;
 import it.unisa.ocelot.util.Utils;
 
 import java.io.File;
@@ -61,158 +70,31 @@ public class ExecuteWholeCoverage {
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = buildCFG(config.getTestFilename(), config.getTestFunction());
+		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 		
 		if (config.getUI())
 			showUI(cfg);
 		
-		CoverageCalculator calculator = new CoverageCalculator(cfg);
-		List<Object[]> paramsList = new ArrayList<Object[]>();
+		TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(config, cfg);
+		TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
 		
-		System.out.println("------------------------------------------------");
-		System.out.println("PHASE 1 - McCabe								");
-		System.out.println("------------------------------------------------");
-		phase1(cfg, config, paramsList, calculator);
+		BenchmarkCalculator timeBenchmark = new TimeBenchmarkCalculator();
+		BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
 		
-		calculator.calculateCoverage(paramsList);
-		if (calculator.getBranchCoverage() < 1.0) {
-			System.out.println("------------------------------------------------");
-			System.out.println("PHASE 2 - Single targets						");
-			System.out.println("------------------------------------------------");
-			phase2(cfg, config, paramsList, calculator);
-		}
-
-		System.out.println("------------------------------------------------");
-		System.out.println("PHASE 3 - Minimization (Additional greedy)		");
-		System.out.println("------------------------------------------------");
-		phase3(cfg, config, paramsList, calculator);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void phase1(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
-			throws Exception {
-		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
-		mcCabeCalculator.calculateMcCabePaths();
-		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator
-				.getMcCabeEdgePaths();
-
-		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
-			PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
-					config, cfg.getParameterTypes(), aMcCabePath);
-
-			exp.initExperiment();
-			//exp.runExperiment(1);
-			exp.basicRun();
-
-			if (config.getPrintResults()) {
-				System.out.println(aMcCabePath.toString());
-				
-				double fitnessValue = exp.getFitnessValue();
-				Variable[] params = exp.getVariables();
-				VariableTranslator translator = new VariableTranslator(params[0]);
-				
-				Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
-				paramsList.add(numericParams);
-
-				System.out.print("Fitness function: " + fitnessValue + ". ");
-				if (fitnessValue == 0.0)
-					System.out.println("Path covered!");
-				else
-					System.out.println("Path not covered...");
-				System.out.println("Parameters found: " + Arrays.toString(numericParams));
-			}
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void phase2(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
-			throws Exception {		
-		for (LabeledEdge uncoveredEdge : calculator.getUncoveredEdges()) {
-			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
-			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
-			exp.initExperiment();
-			exp.basicRun();
-			
-			if (config.getPrintResults()) {
-				System.out.println(targetNode);
-				
-				double fitnessValue = exp.getFitnessValue();
-				Variable[] params = exp.getVariables();
-				VariableTranslator translator = new VariableTranslator(params[0]);
-				
-				System.out.print("Fitness function: " + fitnessValue + ". ");
-				if (fitnessValue == 0.0) {
-					System.out.println("Target covered!");
-					Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
-					paramsList.add(numericParams);
-					System.out.println("Parameters found: " + Arrays.toString(numericParams));
-				} else {
-					System.out.println("Target not covered... test case discarded");
-				}
-			}
-		}
+		generator.addBenchmark(timeBenchmark);
+		generator.addBenchmark(coverageBenchmark);
 		
-		calculator.calculateCoverage(paramsList);
-	}
-	
-	public static void phase3(CFG cfg, ConfigManager config, List<Object[]> paramsList, CoverageCalculator calculator) 
-			throws Exception {
-		Set<TestCase> testSuite = new HashSet<TestCase>();
-		int tcid = 0;
-		for (Object[] params : paramsList) {
-			calculator.calculateCoverage(params);
-			
-			TestCase testCase = new TestCase();
-			testCase.setId(tcid);
-			testCase.setParameters(params);
-			testCase.setCoveredEdges(calculator.getCoveredEdges());
-			testCase.setOracle(null);
-			
-			testSuite.add(testCase);
-			tcid++;
-		}
+		Set<TestCase> suite = generator.generateTestSuite();
 		
-		AdditionalGreedyMinimizer minimizator = new AdditionalGreedyMinimizer();
-		Set<TestCase> minimizedTestSuite = minimizator.minimize(testSuite);
+		System.out.println(timeBenchmark);
+		System.out.println(coverageBenchmark);
 		
-		calculator.calculateCoverage(minimizedTestSuite);
-		System.out.println("Total test cases: " + testSuite.size());
-		System.out.println("Minimized test cases: " + minimizedTestSuite.size());
-		System.out.println("Branch coverage: " + calculator.getBranchCoverage());
-		System.out.println("Block coverage: " + calculator.getBlockCoverage());
+		Set<TestCase> minimizedSuite = minimizer.minimize(suite);
+		
 		System.out.println("-------------------------------------------------------");
-	}
-
-	public static CFG buildCFG(String pSourceFile, String pFunctionName)
-			throws Exception {
-		String code = Utils.readFile(pSourceFile);
-		CFG graph = new CFG();
-
-		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
-				code.toCharArray(), pSourceFile);
-		CFGVisitor visitor = new CFGVisitor(graph, pFunctionName);
-
-		translationUnit.accept(visitor);
-
-		return graph;
-	}
-
-	public static CFGNode getTarget(CFG pCfg, String pTarget) {
-		CFGNodeNavigator navigator = pCfg.getStart().navigate(pCfg);
-
-		String[] targets = StringUtils.split(pTarget, ",");
-		for (String target : targets) {
-			if (target.equalsIgnoreCase("flow"))
-				navigator = navigator.goFlow();
-			else if (target.equalsIgnoreCase("true"))
-				navigator = navigator.goTrue();
-			else if (target.equalsIgnoreCase("false"))
-				navigator = navigator.goFalse();
-			else
-				navigator = navigator.goCase(target);
-		}
-
-		return navigator.node();
+		System.out.println("Total test cases: " + suite.size());
+		System.out.println("Minimized test cases: " + minimizedSuite.size());
+		System.out.println("-------------------------------------------------------");
 	}
 	
 	public static void showUI(CFG pCFG) {
@@ -225,22 +107,4 @@ public class ExecuteWholeCoverage {
 			}
 		}).run();
 	}
-	
-	/*private static Object[] getTestArguments(String pParametersString, Class[] pTypes) {
-		String argsString = pParametersString;
-		String[] args = StringUtils.split(argsString, " ");
-		
-		Object[] arguments = new Object[pTypes.length];
-		
-		for (int i = 0; i < pTypes.length; i++) {
-			Double dValue = new Double(Double.parseDouble(args[i]));
-			if (pTypes[i] == Integer.class) {
-				arguments[i] = new Integer(dValue.intValue());
-			} else if (pTypes[i] == Double.class) {
-				arguments[i] = dValue;
-			}
-		}
-		
-		return arguments;
-	}*/
 }

@@ -1,5 +1,8 @@
 package it.unisa.ocelot.c.instrumentor;
 
+import it.unisa.ocelot.c.compiler.writer.DeclSpecWriter;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,9 +10,11 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
@@ -24,7 +29,8 @@ import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
 import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 
 /**
- * Generates the macro that will contain the call
+ * Generates the macro that will contain the call. Besides, it removes all typedefs from the tree, putting them in the
+ * "typedef" field.
  * @author simone
  *
  */
@@ -39,6 +45,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		this.shouldVisitDeclarators = true;
 		this.shouldVisitTranslationUnit = true;
 		this.shouldVisitStatements = true;
+		this.shouldVisitDeclSpecifiers = true;
 		
 		this.functionName = pFunctionName;
 		

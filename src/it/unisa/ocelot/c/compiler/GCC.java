@@ -19,6 +19,7 @@ import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
 import org.eclipse.cdt.core.parser.tests.scanner.FileCodeReaderFactory;
+import org.eclipse.core.runtime.CoreException;
 
 public class GCC implements Compiler {
 
@@ -50,7 +51,7 @@ public class GCC implements Compiler {
 	}
 	
 	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename, String[] pIncludePaths) 
-			throws Exception {		
+			throws IOException, CoreException {		
 		String codeString = Utils.readFile(pSourceFilename);
 		FileContent fileContent = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
@@ -65,7 +66,8 @@ public class GCC implements Compiler {
 				fileContent, scannerInfo, includeContentProvider, index, options, log);
 	}
 	
-	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) throws Exception {		
+	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) 
+			throws IOException, CoreException {		
 		return getTranslationUnit(code, pSourceFilename, new String[0]);
 	}
 }

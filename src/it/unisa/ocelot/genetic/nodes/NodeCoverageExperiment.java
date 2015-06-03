@@ -39,7 +39,8 @@ public class NodeCoverageExperiment extends OcelotExperiment {
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.target);
 			
-			NodeCoverageSettings settings = new NodeCoverageSettings(problem, config); 
+			NodeCoverageSettings settings = new NodeCoverageSettings(problem, config);
+			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {
 			System.err.println("An error occurred while instantiating problem: " + e.getMessage());

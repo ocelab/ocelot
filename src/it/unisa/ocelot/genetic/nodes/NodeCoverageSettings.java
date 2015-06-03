@@ -3,7 +3,9 @@ package it.unisa.ocelot.genetic.nodes;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.FastPgGA;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
@@ -11,6 +13,7 @@ import jmetal.experiments.Settings;
 import jmetal.metaheuristics.fastPGA.FastPGA;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
 import jmetal.operators.crossover.CrossoverFactory;
+import jmetal.operators.mutation.ConstantMetaMutation;
 import jmetal.operators.mutation.MutationFactory;
 import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
@@ -24,6 +27,8 @@ public class NodeCoverageSettings extends Settings {
     private double crossoverProbability;
     private int threads;
     private boolean debug;
+    
+    private List<Double> numericConstants;
     
 	public NodeCoverageSettings(NodeCoverageProblem pProblem) {
 		super();
@@ -53,6 +58,10 @@ public class NodeCoverageSettings extends Settings {
 		} catch (NumberFormatException e) {}
 		
 		try {
+			mutationProbability = pConfig.getMutationProbability();
+		} catch (NumberFormatException e) {}
+		
+		try {
 			threads = pConfig.getThreads();
 		} catch (NumberFormatException e) {}
 	}
@@ -63,7 +72,7 @@ public class NodeCoverageSettings extends Settings {
         Operator crossover;
         Operator mutation;
         
-        HashMap<String, Double> parameters;
+        HashMap<String, Object> parameters;
 
         IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
 
@@ -74,13 +83,17 @@ public class NodeCoverageSettings extends Settings {
         algorithm.setInputParameter("maxEvaluations", maxEvaluations);
 
         // Mutation and Crossover Permutation codification
-        parameters = new HashMap<String, Double>();
+        parameters = new HashMap<String, Object>();
         parameters.put("probability", crossoverProbability);
         crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
-        parameters = new HashMap<String, Double>();
+        parameters = new HashMap<String, Object>();
         parameters.put("probability", mutationProbability);
-        mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+        parameters.put("realOperator", MutationFactory.getMutationOperator("PolynomialMutation", parameters));
+        parameters.put("metaMutationProbability", mutationProbability/4);
+        List<Double> mutationElements = this.numericConstants;
+        parameters.put("mutationElements", mutationElements);
+        mutation = new ConstantMetaMutation(parameters);
 
         // Selection Operator 
         parameters = null;
@@ -93,4 +106,12 @@ public class NodeCoverageSettings extends Settings {
 
         return algorithm;
     }
+
+	public List<Double> getNumericConstants() {
+		return numericConstants;
+	}
+
+	public void setNumericConstants(List<Double> numericConstants) {
+		this.numericConstants = numericConstants;
+	}
 }

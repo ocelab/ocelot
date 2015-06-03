@@ -74,6 +74,15 @@ public class ConfigManager {
 	}
 	
 	/**
+	 * Returns the probability of mutation for the genetic algorithm (-1 if not specified)
+	 * @return
+	 * @throws NumberFormatException if the parameter is not specified
+	 */
+	public double getMutationProbability() {
+		return Double.parseDouble(this.properties.getProperty("mutation.probability", "ThrowError"));
+	}
+	
+	/**
 	 * Returns the number of threads for the genetic algorithm (1 if not specified)
 	 * @return
 	 */
@@ -281,5 +290,13 @@ public class ConfigManager {
 	
 	public boolean getUI() {
 		return this.properties.getProperty("test.ui", "false").equalsIgnoreCase("true");
+	}
+	
+	public String getTestSuiteGenerator() {
+		return this.properties.getProperty("suite.generator");
+	}
+	
+	public String getTestSuiteMinimizer() {
+		return this.properties.getProperty("suite.minimizer");
 	}
 }

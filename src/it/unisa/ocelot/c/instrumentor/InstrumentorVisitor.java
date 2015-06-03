@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
@@ -22,7 +23,9 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
+import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -33,6 +36,7 @@ import org.eclipse.cdt.core.dom.ast.IEnumeration;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompoundStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTExpressionStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionCallExpression;
@@ -46,6 +50,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 public class InstrumentorVisitor extends ASTVisitor {
 	private Stack<List<IASTStatement>> switchExpressions;
 	private String functionName;
+	private List<IASTNode> typedefs;
 	
 	public InstrumentorVisitor(String pInstrumentFunction) {
 		this.shouldVisitExpressions = true;
@@ -53,10 +58,16 @@ public class InstrumentorVisitor extends ASTVisitor {
 		this.shouldVisitDeclarations = true;
 		this.shouldVisitDeclarators = true;
 		this.shouldVisitTranslationUnit = true;
+		this.shouldVisitDeclSpecifiers = true;
 		
 		this.functionName = pInstrumentFunction;
 		
 		this.switchExpressions = new Stack<List<IASTStatement>>();
+		this.typedefs = new ArrayList<IASTNode>();
+	}
+	
+	public List<IASTNode> getTypedefs() {
+		return this.typedefs;
 	}
 	
 	@Override
@@ -77,6 +88,12 @@ public class InstrumentorVisitor extends ASTVisitor {
 			
 			if (!function.getDeclarator().getName().getRawSignature().equals(this.functionName))
 				return PROCESS_SKIP;
+		} else if (name instanceof IASTSimpleDeclaration) {
+			if (((IASTSimpleDeclaration) name).getDeclSpecifier() instanceof CASTCompositeTypeSpecifier) {
+				this.typedefs.add(name);
+				name.setParent(null);
+			}
+			//name.setParent(null);
 		}
 		
 		return PROCESS_CONTINUE;

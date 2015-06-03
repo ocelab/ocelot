@@ -13,6 +13,8 @@ import it.unisa.ocelot.util.Utils;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -125,6 +127,10 @@ public class Build {
 		mainHeader += "#include \"ocelot.h\"\n";
 		mainHeader += "#include <stdio.h>\n";
 		mainHeader += "#include <math.h>\n";
+		for (IASTNode typedef : instrumentor.getTypedefs()) {
+			mainHeader += writer.write(typedef);
+			mainHeader += "\n";
+		}
 
 		mainHeader += "#define OCELOT_TESTFUNCTION " + config.getTestFunction() + "\n";
 
