@@ -68,17 +68,16 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			VariableTranslator translator = new VariableTranslator(params[0]);
 				
 			this.print("Fitness function: " + fitnessValue + ". ");
-			if (fitnessValue == 0.0) {
+			if (fitnessValue == 0.0)
 				this.println("Target covered!");
-				
-				Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
-				TestCase testCase = this.createTestCase(numericParams, suite.size());
-				suite.add(testCase);
-				
-				this.println("Parameters found: " + Arrays.toString(numericParams));
-			} else {
-				this.println("Target not covered... test case discarded");
-			}
+			else
+				this.println("Target not covered...");
+			
+			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+			TestCase testCase = this.createTestCase(numericParams, suite.size());
+			suite.add(testCase);
+			
+			this.println("Parameters found: " + Arrays.toString(numericParams));
 		}
 	}
 	

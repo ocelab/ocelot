@@ -96,7 +96,7 @@ public class PathCoverageSettings extends Settings {
         parameters = new HashMap<String, Object>();
         parameters.put("probability", mutationProbability);
         parameters.put("realOperator", MutationFactory.getMutationOperator("PolynomialMutation", parameters));
-        parameters.put("metaMutationProbability", mutationProbability/4);
+        parameters.put("metaMutationProbability", mutationProbability/10);
         List<Double> mutationElements = this.numericConstants;
         parameters.put("mutationElements", mutationElements);
         mutation = new ConstantMetaMutation(parameters);
