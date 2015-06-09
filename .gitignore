@@ -15,7 +15,12 @@ hs_err_pid*
 .classpath
 experiments/
 output/
-jni/EN_CBridge.c
+jni/
 libTest.so
+libTest.jnilib
+
 .settings/
 .project
+
+#output files
+outputs/
