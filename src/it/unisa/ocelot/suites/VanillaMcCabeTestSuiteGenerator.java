@@ -67,7 +67,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
 
-			this.printSeparator();
+			// this.printSeparator();
 			this.print("Current McCabe Path: ");
 			this.println(aMcCabePath);
 
@@ -90,8 +90,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				System.out.println("Path not covered...");
 			System.out.println("Parameters found: "
 					+ Arrays.toString(numericParams));
-			System.out
-					.println("-------------------------------------------------------");
+			this.printSeparator();
 
 		}
 	}
@@ -109,7 +108,8 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 
 	private void printSeparator() {
 		if (this.manager.getPrintResults())
-			System.out.println("------------------------------------------");
+			System.out
+					.println("-------------------------------------------------------------------------------");
 	}
 
 	private void print(Object pObject) {
