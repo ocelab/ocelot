@@ -9,8 +9,9 @@ import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 
 /**
- * Simulates the execution of the program on the CFG in order to calculate the distance metrics and, 
- * so, the fitness function.
+ * Simulates the execution of the program on the CFG in order to calculate the
+ * distance metrics and, so, the fitness function.
+ * 
  * @author simone
  *
  */
@@ -25,7 +26,7 @@ public class Simulator {
 		this.events = pEvents;
 		//It is useless, but it prevents ArrayIndexOutOfBound in "simulate" when there is no event.
 		if (this.events.size() == 0)
-			this.events.add(null); 
+			this.events.add(null); //It is useless, but it prevents ArrayIndexOutOfBound in "simulate"
 		this.listeners = new ArrayList<SimulatorListener>();
 	}
 	
@@ -78,7 +79,7 @@ public class Simulator {
 					currentCaseEvent = this.getNextEvent();
 					
 					caseEvents.add(currentCaseEvent);
-					if (((CaseExecutionEvent)currentCaseEvent).isChosen()) {
+					if (((CaseExecutionEvent) currentCaseEvent).isChosen()) {
 						currentEvent = currentCaseEvent;
 						currentEvent.setEdge(edge);
 					}

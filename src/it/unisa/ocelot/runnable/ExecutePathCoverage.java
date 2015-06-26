@@ -58,8 +58,9 @@ public class ExecutePathCoverage {
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
-		
+		CFG cfg = CFGBuilder.build(config.getTestFilename(),
+				config.getTestFunction());
+
 		if (config.getUI())
 			showUI(cfg);
 
@@ -74,17 +75,19 @@ public class ExecutePathCoverage {
 					config, cfg.getParameterTypes(), aMcCabePath);
 
 			exp.initExperiment();
-			//exp.runExperiment(1);
+			// exp.runExperiment(1);
 			exp.basicRun();
 
 			if (config.getPrintResults()) {
 				System.out.println(aMcCabePath.toString());
-				
+
 				double fitnessValue = exp.getFitnessValue();
 				Variable[] params = exp.getVariables();
-				VariableTranslator translator = new VariableTranslator(params[0]);
-				
-				Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+				VariableTranslator translator = new VariableTranslator(
+						params[0]);
+
+				Object[] numericParams = translator.translateArray(cfg
+						.getParameterTypes());
 				paramsList.add(numericParams);
 
 				System.out.print("Fitness function: " + fitnessValue + ". ");
@@ -92,14 +95,18 @@ public class ExecutePathCoverage {
 					System.out.println("Path covered!");
 				else
 					System.out.println("Path not covered...");
-				System.out.println("Parameters found: " + Arrays.toString(numericParams));
+				System.out.println("Parameters found: "
+						+ Arrays.toString(numericParams));
+				System.out
+						.println("-------------------------------------------------------");
 			}
 		}
-		
+
 		CoverageCalculator calculator = new CoverageCalculator(cfg);
 		calculator.calculateCoverage(paramsList);
-		
-		System.out.println("Branch coverage: " + calculator.getBranchCoverage());
+
+		System.out
+				.println("Branch coverage: " + calculator.getBranchCoverage());
 		System.out.println("Block coverage: " + calculator.getBlockCoverage());
 	}
 
@@ -120,10 +127,10 @@ public class ExecutePathCoverage {
 
 		return navigator.node();
 	}
-	
+
 	public static void showUI(CFG pCFG) {
 		final CFGWindow window = new CFGWindow(pCFG);
-		
+
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -131,22 +138,19 @@ public class ExecutePathCoverage {
 			}
 		}).run();
 	}
-	
-	/*private static Object[] getTestArguments(String pParametersString, Class[] pTypes) {
-		String argsString = pParametersString;
-		String[] args = StringUtils.split(argsString, " ");
-		
-		Object[] arguments = new Object[pTypes.length];
-		
-		for (int i = 0; i < pTypes.length; i++) {
-			Double dValue = new Double(Double.parseDouble(args[i]));
-			if (pTypes[i] == Integer.class) {
-				arguments[i] = new Integer(dValue.intValue());
-			} else if (pTypes[i] == Double.class) {
-				arguments[i] = dValue;
-			}
-		}
-		
-		return arguments;
-	}*/
+
+	/*
+	 * private static Object[] getTestArguments(String pParametersString,
+	 * Class[] pTypes) { String argsString = pParametersString; String[] args =
+	 * StringUtils.split(argsString, " ");
+	 * 
+	 * Object[] arguments = new Object[pTypes.length];
+	 * 
+	 * for (int i = 0; i < pTypes.length; i++) { Double dValue = new
+	 * Double(Double.parseDouble(args[i])); if (pTypes[i] == Integer.class) {
+	 * arguments[i] = new Integer(dValue.intValue()); } else if (pTypes[i] ==
+	 * Double.class) { arguments[i] = dValue; } }
+	 * 
+	 * return arguments; }
+	 */
 }
