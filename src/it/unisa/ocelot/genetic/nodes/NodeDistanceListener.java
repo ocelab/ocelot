@@ -9,9 +9,15 @@ import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 
+/**
+ * Listener that calculates branch distance and approach level. The targets are the nodes. 
+ * @author simone
+ *
+ */
 public class NodeDistanceListener implements SimulatorListener {
 	private CFG cfg;
 	private CFGNode nearest;
@@ -71,9 +77,12 @@ public class NodeDistanceListener implements SimulatorListener {
 		if (nearestEvents.size() == 1) {
 			ExecutionEvent event = nearestEvents.get(0);
 			
+			//One of the two is 0, the other is our branch distance, because it is the
+			//distance from the nearest node.
 			distance = Math.max(event.distanceFalse, event.distanceTrue);
 		} else {
 			double minDistance = Double.MAX_VALUE;
+			Set<LabeledEdge> departingEdges = this.cfg.outgoingEdgesOf(this.nearest);
 			
 			for (ExecutionEvent event : nearestEvents) {
 				CaseExecutionEvent caseEvent = (CaseExecutionEvent)event;
