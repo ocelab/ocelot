@@ -1,6 +1,7 @@
 package it.unisa.ocelot.genetic.paths;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.management.JMException;
 
@@ -19,10 +20,10 @@ public class PathCoverageExperiment extends OcelotExperiment {
 	private Class<Object>[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
-	private ArrayList<LabeledEdge> targetPath;
+	private List<LabeledEdge> targetPath;
 
 	public PathCoverageExperiment(CFG pCfg, ConfigManager pConfig,
-			Class<Object>[] pTypes, ArrayList<LabeledEdge> targetPath) {
+			Class<Object>[] pTypes, List<LabeledEdge> targetPath) {
 		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
 		
 		this.cfg = pCfg;

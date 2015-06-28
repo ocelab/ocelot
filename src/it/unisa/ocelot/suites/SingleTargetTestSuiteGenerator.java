@@ -7,13 +7,16 @@ import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
+import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jmetal.core.Variable;
@@ -48,10 +51,12 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 	
 	@SuppressWarnings("unchecked")
 	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {		
-		for (LabeledEdge uncoveredEdge : cfg.edgeSet()) {
-			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
+		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet());
+		Collections.shuffle(uncoveredEdges);
+		while (!uncoveredEdges.isEmpty()) {
+			LabeledEdge targetEdge = uncoveredEdges.remove(0); //avoids infinite loop
 			
-			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
+			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
 			try {
 				exp.basicRun();
@@ -61,7 +66,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			
 			this.printSeparator();
 			this.print("Current target: ");
-			this.println(targetNode);
+			this.println(targetEdge);
 			
 			double fitnessValue = exp.getFitnessValue();
 			Variable[] params = exp.getVariables();
@@ -76,6 +81,8 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
+			
+			uncoveredEdges.removeAll(testCase.getCoveredEdges());
 			
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 		}

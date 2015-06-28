@@ -299,4 +299,8 @@ public class ConfigManager {
 	public String getTestSuiteMinimizer() {
 		return this.properties.getProperty("suite.minimizer");
 	}
+	
+	public int getReducedMcCabeCoverageTimes() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.rmc.times", "1"));
+	}
 }

@@ -8,6 +8,7 @@ import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
+import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 
 import org.apache.commons.lang3.Range;
 
@@ -90,9 +91,6 @@ public class NodeCoverageProblem extends Problem {
 
 		EventsHandler handler = new EventsHandler();
 		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg, target);
-
-		if (debug)
-			System.out.println(Arrays.toString(variables));
 		
 		bridge.getEvents(handler, arguments);
 
@@ -101,9 +99,14 @@ public class NodeCoverageProblem extends Problem {
 		simulator.addListener(bdalListener);
 
 		simulator.simulate();
+		
+		double objective = bdalListener.getNormalizedBranchDistance()
+				+ bdalListener.getApproachLevel();
 
-		solution.setObjective(0, bdalListener.getNormalizedBranchDistance()
-				+ bdalListener.getApproachLevel());
+		solution.setObjective(0, objective);
+		
+		if (debug)
+			System.out.println(Arrays.toString(variables) + ": " + objective);
 	}
 
 	private Object getInstance(double pValue, Class<Object> pType) {

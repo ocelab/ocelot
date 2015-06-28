@@ -119,7 +119,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	
 	/*
 	 * NOTE:
-	 * Assuming that all the structures are compose by either pointers or not pointers.
+	 * Assuming that all the structures are composed by either pointers or not pointers.
 	 * If a field is a pointer, it will be assumed that this is of a C basic type.
 	 * TODO Make sure that also in case of non basic C types this method works properly
 	 * For example, Ocelot won't work if there is a structure with a field with type pointer
@@ -233,6 +233,8 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					IBinding[] binds = ((IASTCompoundStatement) statement).getScope().find(parameterName);
 					if (binds.length > 0)
 						this.parameters.put(parameterName, (IParameter)binds[0]);
+					else
+						System.err.println("An error is going to occur. I couldn't find the parameter in the scope, sorry.");
 				}
 			}
 		}

@@ -84,6 +84,7 @@ public class NodeDistanceListener implements SimulatorListener {
 			double minDistance = Double.MAX_VALUE;
 			Set<LabeledEdge> departingEdges = this.cfg.outgoingEdgesOf(this.nearest);
 			
+			//TODO: There is a BUG here!!! FIX IT!
 			for (ExecutionEvent event : nearestEvents) {
 				CaseExecutionEvent caseEvent = (CaseExecutionEvent)event;
 				if (!caseEvent.chosen && caseEvent.distanceTrue < minDistance)

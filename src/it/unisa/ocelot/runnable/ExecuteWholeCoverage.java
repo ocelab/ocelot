@@ -9,6 +9,7 @@ import it.unisa.ocelot.suites.TestSuiteGenerator;
 import it.unisa.ocelot.suites.TestSuiteGeneratorHandler;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
+import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TimeBenchmarkCalculator;
 import it.unisa.ocelot.suites.minimization.TestSuiteMinimizer;
 import it.unisa.ocelot.suites.minimization.TestSuiteMinimizerHandler;
@@ -44,6 +45,10 @@ public class ExecuteWholeCoverage {
 		CFG cfg = CFGBuilder.build(config.getTestFilename(),
 				config.getTestFunction());
 
+		
+		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
+		System.out.println("Cyclomatic complexity: " + mcCabePaths);
+		
 		if (config.getUI())
 			showUI(cfg);
 
@@ -53,16 +58,18 @@ public class ExecuteWholeCoverage {
 				.getInstance(config);
 
 		BenchmarkCalculator timeBenchmark = new TimeBenchmarkCalculator();
-		BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(
-				cfg);
+		BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
+		BenchmarkCalculator sizeBenchmark = new TestSuiteSizeBenchmarkCalculator(cfg);
 
 		generator.addBenchmark(timeBenchmark);
 		generator.addBenchmark(coverageBenchmark);
+		generator.addBenchmark(sizeBenchmark);
 
 		Set<TestCase> suite = generator.generateTestSuite();
 
 		System.out.println(timeBenchmark);
 		System.out.println(coverageBenchmark);
+		System.out.println(sizeBenchmark);
 
 		Set<TestCase> minimizedSuite = minimizer.minimize(suite);
 
@@ -74,14 +81,13 @@ public class ExecuteWholeCoverage {
 				.println("-------------------------------------------------------");
 	}
 
-	public static void showUI(CFG pCFG) {
-		final CFGWindow window = new CFGWindow(pCFG);
-
-		new Thread(new Runnable() {
+	public static void showUI(final CFG pCFG) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				CFGWindow window = new CFGWindow(pCFG);
 				window.setVisible(true);
 			}
-		}).run();
+		});
 	}
 }

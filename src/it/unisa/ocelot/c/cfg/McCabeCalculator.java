@@ -1,9 +1,16 @@
 package it.unisa.ocelot.c.cfg;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.NotPositiveException;
+import org.apache.commons.math3.exception.OutOfRangeException;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 import org.jgrapht.alg.CycleDetector;
 
 /**
@@ -144,5 +151,24 @@ public class McCabeCalculator {
 		}
 		return this.mcCabeEdgePaths;
 	}
-
+	
+	
+	public List<RealVector> getMcCabeVectorPaths() {
+		ArrayList<ArrayList<LabeledEdge>> paths = this.getMcCabeEdgePaths();
+		List<LabeledEdge> orderedEdges = new ArrayList<LabeledEdge>(this.cfg.edgeSet());
+		Collections.sort(orderedEdges);
+		
+		List<RealVector> result = new ArrayList<RealVector>();
+		for (ArrayList<LabeledEdge> path : paths) {
+			double[] vector = new double[orderedEdges.size()];
+			for (int i = 0; i < orderedEdges.size(); i++) {
+				LabeledEdge edge = orderedEdges.get(i);
+				
+				vector[i] = Collections.frequency(path, edge);
+			}
+			result.add(new ArrayRealVector(vector));
+		}
+		
+		return result;
+	}
 }

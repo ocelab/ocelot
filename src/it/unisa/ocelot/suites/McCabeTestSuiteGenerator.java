@@ -13,7 +13,9 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jmetal.core.Variable;
@@ -93,45 +95,54 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 
+	private List<LabeledEdge> getUncoveredEdges(Set<TestCase> suite) {
+		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet()); 
+		for (TestCase tc : suite) {
+			uncoveredEdges.removeAll(tc.getCoveredEdges());
+		}
+		
+		return uncoveredEdges;
+	}
+	
 	@SuppressWarnings("unchecked")
-	private void coverSingleTargets(Set<TestCase> suite)
-			throws TestSuiteGenerationException {
-		for (LabeledEdge uncoveredEdge : calculator.getUncoveredEdges()) {
-			CFGNode targetNode = cfg.getEdgeTarget(uncoveredEdge);
-
-			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg,
-					config, cfg.getParameterTypes(), targetNode);
+	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {		
+		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
+		
+		Collections.shuffle(uncoveredEdges);
+		while (!uncoveredEdges.isEmpty()) {
+			LabeledEdge targetEdge = uncoveredEdges.get(0);
+			uncoveredEdges.remove(0); //avoids infinite loop
+			CFGNode targetNode = cfg.getEdgeTarget(targetEdge);
+			
+			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
 			exp.initExperiment();
 			try {
 				exp.basicRun();
-			} catch (JMException | ClassNotFoundException e) {
+			} catch (JMException|ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
-
-			//this.printSeparator();
+			
+			this.printSeparator();
 			this.print("Current target: ");
 			this.println(targetNode);
-
+			
 			double fitnessValue = exp.getFitnessValue();
 			Variable[] params = exp.getVariables();
 			VariableTranslator translator = new VariableTranslator(params[0]);
-
+				
 			this.print("Fitness function: " + fitnessValue + ". ");
-			if (fitnessValue == 0.0) {
+			if (fitnessValue == 0.0)
 				this.println("Target covered!");
-
-				Object[] numericParams = translator.translateArray(cfg
-						.getParameterTypes());
-				TestCase testCase = this.createTestCase(numericParams,
-						suite.size());
-				suite.add(testCase);
-
-				this.println("Parameters found: "
-						+ Arrays.toString(numericParams));
-			} else {
-				this.println("Target not covered... test case discarded");
-			}
-			this.printSeparator();
+			else
+				this.println("Target not covered...");
+			
+			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+			TestCase testCase = this.createTestCase(numericParams, suite.size());
+			suite.add(testCase);
+			
+			uncoveredEdges.removeAll(testCase.getCoveredEdges());
+			
+			this.println("Parameters found: " + Arrays.toString(numericParams));
 		}
 	}
 

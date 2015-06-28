@@ -7,6 +7,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 public class TestSuiteGeneratorHandler {
 	public static final String MCCABE_SUITE_GENERATOR = "McCabe";
 	public static final String SINGLE_TARGET_SUITE_GENERATOR = "Target";
+	public static final String REDUCED_MCCABE_SUITE_GENERATOR = "ReducedMcCabe";
 	//generator for only McCabe Path without considering non covered branches 
 	public static final String VANILLA_MCCABE_SUITE_GENERATOR = "Vanilla";
 	
@@ -18,6 +19,8 @@ public class TestSuiteGeneratorHandler {
 			return new VanillaMcCabeTestSuiteGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(SINGLE_TARGET_SUITE_GENERATOR))
 			return new SingleTargetTestSuiteGenerator(pConfigManager, pCFG);
+		else if (name.equalsIgnoreCase(REDUCED_MCCABE_SUITE_GENERATOR))
+			return new ReducedMcCabeTestSuiteGenerator(pConfigManager, pCFG);
 		
 		return null;
 	}
