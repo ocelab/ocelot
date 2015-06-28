@@ -17,7 +17,7 @@ import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
  * @author simone
  *
  */
-public class CFGNode {
+public class CFGNode implements Comparable<CFGNode> {
 	private static int lastId;
 
 	private int id;
@@ -200,5 +200,10 @@ public class CFGNode {
 			if (node != null)
 				result += node.getRawSignature() + "\n";
 		return result;
+	}
+
+	@Override
+	public int compareTo(CFGNode o) {
+		return new Integer(this.id).compareTo(o.id);
 	}
 }

@@ -9,16 +9,27 @@ import org.jgrapht.graph.DefaultEdge;
  * @author simone
  *
  */
-public abstract class LabeledEdge extends DefaultEdge {
+public abstract class LabeledEdge extends DefaultEdge implements Comparable<LabeledEdge> {
 	private static final long serialVersionUID = -1013876340016911304L;
 	
 	private Object label;
+	private int id;
+	private static int availableId;
+	
+	static {
+		availableId = 0;
+	}
+	
+	private static int nextId() {
+		return availableId++; //returns non incremented availableId!
+	}
 	
 	/**
 	 * Creates an edge with an empty label
 	 */
 	public LabeledEdge() {
 		super();
+		this.id = LabeledEdge.nextId();
 	}
 	
 	/**
@@ -80,4 +91,9 @@ public abstract class LabeledEdge extends DefaultEdge {
 		}
 	}
 	**/
+	
+	@Override
+	public int compareTo(LabeledEdge o) {
+		return new Integer(this.id).compareTo(o.id);
+	}
 }
