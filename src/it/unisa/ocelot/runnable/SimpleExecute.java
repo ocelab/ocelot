@@ -15,6 +15,7 @@ import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
 
+@Deprecated
 public class SimpleExecute {
 	private static final String CONFIG_FILENAME = "config.properties";
 	

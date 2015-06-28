@@ -1,6 +1,7 @@
 package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.c.cfg.CFG;
+
 import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
@@ -20,6 +21,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
+@Deprecated
 public class Execute {
 	private static final String CONFIG_FILENAME = "config.properties";
 

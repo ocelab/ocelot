@@ -36,6 +36,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
+@Deprecated
 public class ExecutePathCoverage {
 	private static final String CONFIG_FILENAME = "config.properties";
 
