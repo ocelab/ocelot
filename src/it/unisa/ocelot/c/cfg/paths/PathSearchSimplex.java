@@ -53,9 +53,13 @@ public class PathSearchSimplex {
 	public void solve(Collection<LabeledEdge> pToCover) {
 		List<LabeledEdge> sortedEdges = new ArrayList<LabeledEdge>(this.cfg.edgeSet());
 		Collections.sort(sortedEdges);
+		
+		LabeledEdge startingEdge = new ArrayList<LabeledEdge>(this.cfg.outgoingEdgesOf(this.cfg.getStart())).get(0);
+		
 		int[] toCover = new int[sortedEdges.size()];
 		for (int i = 0 ; i < sortedEdges.size(); i++)
-			toCover[i] = pToCover.contains(sortedEdges.get(i)) ? 1 : 0;
+			if (pToCover.contains(sortedEdges.get(i)) || sortedEdges.get(i).equals(startingEdge))
+				toCover[i] = 1;
 		
 		
 		Problem problem = new Problem();
@@ -102,6 +106,7 @@ public class PathSearchSimplex {
 		RealVector copyCoefficients = currentSolution.copy();
 		List<List<LabeledEdge>> result = new ArrayList<List<LabeledEdge>>();
 		while (copyCoefficients.getMaxValue() > 0 || copyCoefficients.getMinValue() < 0) {
+			System.out.println("Trying...");
 			copyCoefficients = currentSolution.copy();
 			result = this.getPaths(copyCoefficients);
 		}
