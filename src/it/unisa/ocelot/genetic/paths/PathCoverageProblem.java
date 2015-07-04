@@ -107,6 +107,9 @@ public class PathCoverageProblem extends Problem {
 				0,
 				listener.getPathDistance()
 						+ listener.getNormalizedBranchDistance());
+		
+		if (new Double(solution.getObjective(0)).isNaN())
+			solution.setObjective(0, Double.POSITIVE_INFINITY);
 	}
 
 	public void setDebug(boolean debug) {
