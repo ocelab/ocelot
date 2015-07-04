@@ -140,14 +140,14 @@ public class CFGVisitor extends ASTVisitor {
 				return PROCESS_SKIP;
 
 			CFGNode.reset();
-			CFGNode startingNode = new CFGNode();
+			CFGNode startingNode = new CFGNode("Start");
 			this.graph.addVertex(startingNode);
 			this.graph.setStart(startingNode);
 
 			function.getBody().accept(this);
 			SubGraph body = this.ioHandlers.pop();
 
-			CFGNode endingNode = new CFGNode();
+			CFGNode endingNode = new CFGNode("End");
 			this.graph.addVertex(endingNode);
 			this.graph.setEnd(endingNode);
 
@@ -368,16 +368,29 @@ public class CFGVisitor extends ASTVisitor {
 		pStatement.getBody().accept(this);
 		SubGraph statementSubGraph = this.ioHandlers.pop();
 
+		boolean defaultTaken = false;
 		for (CFGNode caseNode : statementSubGraph.getCases()) {
 			String label;
 			if (caseNode.getLeadingNode() instanceof IASTCaseStatement) {
 				IASTCaseStatement caseStatement = (IASTCaseStatement) caseNode
 						.getLeadingNode();
 				label = caseStatement.getExpression().getRawSignature();
-			} else
+			} else {
 				label = "default";
+				defaultTaken = true;
+			}
 
 			this.setOutput(expression, caseNode, new CaseEdge(label));
+		}
+		
+		//If there is no default in switch...
+		if (!defaultTaken) {
+			CFGNode voidDefaultNode = new CFGNode("Noop");
+			this.graph.addVertex(voidDefaultNode);
+			
+			this.setOutput(expression, voidDefaultNode, new CaseEdge("default"));
+			
+			result.addOutput(voidDefaultNode);
 		}
 
 		result.addInput(expression);

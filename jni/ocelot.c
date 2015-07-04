@@ -1,4 +1,5 @@
 #include "ocelot.h"
+#include <math.h>
 
 void _f_ocelot_init() {
 	_v_ocelot_events = g_array_new(FALSE, FALSE, sizeof(_T_ocelot_event));
@@ -9,6 +10,15 @@ int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 	_T_ocelot_event event;
 	event.kind = OCELOT_KIND_STDEV;
 	event.choice = (result == 0 ? 0 : 1);
+
+	//Checks if distanceTrue if NaN
+	//if (distanceTrue != distanceTrue)
+	//	distanceTrue = INFINITY;
+
+	//Checks if distanceFalse is NaN
+	//if (distanceFalse != distanceFalse)
+	//	distanceFalse = INFINITY;
+
 	event.distanceTrue = distanceTrue;
 	event.distanceFalse = distanceFalse;
 	g_array_append_val(_v_ocelot_events, event);

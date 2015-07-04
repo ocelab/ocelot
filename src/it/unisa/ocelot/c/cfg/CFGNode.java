@@ -27,6 +27,8 @@ public class CFGNode implements Comparable<CFGNode> {
 	/* */
 	private boolean isVisited;
 
+	private String name;
+
 	public boolean isVisited() {
 		return this.isVisited;
 	}
@@ -62,6 +64,8 @@ public class CFGNode implements Comparable<CFGNode> {
 	public CFGNode(IASTNode pNode) {
 		this.nodes = new ArrayList<IASTNode>();
 		this.nodes.add(pNode);
+		
+		this.name = this.toString();
 
 		this.id = CFGNode.getID();
 	}
@@ -76,18 +80,22 @@ public class CFGNode implements Comparable<CFGNode> {
 	 */
 	public CFGNode(List<IASTNode> pNodes) {
 		this.nodes = pNodes;
+		
+		this.name = this.toString();
 
 		this.id = CFGNode.getID();
 	}
 
 	/**
 	 * Creates an empty node of the Control Flow Graph and assigns an
-	 * incremental identifier to it.
+	 * incremental identifier to it. It requires a string as a unique
+	 * identifier of the node.
 	 */
-	public CFGNode() {
+	public CFGNode(String pName) {
 		this.nodes = new ArrayList<IASTNode>();
 
 		this.id = CFGNode.getID();
+		this.name = pName;
 	}
 
 	/**
@@ -179,8 +187,10 @@ public class CFGNode implements Comparable<CFGNode> {
 			return false;
 
 		CFGNode node = (CFGNode) obj;
-
-		return node.nodes.equals(this.nodes);
+		if (this.nodes.size() > 0)
+			return node.nodes.equals(this.nodes);
+		else
+			return node.name.equals(this.name);
 	}
 
 	public boolean strongEquals(CFGNode pNode) {
@@ -196,9 +206,14 @@ public class CFGNode implements Comparable<CFGNode> {
 	@Override
 	public String toString() {
 		String result = "" + this.id + ": ";
-		for (IASTNode node : this.nodes)
-			if (node != null)
-				result += node.getRawSignature() + "\n";
+		if (this.nodes.size() > 0) {
+			for (IASTNode node : this.nodes)
+				if (node != null)
+					result += node.getRawSignature() + "\n";
+		} else {
+			result += this.name;
+		}
+					
 		return result;
 	}
 

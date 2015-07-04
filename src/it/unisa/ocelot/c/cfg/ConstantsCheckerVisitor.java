@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
+import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
 /**
  * This visitor saves all the literals in two arrays: numbers and strings. Besides, it updates the
@@ -19,6 +24,8 @@ public class ConstantsCheckerVisitor extends ASTVisitor {
 	private List<Double> numericConstants;
 	private List<String> stringConstants;
 
+	private String functionName;
+
 	/**
 	 * Creates a visitor of the C syntax tree able to generate its Control Flow
 	 * Graph.
@@ -26,13 +33,28 @@ public class ConstantsCheckerVisitor extends ASTVisitor {
 	 * @param pGraph
 	 *            Graph which will contain the result
 	 */
-	public ConstantsCheckerVisitor(CFG pGraph) {
+	public ConstantsCheckerVisitor(CFG pGraph, String pFunctionName) {
 		this.graph = pGraph;
+		
+		this.functionName = pFunctionName;
 		
 		this.numericConstants = new ArrayList<Double>();
 		this.stringConstants = new ArrayList<String>();
 
 		this.shouldVisitExpressions = true;
+		this.shouldVisitDeclarations = true;
+	}
+	
+	public int visit(IASTDeclaration name) {
+
+		if (name instanceof CASTFunctionDefinition) {
+			IASTFunctionDefinition function = (CASTFunctionDefinition) name;
+
+			if (function.getDeclarator().getName().getRawSignature().equals(this.functionName))
+				return PROCESS_CONTINUE;
+		}
+
+		return PROCESS_SKIP;
 	}
 
 	@Override

@@ -17,7 +17,7 @@ public class CFGBuilder {
 		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
 				code.toCharArray(), pSourceFile);
 		CFGVisitor cfgBuilder = new CFGVisitor(graph, pFunctionName);
-		ConstantsCheckerVisitor constantsChecker = new ConstantsCheckerVisitor(graph); 
+		ConstantsCheckerVisitor constantsChecker = new ConstantsCheckerVisitor(graph, pFunctionName);
 
 		translationUnit.accept(cfgBuilder);
 		translationUnit.accept(constantsChecker);

@@ -42,10 +42,16 @@ public class CaseEdge extends LabeledEdge {
 	
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
+		if (pEvent == null && this.isDefault())
+			return true;
 		if (pEvent == null)
 			return false;
 		
 		return pEvent.choice == this.uniqueID;
+	}
+
+	public boolean isDefault() {
+		return this.uniqueID == CaseEdge.getUniqueID("default");
 	}
 
 	@Override
