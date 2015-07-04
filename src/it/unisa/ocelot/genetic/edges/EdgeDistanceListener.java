@@ -25,6 +25,7 @@ public class EdgeDistanceListener implements SimulatorListener {
 
 	private CFG cfg;
 	private CFGNode nearestNode;
+	private LabeledEdge nearestEdge;
 	// the edge target
 	private LabeledEdge targetEdge;
 	// the node targeted by edge target
@@ -104,6 +105,10 @@ public class EdgeDistanceListener implements SimulatorListener {
 				node, this.targetFather);
 		if (path != null && path.size() < this.shortestPath) {
 			this.nearestNode = node;
+			if (path.size() > 0)
+				this.nearestEdge = path.get(0);
+			else
+				this.nearestEdge = this.targetEdge;
 			this.shortestPath = path.size();
 		}
 	}
@@ -119,13 +124,14 @@ public class EdgeDistanceListener implements SimulatorListener {
 		if (nearestEvents.size() == 1) {
 			// single condition
 			ExecutionEvent event = nearestEvents.get(0);
-			if (targetEdge instanceof FalseEdge)
-				distance = event.distanceFalse;
-			if (targetEdge instanceof TrueEdge)
-				distance = event.distanceTrue;
+			distance = Math.max(event.distanceTrue, event.distanceFalse);
+		} else {
+			for (ExecutionEvent event : this.nearestEvents) {
+				if (event.getEdge().equals(this.nearestEdge))
+					distance = Math.max(event.distanceTrue, event.distanceFalse);
+			}
 		}
 		return distance / (distance + 1);
-		// TODO switch-case distance no yet implemented
 	}
 
 	/**

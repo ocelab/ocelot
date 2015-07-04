@@ -6,6 +6,7 @@ import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.CaseEdge;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 
 /**
@@ -79,6 +80,7 @@ public class Simulator {
 					currentCaseEvent = this.getNextEvent();
 					
 					caseEvents.add(currentCaseEvent);
+					currentCaseEvent.setEdge(edge);
 					if (((CaseExecutionEvent) currentCaseEvent).isChosen()) {
 						currentEvent = currentCaseEvent;
 						currentEvent.setEdge(edge);

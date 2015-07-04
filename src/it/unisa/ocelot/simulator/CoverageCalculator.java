@@ -2,17 +2,23 @@ package it.unisa.ocelot.simulator;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class CoverageCalculator {
 	private CFG cfg;
 	private CoverageCalculatorListener coverageListener;
+	private double branchCoverage;
+	private double blockCoverage;
+	
+	private Set<LabeledEdge> coveredEdges;
 	public CoverageCalculator(CFG pCfg) {
 		this.cfg = pCfg;
 	}
@@ -34,6 +40,10 @@ public class CoverageCalculator {
 			if (!simulator.isSimulationCorrect())
 				throw new RuntimeException("Simulation error for parameters " + Arrays.toString(params));
 		}
+		
+		this.coveredEdges = this.coverageListener.getCoveredEdges();
+		this.branchCoverage = this.coverageListener.getBranchCoverage();
+		this.blockCoverage = this.coverageListener.getBlockCoverage();
 	}
 	
 	public void calculateCoverage(Object[] pParameters) {
@@ -43,26 +53,37 @@ public class CoverageCalculator {
 	}
 	
 	public void calculateCoverage(Set<TestCase> pTestCases) {
-		List<Object[]> parametersList = new ArrayList<Object[]>();
+		Set<LabeledEdge> coveredEdges = new HashSet<LabeledEdge>();
+		Set<CFGNode> coveredBlocks = new HashSet<CFGNode>();
 		for (TestCase testCase : pTestCases) {
-			parametersList.add(testCase.getParameters());
+			coveredEdges.addAll(testCase.getCoveredEdges());
 		}
-		this.calculateCoverage(parametersList);
+		
+		for (LabeledEdge edge : coveredEdges) {
+			coveredBlocks.add(this.cfg.getEdgeSource(edge));
+			coveredBlocks.add(this.cfg.getEdgeTarget(edge));
+		}
+		
+		this.coveredEdges = coveredEdges;
+		this.branchCoverage = ((double)coveredEdges.size()) / this.cfg.edgeSet().size();
+		this.blockCoverage = ((double)coveredBlocks.size()) / this.cfg.vertexSet().size();
 	}
 	
 	public double getBranchCoverage() {
-		return this.coverageListener.getBranchCoverage();
+		return this.branchCoverage;
 	}
 	
 	public Set<LabeledEdge> getCoveredEdges() {
-		return this.coverageListener.getCoveredEdges();
+		return this.coveredEdges;
 	}
 	
 	public Set<LabeledEdge> getUncoveredEdges() {
-		return this.coverageListener.getUncoveredEdges();
+		Set<LabeledEdge> uncovered = new HashSet<LabeledEdge>(this.cfg.edgeSet());
+		uncovered.removeAll(this.coveredEdges);
+		return uncovered;
 	}
 	
 	public double getBlockCoverage() {
-		return this.coverageListener.getBlockCoverage();
+		return this.blockCoverage;
 	}
 }
