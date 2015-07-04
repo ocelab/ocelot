@@ -12,6 +12,7 @@
  *******************************************************************************/
 package it.unisa.ocelot.c.compiler.writer;
 
+import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTInitializerExpression;
 import org.eclipse.cdt.core.dom.ast.IASTInitializerList;
@@ -43,8 +44,8 @@ public class InitializerWriter extends NodeWriter{
 	}
 	
 	protected void writeInitializer(IASTInitializer initializer) {
-		if (initializer instanceof IASTInitializerExpression) {
-			((IASTInitializerExpression) initializer).getExpression().accept(visitor);
+		if (initializer instanceof IASTEqualsInitializer) {
+			((IASTEqualsInitializer) initializer).getInitializerClause().accept(visitor);
 		}else if (initializer instanceof IASTInitializerList) {
 			writeInitializerList((IASTInitializerList) initializer);
 		}else if (initializer instanceof ICPPASTConstructorInitializer) {
