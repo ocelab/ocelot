@@ -4,14 +4,18 @@ import it.unisa.ocelot.TestCase;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class TimeBenchmarkCalculator implements BenchmarkCalculator {
+public class TimeBenchmarkCalculator extends BenchmarkCalculator<Integer> {
 	private List<Long> times;
 	private List<String> labels;
 	
 	public TimeBenchmarkCalculator() {
+		super("Time benchmark");
+		
 		this.times = new ArrayList<Long>();
 		this.labels = new ArrayList<String>();
 	}
@@ -23,37 +27,55 @@ public class TimeBenchmarkCalculator implements BenchmarkCalculator {
 	
 	@Override
 	public void measure(String pLabel, Set<TestCase> pSuite) {
-		this.labels.add(pLabel);
+		this.labels.add(this.getRealLabel(pLabel));
 		this.times.add(new Date().getTime());
 	}
-
+	
 	@Override
-	public String getResults() {
-		String result = "";
+	public void removeLast() {
+		this.labels.remove(this.labels.size()-1);
+		this.times.remove(this.times.size()-1);
+	}
+	
+	@Override
+	public String toString() {
+		return this.getSignature()+"\n"+this.getPrintableResults();
+	}
+	
+	@Override
+	public Map<String, Integer> getResults() {
+		Map<String, Integer> result = new HashMap<String, Integer>();
 		
+		result.put(this.labels.get(0), 0);
 		for (int i = 0; i < this.times.size()-1; i++) {
 			long difference = this.times.get(i+1) - this.times.get(i);
 			
 			long seconds = (difference/1000) % 60;
-			long minutes = (difference/60000) % 60;
 			
-			result += this.labels.get(i+1) + ": " + minutes + " minutes and " + seconds + " seconds.\n";
+			result.put(this.labels.get(i+1), (int)seconds);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public Map<String, Integer> getCumulativeResults() {
+		Map<String, Integer> result = new HashMap<String, Integer>();
+		
+		long first = this.times.get(0);
+		for (int i = 0; i < this.times.size(); i++) {
+			long difference = this.times.get(i) - first;
+			
+			long seconds = (difference/1000);
+			
+			result.put(this.labels.get(i), (int)seconds);
 		}
 		
 		return result;
 	}
 	
 	@Override
-	public String getSignature() {
-		String signature = "-------------------------\n";
-		signature 		+= "Time benchmark\n";
-		signature 		+= "-------------------------";
-		
-		return signature;
-	}
-	
-	@Override
-	public String toString() {
-		return this.getSignature()+"\n"+this.getResults();
+	public List<String> getLabels() {
+		return this.labels;
 	}
 }

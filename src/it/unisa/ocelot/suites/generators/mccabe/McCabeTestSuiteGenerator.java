@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.generators.mccabe;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -10,6 +10,8 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,12 +42,10 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 		this.startBenchmarks();
 
 		coverMcCabePaths(suite);
-		this.measureBenchmarks("McCabe paths", suite);
 
 		calculator.calculateCoverage(suite);
-		if (calculator.getBranchCoverage() < 1.0) {
+		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
 			coverSingleTargets(suite);
-			this.measureBenchmarks("Single targets", suite);
 		}
 
 		return suite;
@@ -92,6 +92,8 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 				this.println("Path not covered...");
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 			this.printSeparator();
+			
+			this.measureBenchmarks("McCabe path", suite);
 		}
 	}
 
@@ -143,6 +145,8 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			uncoveredEdges.removeAll(testCase.getCoveredEdges());
 			
 			this.println("Parameters found: " + Arrays.toString(numericParams));
+			
+			this.measureBenchmarks("Single target", suite);
 		}
 	}
 

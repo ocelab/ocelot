@@ -6,15 +6,19 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class BranchCoverageBenchmarkCalculator implements BenchmarkCalculator {
+public class BranchCoverageBenchmarkCalculator extends BenchmarkCalculator<Double> {
 	private List<Double> coverages;
 	private List<String> labels;
 	private CoverageCalculator calculator;
 	
 	public BranchCoverageBenchmarkCalculator(CFG pCFG) {
+		super("Branch coverage banchmark");
+		
 		this.coverages = new ArrayList<Double>();
 		this.labels = new ArrayList<String>();
 		this.calculator = new CoverageCalculator(pCFG);
@@ -23,39 +27,50 @@ public class BranchCoverageBenchmarkCalculator implements BenchmarkCalculator {
 	@Override
 	public void start() {
 		this.coverages.add(0D);
-		this.labels.add("Start");
+		this.labels.add("Start 1");
 	}
 	
 	@Override
 	public void measure(String pLabel, Set<TestCase> pSuite) {
 		this.calculator.calculateCoverage(pSuite);
 		
-		this.labels.add(pLabel);
+		this.labels.add(this.getRealLabel(pLabel));
 		this.coverages.add(this.calculator.getBranchCoverage());
+	}
+	
+	@Override
+	public void removeLast() {
+		this.labels.remove(this.labels.size()-1);
+		this.coverages.remove(this.coverages.size()-1);
 	}
 
 	@Override
-	public String getResults() {
-		String result = "";
+	public Map<String, Double> getResults() {
+		Map<String, Double> result = new HashMap<String, Double>();
+		
+		result.put(this.labels.get(0), this.coverages.get(0));
+		for (int i = 0; i < this.coverages.size()-1; i++) {
+			double difference = this.coverages.get(i+1) - this.coverages.get(i);
+			
+			result.put(this.labels.get(i+1), difference);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public Map<String, Double> getCumulativeResults() {
+		Map<String, Double> result = new HashMap<String, Double>();
 		
 		for (int i = 0; i < this.coverages.size(); i++) {
-			result += this.labels.get(i) + ": " + this.coverages.get(i) + "\n";
+			result.put(this.labels.get(i), this.coverages.get(i));
 		}
 		
 		return result;
 	}
 	
 	@Override
-	public String getSignature() {
-		String signature = "-------------------------\n";
-		signature 		+= "Branch cov. benchmark\n";
-		signature 		+= "-------------------------";
-		
-		return signature;
-	}
-	
-	@Override
-	public String toString() {
-		return this.getSignature()+"\n"+this.getResults();
+	public List<String> getLabels() {
+		return this.labels;
 	}
 }

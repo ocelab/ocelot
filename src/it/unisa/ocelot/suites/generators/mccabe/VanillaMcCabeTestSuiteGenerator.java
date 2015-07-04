@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.generators.mccabe;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -8,6 +8,8 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +44,6 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 
 		this.startBenchmarks();
 		fillVanillaMcCabePaths(vanillaMcCabeSuite);
-		this.measureBenchmarks("Only McCabe Paths", vanillaMcCabeSuite);
 
 		return vanillaMcCabeSuite;
 	}
@@ -82,6 +83,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			TestCase testCase = this
 					.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
+			this.measureBenchmarks("Only McCabe Paths", suite);
 
 			System.out.print("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0)

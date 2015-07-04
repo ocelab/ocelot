@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.generators.edge;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -11,6 +11,8 @@ import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +43,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 		this.startBenchmarks();
 		
 		calculator.calculateCoverage(suite);
-		if (calculator.getBranchCoverage() < 1.0) {
+		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
 			coverSingleTargets(suite);
 			this.measureBenchmarks("Single targets", suite);
 		}

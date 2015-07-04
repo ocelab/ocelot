@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.generators.mccabe;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -10,6 +10,8 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +44,7 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 		coverMcCabePaths(suite);
 
 		calculator.calculateCoverage(suite);
-		if (calculator.getBranchCoverage() < 1.0) {
+		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
 			coverSingleTargets(suite);
 			this.measureBenchmarks("Single targets", suite);
 		}
@@ -67,29 +69,29 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 		
 		boolean improvement = true;
 		
-		while (improvement) {
-			double previousCoverage;
+		double lastCoverage = 0;
+		while (improvement && lastCoverage < this.config.getRequiredCoverage()) {
 			try { 
-				previousCoverage = calculator.getBranchCoverage();
+				lastCoverage = calculator.getBranchCoverage();
 			} catch (NullPointerException e) {
-				previousCoverage = 0;
+				lastCoverage = 0;
 			}
-			
+			System.out.println("Starting an iteration...");
 			Set<TestCase> lastIterationTestCases = new HashSet<TestCase>();
 			for (List<LabeledEdge> aMcCabePath : mcCabePaths) {
 				PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
 						config, cfg.getParameterTypes(), aMcCabePath);
 	
+				//this.printSeparator();
+				this.print("Current target: ");
+				this.println(aMcCabePath);
+				
 				exp.initExperiment();
 				try {
 					exp.basicRun();
 				} catch (JMException | ClassNotFoundException e) {
 					throw new TestSuiteGenerationException(e.getMessage());
 				}
-	
-				//this.printSeparator();
-				this.print("Current target: ");
-				this.println(aMcCabePath);
 	
 				double fitnessValue = exp.getFitnessValue();
 				Variable[] params = exp.getVariables();
@@ -114,12 +116,14 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			
 			this.measureBenchmarks("McCabe paths iteration", suite);
 			calculator.calculateCoverage(suite);
-			improvement = calculator.getBranchCoverage() > previousCoverage;
-			
+			improvement = calculator.getBranchCoverage() > lastCoverage;
+			lastCoverage = calculator.getBranchCoverage();
+			System.out.println("Iteration ended!");
 			if (improvement) {
 				searchPath.solve(this.getUncoveredEdges(suite));
 				mcCabePaths = searchPath.getChosenPaths();
 			} else {
+				this.removeLastBenchmark();
 				suite.removeAll(lastIterationTestCases);
 			}
 		}

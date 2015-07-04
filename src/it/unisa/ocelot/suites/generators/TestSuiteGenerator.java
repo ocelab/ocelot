@@ -1,6 +1,7 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.generators;
 
 import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 
 import java.util.ArrayList;
@@ -26,6 +27,11 @@ public abstract class TestSuiteGenerator {
 	protected void measureBenchmarks(String pLabel, Set<TestCase> pSuite) {
 		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
 			benchmarkCalculator.measure(pLabel, pSuite);
+	}
+	
+	protected void removeLastBenchmark() {
+		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
+			benchmarkCalculator.removeLast();
 	}
 	
 	public abstract Set<TestCase> generateTestSuite() throws TestSuiteGenerationException;
