@@ -311,6 +311,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 		
 		CASTBinaryExpression currentDefaultExpression = defaultExpression;
 		
+		boolean defaultWritten = false;
 		for (IASTStatement aCase : caseStatements) {
 			IASTExpression distanceCalculation;
 			String label;
@@ -341,9 +342,22 @@ public class InstrumentorVisitor extends ASTVisitor {
 				currentDefaultExpression.setOperand2(defaultExpressionSubtree);
 				currentDefaultExpression = defaultExpressionSubtree;
 			} else {
+				defaultWritten = true;
 				label = "default";
 				distanceCalculation = defaultExpression;
 			}
+			
+			IASTExpression[] arguments = new IASTExpression[3];
+			arguments[0] = new CASTLiteralExpression(CASTLiteralExpression.lk_integer_constant, String.valueOf(CaseEdge.retrieveUniqueId(label)).toCharArray());
+			arguments[1] = this.transformDistanceExpression(distanceCalculation, false, false);
+			arguments[2] = distanceCalculation.copy();
+			
+			substitute.addStatement(new CASTExpressionStatement(makeFunctionCall("_f_ocelot_trace_case", arguments)));
+		}
+		
+		if (!defaultWritten) {
+			String label = "default";
+			IASTExpression distanceCalculation = defaultExpression;
 			
 			IASTExpression[] arguments = new IASTExpression[3];
 			arguments[0] = new CASTLiteralExpression(CASTLiteralExpression.lk_integer_constant, String.valueOf(CaseEdge.retrieveUniqueId(label)).toCharArray());

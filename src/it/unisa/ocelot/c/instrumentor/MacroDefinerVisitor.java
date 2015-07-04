@@ -1,8 +1,5 @@
 package it.unisa.ocelot.c.instrumentor;
 
-import it.unisa.ocelot.c.compiler.writer.DeclSpecWriter;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTName;
-import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
@@ -191,7 +186,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 				
 				if (type instanceof CStructure) {
 					macro += parameterStringType; //Type
-					macro += " __arg"+inputArgument+";\\\n";
+					macro += " __arg"+outputArgument+";\\\n";
 					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
 					List<StructNode> basics = tree.getBasicVariables();
 					for (StructNode var : basics) {
