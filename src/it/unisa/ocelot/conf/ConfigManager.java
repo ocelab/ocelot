@@ -303,4 +303,16 @@ public class ConfigManager {
 	public int getReducedMcCabeCoverageTimes() {
 		return Integer.parseInt(this.properties.getProperty("suite.generator.rmc.times", "1"));
 	}
+	
+	public int getRandomSizeLimit() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.random.limit", "1000000"));
+	}
+	
+	public int getRandomGranularity() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.random.granularity", "100"));
+	}
+	
+	public double getRequiredCoverage() {
+		return Double.parseDouble(this.properties.getProperty("suite.coverage", "1.0"));
+	}
 }
