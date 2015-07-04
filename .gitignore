@@ -24,3 +24,5 @@ libTest.jnilib
 
 #output files
 outputs/
+
+*.csv
