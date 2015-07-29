@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
@@ -21,7 +22,7 @@ import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
-public class PathCoverageProblem extends Problem {
+public class PathCoverageProblem extends StandardProblem {
 	private static final long serialVersionUID = 1930014794768729268L;
 
 	private CFG cfg;
@@ -31,41 +32,13 @@ public class PathCoverageProblem extends Problem {
 	private boolean debug;
 
 	@SuppressWarnings("rawtypes")
-	public PathCoverageProblem(CFG pCfg, Class[] pParameters,
-			Range<Double>[] pRanges) throws Exception {
-
+	public PathCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges) throws Exception {
+		super(pParameters, pRanges);
 		this.cfg = pCfg;
-
-		numberOfVariables_ = pParameters.length;
-		numberOfObjectives_ = 1;
-		numberOfConstraints_ = 0;
-		problemName_ = "TestingPrioritizationProblem";
-
-		solutionType_ = new ArrayRealSolutionType(this);
-
-		length_ = new int[numberOfVariables_];
-		lowerLimit_ = new double[numberOfVariables_];
-		upperLimit_ = new double[numberOfVariables_];
-		for (int i = 0; i < numberOfVariables_; i++) {
-			if (pRanges != null && pRanges.length > i && pRanges[i] != null) {
-				lowerLimit_[i] = pRanges[i].getMinimum();
-				upperLimit_[i] = pRanges[i].getMaximum();
-			} else {
-				if (pParameters[i] == Integer.class) {
-					lowerLimit_[i] = Integer.MIN_VALUE;
-					upperLimit_[i] = Integer.MAX_VALUE;
-				} else {
-					lowerLimit_[i] = Double.MIN_VALUE;
-					upperLimit_[i] = Double.MAX_VALUE;
-				}
-			}
-		}
-
-		this.parameters = pParameters;
+		problemName_ = "PathCoverageProblem";
 	}
 
-	public PathCoverageProblem(CFG pCfg, Class<Object>[] pParameters)
-			throws Exception {
+	public PathCoverageProblem(CFG pCfg, Class<Object>[] pParameters) throws Exception {
 		this(pCfg, pParameters, null);
 	}
 
@@ -82,9 +55,7 @@ public class PathCoverageProblem extends Problem {
 	}
 
 	public void evaluate(Solution solution) throws JMException {
-		VariableTranslator translator = new VariableTranslator(solution.getDecisionVariables()[0]);
-
-		Object[] arguments = translator.translateArray(this.parameters);
+		Object[] arguments = this.getParameters(solution);
 
 		CBridge bridge = new CBridge();
 
@@ -110,9 +81,5 @@ public class PathCoverageProblem extends Problem {
 		
 		if (new Double(solution.getObjective(0)).isNaN())
 			solution.setObjective(0, Double.POSITIVE_INFINITY);
-	}
-
-	public void setDebug(boolean debug) {
-		this.debug = debug;
 	}
 }
