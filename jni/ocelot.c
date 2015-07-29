@@ -6,6 +6,11 @@ void _f_ocelot_init() {
 	_v_ocelot_fcalls = g_array_new(FALSE, FALSE, sizeof(double));
 }
 
+void _f_ocelot_end() {
+	g_array_free(_v_ocelot_events, TRUE);
+	g_array_free(_v_ocelot_fcalls, TRUE);
+}
+
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 	_T_ocelot_event event;
 	event.kind = OCELOT_KIND_STDEV;

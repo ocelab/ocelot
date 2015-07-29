@@ -32,6 +32,7 @@ typedef struct {
 } _T_ocelot_event_case;
 
 void _f_ocelot_init();
+void _f_ocelot_end();
 /*
  * Traces the branches
  */

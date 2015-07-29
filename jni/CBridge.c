@@ -34,6 +34,8 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 			(*env)->CallVoidMethod(env, eventHandler, addCaseMethod, event.choice, event.distanceTrue, (jboolean)event.distanceFalse);
 		}
 	}
+
+	_f_ocelot_end();
 }
 
 jdouble _f_ocelot_numval(JNIEnv* env, jobject object) {
