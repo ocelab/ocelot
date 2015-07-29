@@ -57,4 +57,6 @@ public abstract class JNIMakefileGenerator {
 		
 		Utils.writeFile(this.filename, result);
 	}
+	
+	public abstract Process runCompiler() throws IOException;
 }

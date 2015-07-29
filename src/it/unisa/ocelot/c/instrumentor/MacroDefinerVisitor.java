@@ -1,5 +1,6 @@
 package it.unisa.ocelot.c.instrumentor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	private String callMacro;
 	private String functionName;
 	private String[] neededParameters;
+	private List<IType> functionParameters;
 	private Map<String, IParameter> parameters;
 	
 	public MacroDefinerVisitor(String pFunctionName) {
@@ -44,9 +46,15 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		
 		this.functionName = pFunctionName;
 		
+		this.functionParameters = new ArrayList<IType>();
+		
 		this.parameters = new HashMap<String, IParameter>();
 		
 		this.callMacro = "";
+	}
+	
+	public List<IType> getFunctionParameters() {
+		return functionParameters;
 	}
 	
 	private IType getType(IType type) {
@@ -190,6 +198,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
 					List<StructNode> basics = tree.getBasicVariables();
 					for (StructNode var : basics) {
+						this.functionParameters.add(var.type);
 						String fieldType = var.type.toString().replaceAll("\\*", "");
 						macro += fieldType;
 						macro += " __str"+inputArgument;
@@ -201,6 +210,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					}
 					
 				} else {
+					this.functionParameters.add(type);
 					macro += parameterStringType;//Type
 					macro += " __arg" +outputArgument; //Name
 					macro += " = OCELOT_numeric(OCELOT_ARG(" + inputArgument + "));\\\n"; //Assign

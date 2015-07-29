@@ -10,6 +10,7 @@ import java.util.Set;
 public abstract class BenchmarkCalculator<T> {
 	private String name;
 	private Map<String, Integer> labelCategories;
+	protected List<String> labels;
 	
 	public BenchmarkCalculator(String pName) {
 		this.name = pName;
@@ -23,7 +24,7 @@ public abstract class BenchmarkCalculator<T> {
 	public String getPrintableResults() {
 		String result = "";
 		
-		for (Map.Entry<String, T> entry : this.getResults().entrySet()) {
+		for (Map.Entry<String, T> entry : this.getCumulativeResults().entrySet()) {
 			result += entry.getKey() + ": " + entry.getValue() + "\n";
 		}
 		
@@ -32,9 +33,9 @@ public abstract class BenchmarkCalculator<T> {
 
 	public String getPrintableCumulativeResults() {
 		String result = "";
-		
-		for (Map.Entry<String, T> entry : this.getCumulativeResults().entrySet()) {
-			result += entry.getKey() + ": " + entry.getValue() + "\n";
+		Map<String, T> results = this.getCumulativeResults();
+		for (String label : this.labels) {
+			result += label + ": " + results.get(label).toString() + "\n";
 		}
 		
 		return result;

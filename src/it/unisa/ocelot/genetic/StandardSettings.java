@@ -1,4 +1,4 @@
-package it.unisa.ocelot.genetic.paths;
+package it.unisa.ocelot.genetic;
 
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.FastPgGA;
@@ -9,34 +9,30 @@ import java.util.List;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
+import jmetal.core.Problem;
 import jmetal.experiments.Settings;
+import jmetal.metaheuristics.fastPGA.FastPGA;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
 import jmetal.operators.crossover.CrossoverFactory;
 import jmetal.operators.mutation.ConstantMetaMutation;
 import jmetal.operators.mutation.MutationFactory;
-import jmetal.operators.mutation.UniformMutation;
 import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 
-public class PathCoverageSettings extends Settings {
+public class StandardSettings extends Settings {
     private int populationSize;
     private int maxEvaluations;
     private double mutationProbability;
     private double crossoverProbability;
     private int threads;
-	private List<Double> numericConstants;
+    private boolean debug;
     
-	public List<Double> getNumericConstants() {
-		return numericConstants;
-	}
-
-	public void setNumericConstants(List<Double> numericConstants) {
-		this.numericConstants = numericConstants;
-	}
-
-	public PathCoverageSettings(PathCoverageProblem pProblem) {
+    private List<Double> numericConstants;
+	private boolean useMetaMutator;
+    
+	public StandardSettings(Problem pProblem) {
 		super();
 		
 		this.problem_ = pProblem;
@@ -48,7 +44,7 @@ public class PathCoverageSettings extends Settings {
         threads = 1;
 	}
 	
-	public PathCoverageSettings(PathCoverageProblem pProblem, ConfigManager pConfig) {
+	public StandardSettings(Problem pProblem, ConfigManager pConfig) {
 		this(pProblem);
 		
 		try {
@@ -70,6 +66,10 @@ public class PathCoverageSettings extends Settings {
 		try {
 			threads = pConfig.getThreads();
 		} catch (NumberFormatException e) {}
+	}
+	
+	public void useMetaMutator() {
+		this.useMetaMutator = true;
 	}
 	
 	public Algorithm configure() throws JMException {
@@ -95,16 +95,18 @@ public class PathCoverageSettings extends Settings {
 
         parameters = new HashMap<String, Object>();
         parameters.put("probability", mutationProbability);
-        parameters.put("realOperator", MutationFactory.getMutationOperator("PolynomialMutation", parameters));
-        parameters.put("metaMutationProbability", mutationProbability/10);
-        List<Double> mutationElements = this.numericConstants;
-        parameters.put("mutationElements", mutationElements);
-        mutation = new ConstantMetaMutation(parameters);
+        if (!this.useMetaMutator) {
+	        mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+        } else {
+            parameters.put("realOperator", MutationFactory.getMutationOperator("PolynomialMutation", parameters));
+            parameters.put("metaMutationProbability", 0.001);
+            List<Double> mutationElements = this.numericConstants;
+            parameters.put("mutationElements", mutationElements);
+            mutation = new ConstantMetaMutation(parameters);
+        }
 
         // Selection Operator 
-        parameters = new HashMap<String, Object>();
-        parameters.put("problem", this.problem_);
-        parameters.put("populationSize", populationSize);
+        parameters = null;
         selection = SelectionFactory.getSelectionOperator("BinaryTournament", parameters);
 
         // Add the operators to the algorithm
@@ -114,4 +116,12 @@ public class PathCoverageSettings extends Settings {
 
         return algorithm;
     }
+
+	public List<Double> getNumericConstants() {
+		return numericConstants;
+	}
+
+	public void setNumericConstants(List<Double> numericConstants) {
+		this.numericConstants = numericConstants;
+	}
 }

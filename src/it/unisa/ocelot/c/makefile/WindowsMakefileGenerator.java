@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.makefile;
 
+import java.io.IOException;
+
 public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 
 	public WindowsMakefileGenerator() {
@@ -48,4 +50,8 @@ public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 		return "Test.dll";
 	}
 
+	@Override
+	public Process runCompiler() throws IOException {
+		return Runtime.getRuntime().exec(new String[] {"mingw32-make", "--directory=jni"});
+	}
 }

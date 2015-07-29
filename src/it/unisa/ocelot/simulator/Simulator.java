@@ -1,5 +1,6 @@
 package it.unisa.ocelot.simulator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CaseEdge;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.util.Utils;
 
 /**
  * Simulates the execution of the program on the CFG in order to calculate the
@@ -55,9 +57,12 @@ public class Simulator {
 		this.reset();
 		//Consumes the first event
 		ExecutionEvent currentEvent = this.getNextEvent();
+		int lastExecutionEvent = 0;
 		
 		//Takes the first node
 		CFGNode currentNode = cfg.getStart();
+		CFGNode lastNode = null;
+		String emergencyLog = "";
 		
 		//Loop until we don't reach the end of the execution
 		while (!currentNode.strongEquals(cfg.getEnd())) {
@@ -65,6 +70,12 @@ public class Simulator {
 			for (SimulatorListener listener : this.listeners)
 				listener.onNodeVisit(currentNode);
 			Set<LabeledEdge> edges = cfg.outgoingEdgesOf(currentNode);
+			lastNode = currentNode;
+			lastExecutionEvent = this.currentEventIndex;
+
+			emergencyLog += currentNode.toString() + "\n";
+			if (currentEvent != null)
+				emergencyLog += currentEvent.toString() + "\n\n";
 			
 			//If we have a switch, we get all the execution events related to this switch
 			//(one for each edge) and we set currentEvent as the event related to the chosen branch.
@@ -72,12 +83,14 @@ public class Simulator {
 			if (currentNode.isSwitch()) {
 				currentEvent = null;
 				caseEvents = new ArrayList<ExecutionEvent>();
+				emergencyLog += "------ Case events -------\n";
 				ExecutionEvent currentCaseEvent;
 				
 				//Goes back of one event
 				this.rewind(1);
 				for (LabeledEdge edge : edges) {
 					currentCaseEvent = this.getNextEvent();
+					emergencyLog += currentCaseEvent.toString() + "\n";
 					
 					caseEvents.add(currentCaseEvent);
 					currentCaseEvent.setEdge(edge);
@@ -123,10 +136,22 @@ public class Simulator {
 				} //if doesn't need events
 			} //while end not reached
 			
+			if (currentNode == lastNode && 
+					lastExecutionEvent == this.currentEventIndex) {
+				try {
+					Utils.writeFile("EMERGENCY_LOG", emergencyLog);
+				} catch (IOException e) {
+				}
+				throw new SimulationException("Simulation error");
+			}
+			
 			//If needs a new event, consumes a new event.
 			if (newEvent)
 				currentEvent = this.getNextEvent();
 		}
+		
+		if (!this.isSimulationCorrect())
+			throw new SimulationException("Simulation not ended!!");
 	}
 	
 	/**

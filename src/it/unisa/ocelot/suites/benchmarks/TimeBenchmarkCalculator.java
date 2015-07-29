@@ -11,7 +11,6 @@ import java.util.Set;
 
 public class TimeBenchmarkCalculator extends BenchmarkCalculator<Integer> {
 	private List<Long> times;
-	private List<String> labels;
 	
 	public TimeBenchmarkCalculator() {
 		super("Time benchmark");

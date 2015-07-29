@@ -31,18 +31,21 @@ import org.apache.commons.lang3.StringUtils;
 public class ExecuteExperiment {
 	private static final String CONFIG_FILENAME = "config.properties";
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-		TestSuiteGeneratorHandler.RANDOM_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.VANILLA_MCCABE_SUITE_GENERATOR,
 		TestSuiteGeneratorHandler.MCCABE_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.RANDOM_SUITE_GENERATOR,
+		//TestSuiteGeneratorHandler.VANILLA_MCCABE_SUITE_GENERATOR,
 	};
 
 	static {
 		System.loadLibrary("Test");
 	}
+	
+	private static CFG cfg;
+	private static ConfigManager config;
 
 	public static void main(String[] args) throws Exception {
 		ConfigManager.setFilename(CONFIG_FILENAME);
-		ConfigManager config = ConfigManager.getInstance();
+		config = ConfigManager.getInstance();
 
 		// Sets up the output file
 		File outputDirectory = new File(config.getOutputFolder());
@@ -54,12 +57,23 @@ public class ExecuteExperiment {
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = CFGBuilder.build(config.getTestFilename(),
+		cfg = CFGBuilder.build(config.getTestFilename(),
 				config.getTestFunction());
 		
 		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
 		System.out.println("Cyclomatic complexity: " + mcCabePaths);
+		System.out.println("Number of branches: " + cfg.edgeSet().size());
+		System.out.println("Number of nodes: " + cfg.vertexSet().size());
 
+		for (int i = 0; i < config.getExperimentRuns(); i++) {
+			runOnce(i);
+		}
+	}
+	
+	private static void runOnce(int pTime) throws Exception {
+		String folderPath = "RESULTS/"+config.getTestFunction()+"/";
+		File folder = new File(folderPath);
+		folder.mkdirs();
 		
 		for (String generatorName : EXPERIMENT_GENERATORS) {
 			System.out.println("RUNNING " + generatorName);
@@ -86,8 +100,10 @@ public class ExecuteExperiment {
 			String[] parts = config.getTestFilename().split("[./]");
 			String preFilename = parts[parts.length-2]
 					+ "_" + config.getTestFunction() 
-					+ "_" + generatorName;
-			exportCSV(preFilename, benchmarks);
+					+ "_" + generatorName
+					+ "_" + pTime;
+			
+			exportCSV(folderPath + preFilename, benchmarks);
 			
 			Set<TestCase> minimizedSuite = minimizer.minimize(suite);
 	

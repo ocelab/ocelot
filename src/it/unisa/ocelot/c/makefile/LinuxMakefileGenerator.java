@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.makefile;
 
+import java.io.IOException;
+
 public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 	public LinuxMakefileGenerator() {
 		super("jni/makefile");
@@ -38,5 +40,10 @@ public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 	@Override
 	public String getLibName() {
 		return "libTest.so";
+	}
+	
+	@Override
+	public Process runCompiler() throws IOException {
+		return Runtime.getRuntime().exec(new String[] {"make", "--directory=jni"});
 	}
 }

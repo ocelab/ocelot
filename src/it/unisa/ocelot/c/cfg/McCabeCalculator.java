@@ -41,6 +41,12 @@ public class McCabeCalculator {
 		this.cycleGraph = new CycleDetector<>(cfg);
 		this.startNode = cfg.getStart();
 		this.mcCabePaths = new ArrayList<ArrayList<CFGNode>>();
+		this.reset();
+	}
+	
+	public void reset() {
+		for (CFGNode node : this.cfg.vertexSet())
+			node.setVisited(false);
 	}
 
 	/**
@@ -71,7 +77,7 @@ public class McCabeCalculator {
 			// return path as a solution
 			mcCabePaths.add(path);
 		} else if (!node.isVisited()) {
-			node.setVisited();
+			node.setVisited(true);
 
 			this.FindBasis(defaultDestination, new ArrayList<>(path));
 

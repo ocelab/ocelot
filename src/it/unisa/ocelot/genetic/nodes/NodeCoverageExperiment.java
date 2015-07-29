@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
+import it.unisa.ocelot.genetic.StandardSettings;
 import jmetal.core.Algorithm;
 import jmetal.experiments.Experiment;
 
@@ -17,7 +18,7 @@ public class NodeCoverageExperiment extends OcelotExperiment {
 	private CFGNode target;
 	
 	public NodeCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, CFGNode pTarget) {
-		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
+		super(pConfig.getResultsFolder(), 1);
 		
 		this.cfg = pCfg;
 		this.config = pConfig;
@@ -39,7 +40,9 @@ public class NodeCoverageExperiment extends OcelotExperiment {
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.target);
 			
-			NodeCoverageSettings settings = new NodeCoverageSettings(problem, config);
+			StandardSettings settings = new StandardSettings(problem, config);
+			settings.useMetaMutator();
+			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {

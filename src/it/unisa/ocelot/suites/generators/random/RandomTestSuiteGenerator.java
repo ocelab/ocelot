@@ -17,6 +17,7 @@ import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -47,12 +48,21 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
 		Set<TestCase> suite = new HashSet<TestCase>();
 		
-		this.startBenchmarks();
+		long time = 0;
+		long timeout = System.currentTimeMillis() + this.config.getRandomTimeLimit()*1000;
+		if (this.config.getRandomTimeLimit() < 0)
+			timeout = Long.MAX_VALUE;
 		
+		int sizeout = config.getRandomSizeLimit();
+		if (sizeout < 0)
+			sizeout = Integer.MAX_VALUE;
+		
+		this.startBenchmarks();
 		calculator.calculateCoverage(suite);
 		double lastCoverage = 0.0;
 		while (calculator.getBranchCoverage() < this.config.getRequiredCoverage() &&
-				suite.size() <= config.getRandomSizeLimit()) {
+				suite.size() <= sizeout &&
+				time < timeout) {
 			coverRandom(suite);
 			calculator.calculateCoverage(suite);
 			
@@ -68,7 +78,12 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 				this.print("Temporary size: ");
 				this.println(suite.size());
 			}
+			
+			time = System.currentTimeMillis();
+			this.println("Time: " + (timeout-time));
 		}
+		
+		this.measureBenchmarks("End", suite);
 				
 		return suite;
 	}

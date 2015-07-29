@@ -13,7 +13,6 @@ import java.util.Set;
 
 public class BranchCoverageBenchmarkCalculator extends BenchmarkCalculator<Double> {
 	private List<Double> coverages;
-	private List<String> labels;
 	private CoverageCalculator calculator;
 	
 	public BranchCoverageBenchmarkCalculator(CFG pCFG) {

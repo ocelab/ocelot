@@ -11,6 +11,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
+import it.unisa.ocelot.genetic.StandardSettings;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
@@ -24,7 +25,7 @@ public class PathCoverageExperiment extends OcelotExperiment {
 
 	public PathCoverageExperiment(CFG pCfg, ConfigManager pConfig,
 			Class<Object>[] pTypes, List<LabeledEdge> targetPath) {
-		super(pConfig.getResultsFolder(), pConfig.getExperimentRuns());
+		super(pConfig.getResultsFolder(), 1);
 		
 		this.cfg = pCfg;
 		this.config = pConfig;
@@ -46,7 +47,9 @@ public class PathCoverageExperiment extends OcelotExperiment {
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.targetPath);
 
-			PathCoverageSettings settings = new PathCoverageSettings(problem, config);
+			StandardSettings settings = new StandardSettings(problem, config);
+			settings.useMetaMutator();
+			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();
 		} catch (Exception e) {

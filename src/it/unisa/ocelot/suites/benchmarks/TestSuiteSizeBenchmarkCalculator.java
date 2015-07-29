@@ -13,7 +13,6 @@ import java.util.Set;
 
 public class TestSuiteSizeBenchmarkCalculator extends BenchmarkCalculator<Integer> {
 	private List<Integer> sizes;
-	private List<String> labels;
 	
 	public TestSuiteSizeBenchmarkCalculator(CFG pCFG) {
 		super("Test suite size benchmark");

@@ -12,6 +12,7 @@ import it.unisa.ocelot.c.cfg.Dominators;
 import it.unisa.ocelot.c.cfg.FalseEdge;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.TrueEdge;
+import it.unisa.ocelot.simulator.CaseExecutionEvent;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
@@ -31,8 +32,8 @@ public class EdgeDistanceListener implements SimulatorListener {
 	// the node targeted by edge target
 	private CFGNode targetFather;
 	// for approach level
-	private Dominators<CFGNode, LabeledEdge> dominatorTree;
-	private Set<CFGNode> dominatorNodes;
+//	private Dominators<CFGNode, LabeledEdge> dominatorTree;
+//	private Set<CFGNode> dominatorNodes;
 	private int shortestPath;
 	private List<ExecutionEvent> nearestEvents;
 
@@ -48,10 +49,10 @@ public class EdgeDistanceListener implements SimulatorListener {
 		this.cfg = cfg;
 		this.targetEdge = target;
 		this.targetFather = this.cfg.getEdgeSource(targetEdge);
-		this.dominatorTree = new Dominators<CFGNode, LabeledEdge>(cfg,
-				cfg.getStart());
-		this.dominatorNodes = this.dominatorTree
-				.getStrictDominators(targetFather);
+//		this.dominatorTree = new Dominators<CFGNode, LabeledEdge>(cfg,
+//				cfg.getStart());
+//		this.dominatorNodes = this.dominatorTree
+//				.getStrictDominators(targetFather);
 		this.nearestEvents = new ArrayList<ExecutionEvent>();
 		this.shortestPath = Integer.MAX_VALUE;
 	}
@@ -90,16 +91,18 @@ public class EdgeDistanceListener implements SimulatorListener {
 	 * @return an approach level int value
 	 */
 	public int getApproachLevel() {
-		if (dominatorNodes.isEmpty())
-			return 0;
-
-		return dominatorNodes.size();
+//		if (dominatorNodes.isEmpty())
+//			return 0;
+//
+//		return dominatorNodes.size();
+		
+		return this.shortestPath;
 	}
 
 	@Override
 	public void onNodeVisit(CFGNode node) {
-		if (this.dominatorNodes.contains(node))
-			dominatorNodes.remove(node);
+//		if (this.dominatorNodes.contains(node))
+//			dominatorNodes.remove(node);
 
 		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg,
 				node, this.targetFather);
@@ -121,6 +124,27 @@ public class EdgeDistanceListener implements SimulatorListener {
 	 */
 	public double getNormalizedBranchDistance() {
 		double distance = 0;
+
+		if (this.getApproachLevel() == 0) {
+			// execution reach the parent node of edge target
+			if (this.nearestEvents.size() == 1) {
+				ExecutionEvent event = nearestEvents.get(0);
+	
+				if (event.getEdge().equals(this.targetEdge))
+					distance = 0;
+				else
+					distance = Math.max(event.distanceTrue, event.distanceFalse);;
+			} else {
+				for (ExecutionEvent event : this.nearestEvents) {
+					if (event.getEdge().equals(this.targetEdge))
+						distance = event.distanceTrue;
+				}
+			}
+			
+			return distance / (distance + 1);
+		}
+
+		// approach level more than 0
 		if (nearestEvents.size() == 1) {
 			// single condition
 			ExecutionEvent event = nearestEvents.get(0);
@@ -130,6 +154,8 @@ public class EdgeDistanceListener implements SimulatorListener {
 				if (event.getEdge().equals(this.nearestEdge))
 					distance = Math.max(event.distanceTrue, event.distanceFalse);
 			}
+			if (distance == 0)
+				System.err.println("Something went wrong in EdgeDistanceListener...");
 		}
 		return distance / (distance + 1);
 	}

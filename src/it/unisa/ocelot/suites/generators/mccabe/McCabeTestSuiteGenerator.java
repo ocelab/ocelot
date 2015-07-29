@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
+import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
@@ -63,16 +64,15 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
 					config, cfg.getParameterTypes(), aMcCabePath);
 
+			this.print("Current target: ");
+			this.println(aMcCabePath);
+			
 			exp.initExperiment();
 			try {
 				exp.basicRun();
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
-
-			//this.printSeparator();
-			this.print("Current target: ");
-			this.println(aMcCabePath);
 
 			double fitnessValue = exp.getFitnessValue();
 			Variable[] params = exp.getVariables();
@@ -111,12 +111,12 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
 		
 		Collections.shuffle(uncoveredEdges);
-		while (!uncoveredEdges.isEmpty()) {
+		while (!uncoveredEdges.isEmpty() && calculator.getBranchCoverage() < config.getRequiredCoverage()) {
 			LabeledEdge targetEdge = uncoveredEdges.get(0);
 			uncoveredEdges.remove(0); //avoids infinite loop
 			CFGNode targetNode = cfg.getEdgeTarget(targetEdge);
 			
-			NodeCoverageExperiment exp = new NodeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetNode);
+			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
 			try {
 				exp.basicRun();
@@ -147,6 +147,8 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 			
 			this.measureBenchmarks("Single target", suite);
+			
+			calculator.calculateCoverage(suite);
 		}
 	}
 

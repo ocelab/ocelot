@@ -103,7 +103,7 @@ public class EdgeCoverageProblem extends Problem {
 		
 		double objective = bdalListener.getNormalizedBranchDistance()
 				+ bdalListener.getApproachLevel();
-
+		
 		solution.setObjective(0, objective);
 		
 		if (debug)

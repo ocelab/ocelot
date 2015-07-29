@@ -33,8 +33,8 @@ public class CFGNode implements Comparable<CFGNode> {
 		return this.isVisited;
 	}
 
-	public void setVisited() {
-		this.isVisited = true;
+	public void setVisited(boolean value) {
+		this.isVisited = value;
 	}
 
 	static {

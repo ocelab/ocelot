@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import org.eclipse.cdt.core.dom.ast.IASTNullStatement;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
@@ -61,6 +64,25 @@ public class CFGVisitor extends ASTVisitor {
 		
 		this.shouldVisitDeclarations = true;
 		this.shouldVisitStatements = true;
+		this.shouldVisitTranslationUnit = true;
+	}
+	
+	@Override
+	public int visit(IASTTranslationUnit tu) {
+		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName);
+		tu.accept(typesDefiner);
+		
+		Class[] parameterTypes = new Class[typesDefiner.getFunctionParameters().size()];
+		for (int i = 0; i < typesDefiner.getFunctionParameters().size(); i++) {
+			String type = typesDefiner.getFunctionParameters().get(i).toString();
+			if (type.startsWith("int"))
+				parameterTypes[i] = Integer.class;
+			else
+				parameterTypes[i] = Double.class;
+		}
+		
+		this.graph.setParameterTypes(parameterTypes);
+		return super.visit(tu);
 	}
 
 	protected void onExit() {
@@ -122,16 +144,18 @@ public class CFGVisitor extends ASTVisitor {
 			/* my code starts here */
 
 			IASTFunctionDeclarator declarator = function.getDeclarator();
-			String[] types = ASTStringUtil
-					.getParameterSignatureArray(declarator);
-			Class[] parameterTypes = new Class[types.length];
-			for (int i = 0; i < parameterTypes.length; i++) {
-				if (types[i].startsWith("int"))
-					parameterTypes[i] = Integer.class;
-				else
-					parameterTypes[i] = Double.class;
-			}
-			this.graph.setParameterTypes(parameterTypes);
+//			String[] types = ASTStringUtil
+//					.getParameterSignatureArray(declarator);
+//			Class[] parameterTypes = new Class[types.length];
+//			for (int i = 0; i < parameterTypes.length; i++) {
+//				if (types[i].startsWith("int"))
+//					parameterTypes[i] = Integer.class;
+//				else
+//					parameterTypes[i] = Double.class;
+//			}
+//			
+//			if (this.functionName.equals(function.getDeclarator().getName().toString()))
+//				this.graph.setParameterTypes(parameterTypes);
 
 			/* my code ends here */
 
@@ -223,7 +247,8 @@ public class CFGVisitor extends ASTVisitor {
 								.getInput().get(0).getLeadingNode();
 						String label = caseSt.getExpression().getRawSignature();
 						this.setOutput(lastSubGraph.getOutput(),
-								currentSubGraph.getInput(), new CaseEdge(label));
+								currentSubGraph.getInput(), FlowEdge.class);
+						//Here there was a bug once. No more. Maybe...
 					} else
 						this.setOutput(lastSubGraph.getOutput(),
 								currentSubGraph.getInput(), FlowEdge.class);
@@ -680,7 +705,7 @@ public class CFGVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * 
+	 * Returns true if the statement is an expression, a NullStatement or a declaration
 	 */
 	private boolean isSimpleStatement(IASTStatement pStatement) {
 		return (pStatement instanceof IASTExpressionStatement)
@@ -688,12 +713,22 @@ public class CFGVisitor extends ASTVisitor {
 				|| (pStatement instanceof IASTDeclarationStatement);
 	}
 
+	/**
+	 * Returns true if the statement is a label, a case or a default
+	 * @param pStatement
+	 * @return
+	 */
 	private boolean isStartingSimpleStatement(IASTStatement pStatement) {
 		return (pStatement instanceof IASTLabelStatement)
 				|| (pStatement instanceof IASTCaseStatement)
 				|| (pStatement instanceof IASTDefaultStatement);
 	}
 
+	/**
+	 * Returns true if the statement is a break, a return a goto or a continue
+	 * @param pStatement
+	 * @return
+	 */
 	private boolean isEndingSimpleStatement(IASTStatement pStatement) {
 		return (pStatement instanceof IASTBreakStatement)
 				|| (pStatement instanceof IASTReturnStatement)

@@ -305,7 +305,11 @@ public class ConfigManager {
 	}
 	
 	public int getRandomSizeLimit() {
-		return Integer.parseInt(this.properties.getProperty("suite.generator.random.limit", "1000000"));
+		return Integer.parseInt(this.properties.getProperty("suite.generator.random.limit.tc", "-1"));
+	}
+	
+	public int getRandomTimeLimit() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.random.limit.time", "-1"));
 	}
 	
 	public int getRandomGranularity() {
