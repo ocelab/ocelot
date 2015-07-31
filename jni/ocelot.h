@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "pointers.h"
 
 #ifndef _Included_OcelotHeader
 #define _Included_OcelotHeader
@@ -16,6 +17,10 @@ extern "C" {
 #ifndef ABS
 #define ABS(x) (x < 0 ? -x : x)
 #endif
+
+#define OCELOD_DEREF(type, variable) ((type)*((double*)variable))
+
+extern _t_ocelot_array *_v_ocelot_pointers;
 
 typedef struct {
 	int kind;
@@ -50,6 +55,8 @@ double _f_ocelot_reg_fcall_pointer(void* fcall);
  */
 double _f_ocelot_get_fcall();
 
+int _f_ocelot_pointertotab(void*);
+
 double _f_ocelot_eq_numeric(double,double);
 double _f_ocelot_eq_pointer(void*, void*);
 
@@ -58,6 +65,12 @@ double _f_ocelot_gt_pointer(void*, void*);
 
 double _f_ocelot_ge_numeric(double,double);
 double _f_ocelot_ge_pointer(void*, void*);
+
+double _f_ocelot_lt_numeric(double,double);
+double _f_ocelot_lt_pointer(void*, void*);
+
+double _f_ocelot_le_numeric(double,double);
+double _f_ocelot_le_pointer(void*, void*);
 
 double _f_ocelot_neq_numeric(double,double);
 double _f_ocelot_neq_pointer(void*, void*);

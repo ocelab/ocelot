@@ -2,6 +2,9 @@
 #include <jni.h>
 #include "ocelot.h"
 #include "main.h"
+#include "pointers.h"
+
+_t_ocelot_array *_v_ocelot_pointers;
 
 /* Header for class it_unisa_ocelot_simulator_CBridge */
 
@@ -10,16 +13,26 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define TYPE_INT 0
+#define TYPE_DOUBLE 1
+#define TYPE_CHAR 2
+#define TYPE_LONG 3
+
 /*
  * Class:     it_unisa_ocelot_simulator_CBridge
  * Method:    getEvents
- * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;)V
+ * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;[Ljava/lang/Object;[[Ljava/lang/Object;[Ljava/lang/Object;)V
  */
-JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jobjectArray);
+JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jobjectArray, jobjectArray, jobjectArray);
 jdouble _f_ocelot_numval(JNIEnv*, jobject);
+void _f_ocelot_init_arrays(JNIEnv*, jobjectArray, int*);
 
-#define OCELOT_ARG(i) (*env)->GetObjectArrayElement(env, arguments, i)
-#define OCELOT_numeric(object) _f_ocelot_numval(env, object)
+#define OCELOT_ARGUMENT_VALUE(i) (*env)->GetObjectArrayElement(env, values, i)
+#define OCELOT_ARGUMENT_ARRAY(i) (*env)->GetObjectArrayElement(env, arrays, i)
+#define OCELOT_ARGUMENT_POINTER(i) (*env)->GetObjectArrayElement(env, pointers, i)
+
+#define OCELOT_NUM(object) _f_ocelot_numval(env, object)
 
 #ifdef __cplusplus
 }

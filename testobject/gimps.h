@@ -102,20 +102,6 @@ typedef struct
 } GimpCMYK;
 
 
-typedef void (* GimpRenderFunc)   (gdouble   x,
-                                   gdouble   y,
-                                   GimpRGB  *color,
-                                   gpointer  data);
-typedef void (* GimpPutPixelFunc) (gint      x,
-                                   gint      y,
-                                   GimpRGB  *color,
-                                   gpointer  data);
-typedef void (* GimpProgressFunc) (gint      min,
-                                   gint      max,
-                                   gint      current,
-                                   gpointer  data);
-
-
 
 #define GIMP_HSV_UNDEFINED -1.0
 #define GIMP_HSL_UNDEFINED -1.0

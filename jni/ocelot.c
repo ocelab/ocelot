@@ -9,20 +9,13 @@ void _f_ocelot_init() {
 void _f_ocelot_end() {
 	g_array_free(_v_ocelot_events, TRUE);
 	g_array_free(_v_ocelot_fcalls, TRUE);
+	free(_v_ocelot_pointers);
 }
 
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 	_T_ocelot_event event;
 	event.kind = OCELOT_KIND_STDEV;
 	event.choice = (result == 0 ? 0 : 1);
-
-	//Checks if distanceTrue if NaN
-	//if (distanceTrue != distanceTrue)
-	//	distanceTrue = INFINITY;
-
-	//Checks if distanceFalse is NaN
-	//if (distanceFalse != distanceFalse)
-	//	distanceFalse = INFINITY;
 
 	event.distanceTrue = distanceTrue;
 	event.distanceFalse = distanceFalse;
@@ -98,6 +91,14 @@ double _f_ocelot_ge_numeric(double op1, double op2) {
 	return result;
 }
 
+double _f_ocelot_lt_numeric(double op1, double op2) {
+	return _f_ocelot_ge_numeric(op2, op1);
+}
+
+double _f_ocelot_le_numeric(double op1, double op2) {
+	return _f_ocelot_gt_numeric(op2, op1);
+}
+
 double _f_ocelot_neq_numeric(double op1, double op2) {
 	double k = ABS(op1 - op2);
 	double result;
@@ -111,16 +112,33 @@ double _f_ocelot_neq_numeric(double op1, double op2) {
 }
 
 double _f_ocelot_eq_pointer(void* op1, void* op2) {
-	return 0;
+	int pos1 = _f_ocelot_pointertotab(op1);
+	int pos2 = _f_ocelot_pointertotab(op2);
+	return _f_ocelot_eq_numeric(pos1, pos2);
 }
 double _f_ocelot_gt_pointer(void* op1, void* op2) {
-	return 0;
+	int pos1 = _f_ocelot_pointertotab(op1);
+	int pos2 = _f_ocelot_pointertotab(op2);
+
+	return _f_ocelot_gt_numeric(pos1, pos2);
 }
 double _f_ocelot_ge_pointer(void* op1, void* op2) {
-	return 0;
+	int pos1 = _f_ocelot_pointertotab(op1);
+	int pos2 = _f_ocelot_pointertotab(op2);
+
+	return _f_ocelot_ge_numeric(pos1, pos2);
+}
+double _f_ocelot_lt_pointer(void* op1, void* op2) {
+	return _f_ocelot_ge_pointer(op2, op1);
+}
+double _f_ocelot_le_pointer(void* op1, void* op2) {
+	return _f_ocelot_gt_pointer(op2, op1);
 }
 double _f_ocelot_neq_pointer(void* op1, void* op2) {
-	return 0;
+	int pos1 = _f_ocelot_pointertotab(op1);
+	int pos2 = _f_ocelot_pointertotab(op2);
+
+	return _f_ocelot_neq_numeric(pos1, pos2);
 }
 
 double _f_ocelot_and(double op1, double op2) {
@@ -149,4 +167,9 @@ double _f_ocelot_isfalse(double flag) {
 		return OCELOT_K;
 	else
 		return k;
+}
+
+int _f_ocelot_pointertotab(void* ptr) {
+	int result = (ptr - (void*)_v_ocelot_pointers) / sizeof(_t_ocelot_array);
+	return result;
 }
