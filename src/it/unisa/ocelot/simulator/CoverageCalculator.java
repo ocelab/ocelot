@@ -23,14 +23,14 @@ public class CoverageCalculator {
 		this.cfg = pCfg;
 	}
 	
-	public void calculateCoverage(List<Object[]> pParametersList) {
+	public void calculateCoverage(List<Object[][][]> pParametersList) {
 		this.coverageListener = new CoverageCalculatorListener(cfg);
 		
-		for (Object[] params : pParametersList) {
+		for (Object[][][] params : pParametersList) {
 			CBridge bridge = new CBridge();
 			EventsHandler h = new EventsHandler();
 			
-			bridge.getEvents(h, params);
+			bridge.getEvents(h, params[0][0], params[1], params[2][0]);
 			
 			Simulator simulator = new Simulator(cfg, h.getEvents());
 			
@@ -46,8 +46,8 @@ public class CoverageCalculator {
 		this.blockCoverage = this.coverageListener.getBlockCoverage();
 	}
 	
-	public void calculateCoverage(Object[] pParameters) {
-		List<Object[]> parametersList = new ArrayList<Object[]>();
+	public void calculateCoverage(Object[][][] pParameters) {
+		List<Object[][][]> parametersList = new ArrayList<Object[][][]>();
 		parametersList.add(pParameters);
 		this.calculateCoverage(parametersList);
 	}

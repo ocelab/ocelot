@@ -73,10 +73,9 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			this.println(aMcCabePath);
 
 			double fitnessValue = exp.getFitnessValue();
-			Variable[] params = exp.getVariables();
-			VariableTranslator translator = new VariableTranslator(params[0]);
+			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 
-			Object[] numericParams = translator.translateArray(cfg
+			Object[][][] numericParams = translator.translateArray(cfg
 					.getParameterTypes());
 
 			// Creation of test case and addition to test suite
@@ -97,7 +96,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 
-	private TestCase createTestCase(Object[] pParams, int id) {
+	private TestCase createTestCase(Object[][][] pParams, int id) {
 		this.coverageCalculator.calculateCoverage(pParams);
 
 		TestCase tc = new TestCase();

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.Range;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
@@ -13,12 +14,12 @@ import jmetal.core.Algorithm;
 import jmetal.experiments.Experiment;
 
 public class EdgeCoverageExperiment extends OcelotExperiment {
-	private Class<Object>[] parametersTypes;
+	private CType[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
 	private LabeledEdge target;
 	
-	public EdgeCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, LabeledEdge pTarget) {
+	public EdgeCoverageExperiment(CFG pCfg, ConfigManager pConfig, CType[] pTypes, LabeledEdge pTarget) {
 		super(pConfig.getResultsFolder(), 1);
 		
 		this.cfg = pCfg;
@@ -34,9 +35,9 @@ public class EdgeCoverageExperiment extends OcelotExperiment {
 			
 			EdgeCoverageProblem problem;
 			if (ranges != null)
-				problem = new EdgeCoverageProblem(this.cfg, this.parametersTypes, ranges);
+				problem = new EdgeCoverageProblem(this.cfg, this.parametersTypes, ranges, this.config.getTestArraysSize());
 			else
-				problem = new EdgeCoverageProblem(this.cfg, this.parametersTypes);
+				problem = new EdgeCoverageProblem(this.cfg, this.parametersTypes, this.config.getTestArraysSize());
 			
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.target);

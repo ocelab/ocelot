@@ -7,12 +7,14 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
+import it.unisa.ocelot.util.Utils;
 
 import org.apache.commons.lang3.Range;
 
@@ -29,17 +31,15 @@ public class PathCoverageProblem extends StandardProblem {
 	private Class<Object>[] parameters;
 	private List<LabeledEdge> target;
 
-	private boolean debug;
-
 	@SuppressWarnings("rawtypes")
-	public PathCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges) throws Exception {
-		super(pParameters, pRanges);
+	public PathCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize) throws Exception {
+		super(pParameters, pRanges, pArraySize);
 		this.cfg = pCfg;
 		problemName_ = "PathCoverageProblem";
 	}
 
-	public PathCoverageProblem(CFG pCfg, Class<Object>[] pParameters) throws Exception {
-		this(pCfg, pParameters, null);
+	public PathCoverageProblem(CFG pCfg, CType[] pParameters, int pArraySize) throws Exception {
+		this(pCfg, pParameters, null, pArraySize);
 	}
 
 	public CFG getCFG() {
@@ -55,7 +55,7 @@ public class PathCoverageProblem extends StandardProblem {
 	}
 
 	public void evaluate(Solution solution) throws JMException {
-		Object[] arguments = this.getParameters(solution);
+		Object[][][] arguments = this.getParameters(solution);
 
 		CBridge bridge = new CBridge();
 
@@ -63,10 +63,7 @@ public class PathCoverageProblem extends StandardProblem {
 		PathDistanceListener listener = new PathDistanceListener(this.cfg,
 				this.target);
 
-		if (debug)
-			System.out.println(Arrays.toString(arguments));
-
-		bridge.getEvents(handler, arguments);
+		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 
@@ -74,10 +71,11 @@ public class PathCoverageProblem extends StandardProblem {
 
 		simulator.simulate();
 
-		solution.setObjective(
-				0,
-				listener.getPathDistance()
-						+ listener.getNormalizedBranchDistance());
+		solution.setObjective(0,
+				listener.getPathDistance() + listener.getNormalizedBranchDistance());
+		
+		if (debug)
+			System.out.println(Utils.printParameters(arguments) + "\nBD:" + listener.getBranchDistance());
 		
 		if (new Double(solution.getObjective(0)).isNaN())
 			solution.setObjective(0, Double.POSITIVE_INFINITY);

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class TestCase {
 	private int id;
-	private Object[] parameters;
+	private Object[][][] parameters;
 	private Object oracle;
 	private Set<LabeledEdge> coveredEdges;
 	
@@ -22,10 +22,10 @@ public class TestCase {
 	public void setCoveredEdges(Set<LabeledEdge> coveredEdges) {
 		this.coveredEdges = coveredEdges;
 	}
-	public Object[] getParameters() {
+	public Object[][][] getParameters() {
 		return parameters;
 	}
-	public void setParameters(Object[] parameters) {
+	public void setParameters(Object[][][] parameters) {
 		this.parameters = parameters;
 	}
 	public Object getOracle() {

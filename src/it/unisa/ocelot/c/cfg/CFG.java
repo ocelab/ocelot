@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.types.CType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	private List<String> constantStrings;
 	
 	@SuppressWarnings("rawtypes")
-	private Class[] parameterTypes;
+	private CType[] parameterTypes;
 	
 	/**
 	 * Creates an empty CFG
@@ -84,7 +86,7 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	public Class[] getParameterTypes() {
+	public CType[] getParameterTypes() {
 		return parameterTypes;
 	}
 
@@ -93,7 +95,7 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 * @param parameterTypes
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setParameterTypes(Class[] parameterTypes) {
+	public void setParameterTypes(CType[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
 

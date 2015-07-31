@@ -319,4 +319,8 @@ public class ConfigManager {
 	public double getRequiredCoverage() {
 		return Double.parseDouble(this.properties.getProperty("suite.coverage", "1.0"));
 	}
+
+	public int getTestArraysSize() {
+		return Integer.parseInt(this.properties.getProperty("test.arrays.size", "100"));
+	}
 }

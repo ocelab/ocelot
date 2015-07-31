@@ -29,6 +29,7 @@ import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTPointerOperator;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
@@ -40,14 +41,17 @@ import org.eclipse.cdt.core.dom.ast.IEnumeration;
 import org.eclipse.cdt.core.dom.ast.IType;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTCastExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompositeTypeSpecifier;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompoundStatement;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTExpressionStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionCallExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTIdExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTLiteralExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTName;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTTypeId;
 import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 
@@ -63,6 +67,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 		this.shouldVisitDeclarators = true;
 		this.shouldVisitTranslationUnit = true;
 		this.shouldVisitDeclSpecifiers = true;
+		this.shouldVisitPointerOperators = true;
 		
 		this.functionName = pInstrumentFunction;
 		
@@ -126,22 +131,14 @@ public class InstrumentorVisitor extends ASTVisitor {
 	
 	public IASTExpression transformLessThan(IASTBinaryExpression pExpression, boolean pNegation, boolean pTransPerformed) {
 		if (!pNegation) {
-			IASTExpression temp = pExpression.getOperand1();
-			pExpression.setOperand1(pExpression.getOperand2());
-			pExpression.setOperand2(temp);
-			
-			return this.transformComparisonExpression(pExpression, "gt", IASTBinaryExpression.op_lessThan);
+			return this.transformComparisonExpression(pExpression, "lt", IASTBinaryExpression.op_lessThan);
 		} else
 			return this.transformGreaterEquals(pExpression, false, pTransPerformed);
 	}
 	
 	public IASTExpression transformLessEquals(IASTBinaryExpression pExpression, boolean pNegation, boolean pTransPerformed) {
 		if (!pNegation) {
-			IASTExpression temp = pExpression.getOperand1();
-			pExpression.setOperand1(pExpression.getOperand2());
-			pExpression.setOperand2(temp);
-			
-			return this.transformComparisonExpression(pExpression, "ge", IASTBinaryExpression.op_lessEqual);
+			return this.transformComparisonExpression(pExpression, "le", IASTBinaryExpression.op_lessEqual);
 		} else
 			return this.transformGreaterThan(pExpression, false, pTransPerformed);
 	}
@@ -267,8 +264,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 			IASTUnaryExpression realExpression = (IASTUnaryExpression)expression;
 			if (realExpression.getOperator() == IASTUnaryExpression.op_not) {
 				return this.transformNot(realExpression, pNegation, pTransPerformed);
-			} else if (realExpression.getOperator() == IASTUnaryExpression.op_star ||
-					realExpression.getOperator() == IASTUnaryExpression.op_amper) {
+			} else if (realExpression.getOperator() == IASTUnaryExpression.op_amper ||
+					realExpression.getOperator() == IASTUnaryExpression.op_star) {
 				return realExpression;
 			} else if (realExpression.getOperator() == IASTUnaryExpression.op_postFixDecr ||
 					realExpression.getOperator() == IASTUnaryExpression.op_postFixIncr) {
@@ -288,6 +285,12 @@ public class InstrumentorVisitor extends ASTVisitor {
 						new CASTLiteralExpression(IASTLiteralExpression.lk_integer_constant, new char[] {'1'}));
 				
 				return this.transformDistanceExpression(distanceExpression, pNegation, pTransPerformed);
+//			} else if (realExpression.getOperator() == IASTUnaryExpression.op_star) {				
+//				CASTCastExpression cast = new CASTCastExpression(type, this.cloneExpression(realExpression.getOperand()));
+//				realExpression.setOperand(cast);
+//				
+//				System.out.println(new ASTWriter().write(realExpression));
+//				return realExpression;
 			} else {
 				IASTExpression operand = realExpression.getOperand();
 				return this.transformDistanceExpression(operand, pNegation, pTransPerformed);
@@ -557,6 +560,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 		operationArgs[0] = instrumentedOp1;
 		operationArgs[1] = instrumentedOp2;
 		
+//		System.out.println("FROM:" + new ASTWriter().write(pExpression));
+//		System.out.println("TO:" + new ASTWriter().write(operationArgs[0]) + " " + pOperator +" " + new ASTWriter().write(operationArgs[1]));
+		
 		IASTFunctionCallExpression operationFunction = makeFunctionCall("_f_ocelot_" + pOperator, operationArgs);
 		
 		return operationFunction;
@@ -573,6 +579,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 		IASTExpression[] operationArgs = new IASTExpression[2];
 		operationArgs[0] = this.castToDouble(this.transformDistanceExpression(operand1, false, true));
 		operationArgs[1] = this.castToDouble(this.transformDistanceExpression(operand2, false, true));
+		
+//		System.out.println("FROM:" + new ASTWriter().write(pExpression));
+//		System.out.println("TO:" + new ASTWriter().write(operationArgs[0]) + " " + pOperator +" " + new ASTWriter().write(operationArgs[1]));
 		
 		IASTFunctionCallExpression operationFunction;
 		if (op1Type instanceof IBasicType && op2Type instanceof IBasicType ||

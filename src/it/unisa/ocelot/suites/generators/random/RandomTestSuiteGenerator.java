@@ -5,6 +5,9 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
+import it.unisa.ocelot.c.types.CDouble;
+import it.unisa.ocelot.c.types.CInteger;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
@@ -91,13 +94,13 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 	@SuppressWarnings("unchecked")
 	private void coverRandom(Set<TestCase> suite) throws TestSuiteGenerationException {
 		for (int i = 0; i < this.config.getRandomGranularity(); i++) {
-			Object[] numericParams = random(cfg.getParameterTypes());
+			Object[][][] numericParams = random(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 		}
 	}
 	
-	private TestCase createTestCase(Object[] pParams, int id) {
+	private TestCase createTestCase(Object[][][] pParams, int id) {
 		this.calculator.calculateCoverage(pParams);
 		
 		TestCase tc = new TestCase();
@@ -108,22 +111,25 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 		return tc;
 	}
 	
-	private Object[] random(Class[] pParamTypes) {
-		Object[] parameters = new Object[pParamTypes.length];
+	//TODO Make this method work. Now it doesn't, due to the major change of parameters
+	private Object[][][] random(CType[] pParamTypes) {
+		Object[][][] parameters = new Object[pParamTypes.length][][];
+		parameters[0] = new Object[1][];
+		parameters[0][0] = new Object[pParamTypes.length];
 		
 		for (int i = 0; i < pParamTypes.length; i++) {
-			if (pParamTypes[i] == Double.class) {
+			if (pParamTypes[i] instanceof CDouble) {
 				double param = random.nextDouble() * (ranges[i].getMaximum() - ranges[i].getMinimum());
 				param += ranges[i].getMinimum();
-				parameters[i] = param;
-			} else if (pParamTypes[i] == Integer.class) {
+				parameters[0][0][i] = param;
+			} else if (pParamTypes[i] instanceof CInteger) {
 				int param = random.nextInt((int)(ranges[i].getMaximum() - ranges[i].getMinimum()));
 				param += ranges[i].getMinimum();
-				parameters[i] = param;
+				parameters[0][0][i] = param;
 			} else {
 				double param = random.nextDouble() * (ranges[i].getMaximum() - ranges[i].getMinimum());
 				param += ranges[i].getMinimum();
-				parameters[i] = param;
+				parameters[0][0][i] = param;
 			}
 		}
 		

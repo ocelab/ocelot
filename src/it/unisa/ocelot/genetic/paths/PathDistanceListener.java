@@ -130,4 +130,8 @@ public class PathDistanceListener implements SimulatorListener {
 	public double getNormalizedBranchDistance() {
 		return (this.branchDistance / (this.branchDistance + 1));
 	}
+	
+	public double getBranchDistance() {
+		return branchDistance;
+	}
 }

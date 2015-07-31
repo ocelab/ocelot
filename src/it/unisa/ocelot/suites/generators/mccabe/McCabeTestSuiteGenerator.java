@@ -57,12 +57,10 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			throws TestSuiteGenerationException {
 		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
 		mcCabeCalculator.calculateMcCabePaths();
-		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator
-				.getMcCabeEdgePaths();
+		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator.getMcCabeEdgePaths();
 
 		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
-			PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
-					config, cfg.getParameterTypes(), aMcCabePath);
+			PathCoverageExperiment exp = new PathCoverageExperiment(cfg, config, cfg.getParameterTypes(), aMcCabePath);
 
 			this.print("Current target: ");
 			this.println(aMcCabePath);
@@ -75,14 +73,11 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			}
 
 			double fitnessValue = exp.getFitnessValue();
-			Variable[] params = exp.getVariables();
-			VariableTranslator translator = new VariableTranslator(params[0]);
+			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 
-			Object[] numericParams = translator.translateArray(cfg
-					.getParameterTypes());
+			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 
-			TestCase testCase = this
-					.createTestCase(numericParams, suite.size());
+			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 
 			this.println("Fitness function: " + fitnessValue + ". ");
@@ -129,8 +124,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			this.println(targetNode);
 			
 			double fitnessValue = exp.getFitnessValue();
-			Variable[] params = exp.getVariables();
-			VariableTranslator translator = new VariableTranslator(params[0]);
+			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 				
 			this.print("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0)
@@ -138,7 +132,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			else
 				this.println("Target not covered...");
 			
-			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 			
@@ -152,7 +146,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 
-	private TestCase createTestCase(Object[] pParams, int id) {
+	private TestCase createTestCase(Object[][][] pParams, int id) {
 		this.calculator.calculateCoverage(pParams);
 
 		TestCase tc = new TestCase();

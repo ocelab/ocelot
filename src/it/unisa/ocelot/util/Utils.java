@@ -1,12 +1,15 @@
 package it.unisa.ocelot.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,6 +42,14 @@ public class Utils {
 		}
 		return false;
 	}
+	
+	public static void waitForEnter() {
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+			in.readLine();
+		} catch (Exception e) {
+		}
+	}
 
 	/**
 	 * Writes the specified content to the file with the specified path.
@@ -64,6 +75,17 @@ public class Utils {
 			}
 
 		return combinations;
+	}
+	
+	public static String printParameters(Object[][][] pParameters) {
+		String result = "";
+		result += "Values\n\t" + Arrays.toString(pParameters[0][0]) + "\n";
+		result += "Arrays\n";
+		for (int i = 0; i < pParameters[1].length; i++)
+			result += "\t" + Arrays.toString(pParameters[1][i]) + "\n";
+		result += "Pointers\n\t" + Arrays.toString(pParameters[2][0]) + "\n";
+		
+		return result;
 	}
 
 	/**

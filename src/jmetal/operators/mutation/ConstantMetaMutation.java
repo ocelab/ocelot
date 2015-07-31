@@ -8,6 +8,7 @@ import jmetal.core.Solution;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
+import jmetal.util.wrapper.XParam;
 import jmetal.util.wrapper.XReal;
 
 /**
@@ -36,8 +37,8 @@ public class ConstantMetaMutation extends Mutation {
 	}
 	
 	public void doMutation(double probability, Solution solution) throws JMException {        
-		XReal x = new XReal(solution) ;		
-		for (int var=0; var < solution.numberOfVariables(); var++) {
+		XParam x = new XParam(solution);		
+		for (int var=0; var < x.getNumberOfDecisionVariables(); var++) {
 			if (PseudoRandom.randDouble() <= metaMutationProbability_) {
 				double y = x.getValue(var);
 				if (this.mutationElements_.size() > 0) {
@@ -45,8 +46,12 @@ public class ConstantMetaMutation extends Mutation {
 				
 					x.setValue(var, this.mutationElements_.get(randIndex));
 				}
-			} else
-				this.realOperator_.execute(solution);
+			} else {
+				if (realOperator_ instanceof PolynomialMutation)
+					((PolynomialMutation)this.realOperator_).doMutation(mutationProbability_, solution);
+				else
+					this.realOperator_.execute(solution);
+			}
 		} // for
 
 	} // doMutation

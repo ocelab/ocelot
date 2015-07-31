@@ -1,6 +1,9 @@
 package it.unisa.ocelot.c.cfg;
 
 import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
+import it.unisa.ocelot.c.types.CDouble;
+import it.unisa.ocelot.c.types.CInteger;
+import it.unisa.ocelot.c.types.CType;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -72,13 +75,13 @@ public class CFGVisitor extends ASTVisitor {
 		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName);
 		tu.accept(typesDefiner);
 		
-		Class[] parameterTypes = new Class[typesDefiner.getFunctionParameters().size()];
+		CType[] parameterTypes = new CType[typesDefiner.getFunctionParameters().size()];
 		for (int i = 0; i < typesDefiner.getFunctionParameters().size(); i++) {
 			String type = typesDefiner.getFunctionParameters().get(i).toString();
 			if (type.startsWith("int"))
-				parameterTypes[i] = Integer.class;
+				parameterTypes[i] = new CInteger(type.contains("*"));
 			else
-				parameterTypes[i] = Double.class;
+				parameterTypes[i] = new CDouble(type.contains("*"));
 		}
 		
 		this.graph.setParameterTypes(parameterTypes);

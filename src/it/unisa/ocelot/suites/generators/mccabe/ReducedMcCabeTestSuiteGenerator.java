@@ -12,6 +12,7 @@ import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +47,6 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 		calculator.calculateCoverage(suite);
 		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
 			coverSingleTargets(suite);
-			this.measureBenchmarks("Single targets", suite);
 		}
 
 		return suite;
@@ -85,6 +85,8 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				//this.printSeparator();
 				this.print("Current target: ");
 				this.println(aMcCabePath);
+				if (this.config.getDebug())
+					Utils.waitForEnter();
 				
 				exp.initExperiment();
 				try {
@@ -94,15 +96,13 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				}
 	
 				double fitnessValue = exp.getFitnessValue();
-				Variable[] params = exp.getVariables();
-				VariableTranslator translator = new VariableTranslator(params[0]);
+				VariableTranslator translator = new VariableTranslator(exp.getSolution());
 	
-				Object[] numericParams = translator.translateArray(cfg
-						.getParameterTypes());
+				Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 	
-				TestCase testCase = this
-						.createTestCase(numericParams, suite.size());
+				TestCase testCase = this.createTestCase(numericParams, suite.size());
 				suite.add(testCase);
+				this.measureBenchmarks("McCabe", suite);
 				lastIterationTestCases.add(testCase);
 	
 				this.println("Fitness function: " + fitnessValue + ". ");
@@ -110,11 +110,13 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 					this.println("Path covered!");
 				else
 					this.println("Path not covered...");
-				this.println("Parameters found: " + Arrays.toString(numericParams));
+				this.println("Parameters found: ");
+				this.println(Arrays.toString(numericParams[0][0]));
+				for (int k = 0; k < numericParams[1].length; k++)
+					this.println(Arrays.toString(numericParams[1][k]));
+				this.println(Arrays.toString(numericParams[2][0]));
 				this.printSeparator();
 			}
-			
-			this.measureBenchmarks("McCabe paths iteration", suite);
 			calculator.calculateCoverage(suite);
 			improvement = calculator.getBranchCoverage() > lastCoverage;
 			lastCoverage = calculator.getBranchCoverage();
@@ -159,26 +161,30 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			this.println(targetEdge);
 			
 			double fitnessValue = exp.getFitnessValue();
-			Variable[] params = exp.getVariables();
-			VariableTranslator translator = new VariableTranslator(params[0]);
+			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 			
 			this.print("Fitness function: " + fitnessValue + ". ");
-			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
 				suite.add(testCase);
+				this.measureBenchmarks("McCabe", suite);
 			} else
 				this.println("Target not covered...");
 			
 			uncoveredEdges.removeAll(testCase.getCoveredEdges());
 			
-			this.println("Parameters found: " + Arrays.toString(numericParams));
+			this.println("Parameters found: ");
+			this.println(Arrays.toString(numericParams[0][0]));
+			for (int k = 0; k < numericParams[1].length; k++)
+				this.println(Arrays.toString(numericParams[1][k]));
+			this.println(Arrays.toString(numericParams[2][0]));
 		}
 	}
 
-	private TestCase createTestCase(Object[] pParams, int id) {
+	private TestCase createTestCase(Object[][][] pParams, int id) {
 		this.calculator.calculateCoverage(pParams);
 
 		TestCase tc = new TestCase();

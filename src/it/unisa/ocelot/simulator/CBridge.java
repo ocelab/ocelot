@@ -6,5 +6,5 @@ public class CBridge {
 	 * @param pHandler Event handler, it will contain the result of the test (each non-trivial choice)
 	 * @param arguments Parameters of the function
 	 */
-	public native synchronized void getEvents(EventsHandler pHandler, Object[] arguments);
+	public native synchronized void getEvents(EventsHandler pHandler, Object[] values, Object[][] arrays, Object[] pointers);
 }

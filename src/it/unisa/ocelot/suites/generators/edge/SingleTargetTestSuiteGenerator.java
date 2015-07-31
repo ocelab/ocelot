@@ -71,8 +71,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			this.println(targetEdge);
 			
 			double fitnessValue = exp.getFitnessValue();
-			Variable[] params = exp.getVariables();
-			VariableTranslator translator = new VariableTranslator(params[0]);
+			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 				
 			this.print("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0)
@@ -80,7 +79,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			else
 				this.println("Target not covered...");
 			
-			Object[] numericParams = translator.translateArray(cfg.getParameterTypes());
+			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 			
@@ -90,7 +89,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 	
-	private TestCase createTestCase(Object[] pParams, int id) {
+	private TestCase createTestCase(Object[][][] pParams, int id) {
 		this.calculator.calculateCoverage(pParams);
 		
 		TestCase tc = new TestCase();

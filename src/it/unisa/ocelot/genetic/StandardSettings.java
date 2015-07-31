@@ -14,8 +14,12 @@ import jmetal.experiments.Settings;
 import jmetal.metaheuristics.fastPGA.FastPGA;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
 import jmetal.operators.crossover.CrossoverFactory;
+import jmetal.operators.crossover.SBXGenericCrossover;
 import jmetal.operators.mutation.ConstantMetaMutation;
+import jmetal.operators.mutation.GenericPolynomialMutation;
 import jmetal.operators.mutation.MutationFactory;
+import jmetal.operators.mutation.PolynomialMutation;
+import jmetal.operators.mutation.PolynomialMutationParams;
 import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
@@ -91,18 +95,19 @@ public class StandardSettings extends Settings {
         // Mutation and Crossover Permutation codification
         parameters = new HashMap<String, Object>();
         parameters.put("probability", crossoverProbability);
-        crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+        //crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+        crossover = new SBXGenericCrossover(parameters);
 
         parameters = new HashMap<String, Object>();
         parameters.put("probability", mutationProbability);
         if (!this.useMetaMutator) {
-	        mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+	        mutation = new PolynomialMutationParams(parameters);
         } else {
-            parameters.put("realOperator", MutationFactory.getMutationOperator("PolynomialMutation", parameters));
+            parameters.put("realOperator", new PolynomialMutationParams(parameters));
             parameters.put("metaMutationProbability", 0.001);
             List<Double> mutationElements = this.numericConstants;
             parameters.put("mutationElements", mutationElements);
-            mutation = new ConstantMetaMutation(parameters);
+            mutation = new GenericPolynomialMutation(parameters);
         }
 
         // Selection Operator 

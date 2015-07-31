@@ -5,11 +5,13 @@ import java.util.Arrays;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
+import it.unisa.ocelot.util.Utils;
 
 import org.apache.commons.lang3.Range;
 
@@ -28,15 +30,15 @@ public class NodeCoverageProblem extends StandardProblem {
 	private boolean debug;
 
 	@SuppressWarnings("rawtypes")
-	public NodeCoverageProblem(CFG pCfg, Class[] pParameters, Range<Double>[] pRanges)
+	public NodeCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize)
 			throws Exception {
-		super(pParameters, pRanges);
+		super(pParameters, pRanges, pArraySize);
 		this.cfg = pCfg;
 		problemName_ = "NodeCoverageProblem";
 	}
 	
-	public NodeCoverageProblem(CFG pCfg, Class<Object>[] pParameters) throws Exception {
-		this(pCfg, pParameters, null);
+	public NodeCoverageProblem(CFG pCfg, CType[] pParameters, int pArraySize) throws Exception {
+		this(pCfg, pParameters, null, pArraySize);
 	}
 
 	public CFG getCFG() {
@@ -52,14 +54,14 @@ public class NodeCoverageProblem extends StandardProblem {
 	}
 
 	public void evaluate(Solution solution) throws JMException {
-		Object[] arguments = this.getParameters(solution);
+		Object[][][] arguments = this.getParameters(solution);
 
 		CBridge bridge = new CBridge();
 
 		EventsHandler handler = new EventsHandler();
 		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg, target);
 		
-		bridge.getEvents(handler, arguments);
+		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 
@@ -73,6 +75,6 @@ public class NodeCoverageProblem extends StandardProblem {
 		solution.setObjective(0, objective);
 		
 		if (debug)
-			System.out.println(Arrays.toString(arguments) + ": " + objective);
+			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);
 	}
 }

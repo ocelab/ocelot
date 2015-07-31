@@ -5,6 +5,7 @@ import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
@@ -12,12 +13,12 @@ import jmetal.core.Algorithm;
 import jmetal.experiments.Experiment;
 
 public class NodeCoverageExperiment extends OcelotExperiment {
-	private Class<Object>[] parametersTypes;
+	private CType[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
 	private CFGNode target;
 	
-	public NodeCoverageExperiment(CFG pCfg, ConfigManager pConfig, Class<Object>[] pTypes, CFGNode pTarget) {
+	public NodeCoverageExperiment(CFG pCfg, ConfigManager pConfig, CType[] pTypes, CFGNode pTarget) {
 		super(pConfig.getResultsFolder(), 1);
 		
 		this.cfg = pCfg;
@@ -33,9 +34,9 @@ public class NodeCoverageExperiment extends OcelotExperiment {
 			
 			NodeCoverageProblem problem;
 			if (ranges != null)
-				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes, ranges);
+				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes, ranges, this.config.getTestArraysSize());
 			else
-				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes);
+				problem = new NodeCoverageProblem(this.cfg, this.parametersTypes, this.config.getTestArraysSize());
 			
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.target);

@@ -62,4 +62,8 @@ public abstract class OcelotExperiment extends Experiment {
 	public Variable[] getVariables() {
 		return this.solution.getDecisionVariables();
 	}
+	
+	public Solution getSolution() {
+		return solution;
+	}
 }
