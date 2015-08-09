@@ -19,14 +19,27 @@ extern "C" {
 #define TYPE_CHAR 2
 #define TYPE_LONG 3
 
+#define MAX_EVENTS_NUMBER 1000
+#define TIMEOUT 30
+#define TIMEOUT_GRANULARITY 1000
+
+#define OCELOT_ERR_TOOMANYEVENTS 1
+#define OCELOT_ERR_UNKNOWN 2
+
 /*
  * Class:     it_unisa_ocelot_simulator_CBridge
  * Method:    getEvents
  * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;[Ljava/lang/Object;[[Ljava/lang/Object;[Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jobjectArray, jobjectArray, jobjectArray);
+JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize(JNIEnv *, jobject);
+
+void _f_ocelot_fork();
+
+void _f_ocelot_do_stuff(JNIEnv *env, jobject self, jobject eventHandler, jobjectArray values, jobjectArray arrays, jobjectArray pointers, int*);
 jdouble _f_ocelot_numval(JNIEnv*, jobject);
 void _f_ocelot_init_arrays(JNIEnv*, jobjectArray, int*);
+void _f_ocelot_throw_runtimeexception(JNIEnv*, char*);
 
 #define OCELOT_ARGUMENT_VALUE(i) (*env)->GetObjectArrayElement(env, values, i)
 #define OCELOT_ARGUMENT_ARRAY(i) (*env)->GetObjectArrayElement(env, arrays, i)

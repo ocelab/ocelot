@@ -54,4 +54,9 @@ public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 	public Process runCompiler() throws IOException {
 		return Runtime.getRuntime().exec(new String[] {"mingw32-make", "--directory=jni"});
 	}
+	
+	@Override
+	public String getMoreOptions() {
+		return "";
+	}
 }

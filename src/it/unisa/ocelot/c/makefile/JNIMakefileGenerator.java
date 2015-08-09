@@ -17,6 +17,7 @@ public abstract class JNIMakefileGenerator {
 	
 	public abstract String[] getGlib2Paths();
 	public abstract String[] getJavaPaths();
+	public abstract String getMoreOptions();
 	
 	public abstract String getCFlags();
 	public String[] getLibs() {
@@ -38,6 +39,8 @@ public abstract class JNIMakefileGenerator {
 		for (String temp : this.getLibs())
 			libspath += "-l"+temp+" ";
 		
+		String moreOptions = this.getMoreOptions();
+		
 		String result = "CC = " + this.getCCompiler() + "\n\n" +
 		"JAVA_HOME = " + this.getJavaHome() + "\n\n" +
 		"SYSTEM_INCLUDE = " + this.getSystemInclude() + "\n\n" +
@@ -47,10 +50,11 @@ public abstract class JNIMakefileGenerator {
 		"INCLUDES = $(GLIB2_INCUDE) $(JAVA_INCLUDE)\n" +
 		"LIBS = " + libspath + "\n" +
 		"SRCS = ocelot.c EN_CBridge.c main.c" + "\n\n" +
+		"MOREOPTS = " + moreOptions + "\n\n"+
 		"MAIN = ../" + this.getLibName() + "\n\n" +
 		".PHONY: clean all\n" +
 		"all:\n"+
-		"\t$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(LFLAGS) $(SRCS) $(LIBS)\n"+
+		"\t$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(LFLAGS) $(SRCS) $(LIBS) $(MOREOPTS)\n"+
 		//"\t$(RM) EN_CBridge.c\n"+
 		"clean:\n" +
 		"\t$(RM) $(MAIN)\n";
