@@ -13,6 +13,7 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
+import it.unisa.ocelot.genetic.settings.SettingsFactory;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
@@ -47,7 +48,7 @@ public class PathCoverageExperiment extends OcelotExperiment {
 			problem.setDebug(config.getDebug());
 			problem.setTarget(this.targetPath);
 
-			StandardSettings settings = new StandardSettings(problem, config);
+			StandardSettings settings = SettingsFactory.getSettings(config.getAlgorithm(), problem, config);
 			settings.useMetaMutator();
 			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());

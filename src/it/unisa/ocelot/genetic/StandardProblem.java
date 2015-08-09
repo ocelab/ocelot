@@ -131,4 +131,9 @@ public abstract class StandardProblem extends Problem {
 		// TODO Auto-generated method stub
 		return upperLimits[pArray][i];
 	}
+	
+	public void onError(Solution solution, Throwable e) {
+		solution.setObjective(0, Double.POSITIVE_INFINITY);
+		System.err.println("An error occurred: " + e.getMessage());
+	}
 }

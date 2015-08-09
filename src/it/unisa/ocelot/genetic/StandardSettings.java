@@ -1,9 +1,8 @@
 package it.unisa.ocelot.genetic;
 
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.FastPgGA;
+import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,30 +10,24 @@ import jmetal.core.Algorithm;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.experiments.Settings;
-import jmetal.metaheuristics.fastPGA.FastPGA;
-import jmetal.metaheuristics.singleObjective.geneticAlgorithm.pgGA;
-import jmetal.operators.crossover.CrossoverFactory;
 import jmetal.operators.crossover.SBXGenericCrossover;
-import jmetal.operators.mutation.ConstantMetaMutation;
 import jmetal.operators.mutation.GenericPolynomialMutation;
-import jmetal.operators.mutation.MutationFactory;
-import jmetal.operators.mutation.PolynomialMutation;
 import jmetal.operators.mutation.PolynomialMutationParams;
 import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 
-public class StandardSettings extends Settings {
-    private int populationSize;
-    private int maxEvaluations;
-    private double mutationProbability;
-    private double crossoverProbability;
-    private int threads;
-    private boolean debug;
+public abstract class StandardSettings extends Settings {
+    protected int populationSize;
+    protected int maxEvaluations;
+    protected double mutationProbability;
+    protected double crossoverProbability;
+    protected int threads;
+    protected boolean debug;
     
-    private List<Double> numericConstants;
-	private boolean useMetaMutator;
+    protected List<Double> numericConstants;
+    protected boolean useMetaMutator;
     
 	public StandardSettings(Problem pProblem) {
 		super();
@@ -70,57 +63,14 @@ public class StandardSettings extends Settings {
 		try {
 			threads = pConfig.getThreads();
 		} catch (NumberFormatException e) {}
+		
 	}
 	
 	public void useMetaMutator() {
 		this.useMetaMutator = true;
 	}
 	
-	public Algorithm configure() throws JMException {
-        Algorithm algorithm;
-        Operator selection;
-        Operator crossover;
-        Operator mutation;
-        
-        HashMap<String, Object> parameters;
-
-        IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
-
-        // Creating the problem
-        algorithm = new FastPgGA(problem_, parallelEvaluator);
-        
-        algorithm.setInputParameter("populationSize", populationSize);
-        algorithm.setInputParameter("maxEvaluations", maxEvaluations);
-
-        // Mutation and Crossover Permutation codification
-        parameters = new HashMap<String, Object>();
-        parameters.put("probability", crossoverProbability);
-        //crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
-        crossover = new SBXGenericCrossover(parameters);
-
-        parameters = new HashMap<String, Object>();
-        parameters.put("probability", mutationProbability);
-        if (!this.useMetaMutator) {
-	        mutation = new PolynomialMutationParams(parameters);
-        } else {
-            parameters.put("realOperator", new PolynomialMutationParams(parameters));
-            parameters.put("metaMutationProbability", 0.001);
-            List<Double> mutationElements = this.numericConstants;
-            parameters.put("mutationElements", mutationElements);
-            mutation = new GenericPolynomialMutation(parameters);
-        }
-
-        // Selection Operator 
-        parameters = null;
-        selection = SelectionFactory.getSelectionOperator("BinaryTournament", parameters);
-
-        // Add the operators to the algorithm
-        algorithm.addOperator("crossover", crossover);
-        algorithm.addOperator("mutation", mutation);
-        algorithm.addOperator("selection", selection);
-
-        return algorithm;
-    }
+	public abstract Algorithm configure() throws JMException;
 
 	public List<Double> getNumericConstants() {
 		return numericConstants;

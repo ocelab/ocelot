@@ -104,7 +104,7 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				suite.add(testCase);
 				this.measureBenchmarks("McCabe", suite);
 				lastIterationTestCases.add(testCase);
-	
+				
 				this.println("Fitness function: " + fitnessValue + ". ");
 				if (fitnessValue == 0.0)
 					this.println("Path covered!");

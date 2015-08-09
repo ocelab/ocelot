@@ -13,6 +13,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.util.Utils;
 
@@ -63,13 +64,22 @@ public class PathCoverageProblem extends StandardProblem {
 		PathDistanceListener listener = new PathDistanceListener(this.cfg,
 				this.target);
 
-		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		try {
+			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		} catch (RuntimeException e) {
+			this.onError(solution, e);
+			return;
+		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 
 		simulator.addListener(listener);
 
-		simulator.simulate();
+		try {
+			simulator.simulate();
+		} catch (SimulationException e) {
+			System.out.println("Mmmh....");
+		}
 
 		solution.setObjective(0,
 				listener.getPathDistance() + listener.getNormalizedBranchDistance());

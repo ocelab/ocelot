@@ -62,7 +62,12 @@ public class EdgeCoverageProblem extends StandardProblem {
 		EventsHandler handler = new EventsHandler();
 		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target);
 		
-		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		try {
+			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		} catch (RuntimeException e) {
+			this.onError(solution, e);
+			return;
+		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 

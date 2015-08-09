@@ -323,4 +323,8 @@ public class ConfigManager {
 	public int getTestArraysSize() {
 		return Integer.parseInt(this.properties.getProperty("test.arrays.size", "100"));
 	}
+	
+	public String getAlgorithm() {
+		return this.properties.getProperty("suite.generator.algorithm", "GeneticAlgorithm");
+	}
 }

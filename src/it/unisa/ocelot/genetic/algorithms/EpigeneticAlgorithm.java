@@ -1,4 +1,4 @@
-package it.unisa.ocelot.genetic;
+package it.unisa.ocelot.genetic.algorithms;
 
 //  pgGA.java
 //
@@ -21,19 +21,25 @@ package it.unisa.ocelot.genetic;
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import jmetal.core.*;
+import jmetal.encodings.variable.ArrayParameters;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.parallel.IParallelEvaluator;
+import jmetal.util.wrapper.XParam;
 
 import java.util.Comparator;
 import java.util.List;
+
+import javax.sound.midi.Soundbank;
+
+import eva2.server.go.strategies.HillClimbing;
 
 /**
  * A multithreaded generational genetic algorithm
  */
 
-public class FastPgGA extends Algorithm {
-
+public class EpigeneticAlgorithm extends Algorithm {
+	private static final double EPIGENETIC_STEP = 0.1;
 	IParallelEvaluator parallelEvaluator_;
 
 	/**
@@ -44,7 +50,7 @@ public class FastPgGA extends Algorithm {
 	 * @param evaluator
 	 *            Parallel evaluator
 	 */
-	public FastPgGA(Problem problem, IParallelEvaluator evaluator) {
+	public EpigeneticAlgorithm(Problem problem, IParallelEvaluator evaluator) {
 		super(problem);
 
 		parallelEvaluator_ = evaluator;
@@ -140,6 +146,38 @@ public class FastPgGA extends Algorithm {
 					targetCovered = true;
 				evaluations++;
 			}
+			
+			/*for (Solution solution : solutions) {
+				Variable[] variables = solution.getDecisionVariables();
+				
+				for (int v = 0; v < variables.length; v++) {
+					Variable variable = variables[v];
+					if (variable instanceof ArrayParameters) {
+						ArrayParameters realVariable = (ArrayParameters)variable;
+						
+						for (int i = 0; i < realVariable.array_.length; i++) {
+							double solutionObjective = solution.getObjective(0);
+							realVariable.array_[i] += EPIGENETIC_STEP;
+							variables[v] = realVariable;
+							solution.setDecisionVariables(variables);
+							problem_.evaluate(solution);
+							if (solution.getObjective(0) > solutionObjective) {
+								realVariable.array_[i] -= 2*EPIGENETIC_STEP;
+								variables[v] = realVariable;
+								solution.setDecisionVariables(variables);
+								problem_.evaluate(solution);
+								if (solution.getObjective(0) > solutionObjective) {
+									variables[v] = realVariable;
+									realVariable.array_[i] += EPIGENETIC_STEP;
+									solution.setDecisionVariables(variables);
+								}
+							}
+						}
+					}
+				}
+			}*/
+			
+			
 
 			// The offspring population becomes the new current population
 			population.clear();

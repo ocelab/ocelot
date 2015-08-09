@@ -122,7 +122,6 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			this.printSeparator();
 			this.print("Current target: ");
 			this.println(targetNode);
-			
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 				
