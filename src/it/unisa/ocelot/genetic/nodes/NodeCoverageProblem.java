@@ -56,6 +56,7 @@ public class NodeCoverageProblem extends StandardProblem {
 	public void evaluate(Solution solution) throws JMException {
 		Object[][][] arguments = this.getParameters(solution);
 
+		CBridge.initialize(arguments);
 		CBridge bridge = new CBridge();
 
 		EventsHandler handler = new EventsHandler();
