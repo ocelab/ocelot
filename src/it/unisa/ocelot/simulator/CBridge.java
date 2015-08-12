@@ -28,6 +28,7 @@ public class CBridge {
 					initialized = true;
 					break;
 				} catch (RuntimeException e) {
+					System.err.println("Temporary fail: " + e.getMessage());
 				}
 			}
 		}

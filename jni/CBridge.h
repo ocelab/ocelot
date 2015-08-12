@@ -35,6 +35,13 @@ extern "C" {
 #define MEMSET(field, value) (*(field)) = value
 #define MEMGET(field) (*(field))
 
+#define LOCK_CHILD flock(childControl, LOCK_EX)
+#define UNLOCK_CHILD flock(childControl, LOCK_UN)
+#define LOCK_PARENT flock(parentControl, LOCK_EX, 0)
+#define UNLOCK_PARENT flock(parentControl, LOCK_UN, 0)
+#define WAIT_PASSAGE flock(releaser, LOCK_EX, 0)
+#define RELEASE_PASSAGE flock(releaser, LOCK_UN, 0)
+
 #define OCELOT_SLEEP usleep(1000000/TIMEOUT_GRANULARITY)
 
 typedef struct {
