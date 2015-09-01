@@ -46,4 +46,9 @@ public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 	public Process runCompiler() throws IOException {
 		return Runtime.getRuntime().exec(new String[] {"make", "--directory=jni"});
 	}
+
+	@Override
+	public String getMoreOptions() {
+		return "-lrt";
+	}
 }

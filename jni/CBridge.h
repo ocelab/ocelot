@@ -19,20 +19,76 @@ extern "C" {
 #define TYPE_CHAR 2
 #define TYPE_LONG 3
 
+#define MAX_EVENTS_NUMBER 1000
+#define TIMEOUT 30
+#define TIMEOUT_GRANULARITY 100000
+
+#define OCELOT_ERR_TOOMANYEVENTS 1
+#define OCELOT_ERR_UNKNOWN 2
+
+#define OCELOT_SIGNAL_NOTREADY 0
+#define OCELOT_SIGNAL_CALL 1
+#define OCELOT_SIGNAL_RESULT 1
+
+#define OCELOT_CORES 1
+
+#define MEMSET(field, value) (*(field)) = value
+#define MEMGET(field) (*(field))
+
+#define LOCK_CHILD flock(childControl, LOCK_EX)
+#define UNLOCK_CHILD flock(childControl, LOCK_UN)
+#define LOCK_PARENT flock(parentControl, LOCK_EX, 0)
+#define UNLOCK_PARENT flock(parentControl, LOCK_UN, 0)
+#define WAIT_PASSAGE flock(releaser, LOCK_EX, 0)
+#define RELEASE_PASSAGE flock(releaser, LOCK_UN, 0)
+
+#define OCELOT_SLEEP usleep(1000000/TIMEOUT_GRANULARITY)
+
+typedef struct {
+	int *size;
+	_T_ocelot_event *events;
+} _T_ocelot_return_memory;
+
+typedef struct {
+	unsigned char *signal;
+
+	int *values;
+	int *arrays;
+	int *pointers;
+
+	double *data;
+} _T_ocelot_call_memory;
+
 /*
  * Class:     it_unisa_ocelot_simulator_CBridge
  * Method:    getEvents
  * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;[Ljava/lang/Object;[[Ljava/lang/Object;[Ljava/lang/Object;)V
  */
-JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jobjectArray, jobjectArray, jobjectArray);
+JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jdoubleArray, jobjectArray, jdoubleArray);
+JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize(JNIEnv *, jobject, jint, jint, jint);
+
+_T_ocelot_call_memory   _f_ocelot_shared_call(void*);
+_T_ocelot_return_memory _f_ocelot_shared_return(void*);
+
+pid_t _f_ocelot_fork(JNIEnv*);
+
+void _f_ocelot_on_signal(int);
+int _f_ocelot_do_stuff(JNIEnv*,int,int,int,double*,double*,double*);
 jdouble _f_ocelot_numval(JNIEnv*, jobject);
-void _f_ocelot_init_arrays(JNIEnv*, jobjectArray, int*);
+void _f_ocelot_init_arrays(JNIEnv*, int, double*, int*);
+void _f_ocelot_throw_runtimeexception(JNIEnv*, char*);
 
-#define OCELOT_ARGUMENT_VALUE(i) (*env)->GetObjectArrayElement(env, values, i)
-#define OCELOT_ARGUMENT_ARRAY(i) (*env)->GetObjectArrayElement(env, arrays, i)
-#define OCELOT_ARGUMENT_POINTER(i) (*env)->GetObjectArrayElement(env, pointers, i)
+void _f_ocelot_debug(char* info, int num);
 
-#define OCELOT_NUM(object) _f_ocelot_numval(env, object)
+//#define OCELOT_ARGUMENT_VALUE(i) (*env)->GetObjectArrayElement(env, values, i)
+//#define OCELOT_ARGUMENT_ARRAY(i) (*env)->GetObjectArrayElement(env, arrays, i)
+//#define OCELOT_ARGUMENT_POINTER(i) (*env)->GetObjectArrayElement(env, pointers, i)
+//#define OCELOT_NUM(object) _f_ocelot_numval(env, object)
+
+#define OCELOT_ARGUMENT_VALUE(i) (*(values + i))
+#define OCELOT_ARGUMENT_ARRAY(i) (*(arrays + i))
+#define OCELOT_ARGUMENT_POINTER(i) (*(pointers + i))
+#define OCELOT_NUM(object) object
 
 #ifdef __cplusplus
 }
