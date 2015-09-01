@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import org.antlr.v4.tool.ast.RangeAST;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 

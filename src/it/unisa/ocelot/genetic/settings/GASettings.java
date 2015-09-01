@@ -14,8 +14,10 @@ import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.CDG_GA;
 import it.unisa.ocelot.genetic.StandardSettings;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
+import it.unisa.ocelot.genetic.edges.CDG_BasedProblem;
 
 public class GASettings extends StandardSettings {
 	public GASettings(Problem pProblem) {
@@ -37,7 +39,10 @@ public class GASettings extends StandardSettings {
         IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
 
         // Creating the problem
-        algorithm = new GeneticAlgorithm(problem_, parallelEvaluator);
+        if (problem_ instanceof CDG_BasedProblem)
+        	algorithm = new CDG_GA(problem_, parallelEvaluator);
+        else 
+        	algorithm = new GeneticAlgorithm(problem_, parallelEvaluator);;
         
         algorithm.setInputParameter("populationSize", populationSize);
         algorithm.setInputParameter("maxEvaluations", maxEvaluations);

@@ -82,7 +82,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			TestCase testCase = this
 					.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
-			this.measureBenchmarks("Only McCabe Paths", suite);
+			this.measureBenchmarks("Only McCabe Paths", suite, null);
 
 			System.out.print("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0)

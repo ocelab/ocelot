@@ -16,7 +16,7 @@ public class BranchCoverageBenchmarkCalculator extends BenchmarkCalculator<Doubl
 	private CoverageCalculator calculator;
 	
 	public BranchCoverageBenchmarkCalculator(CFG pCFG) {
-		super("Branch coverage banchmark");
+		super("Branch coverage benchmark");
 		
 		this.coverages = new ArrayList<Double>();
 		this.labels = new ArrayList<String>();
@@ -30,7 +30,7 @@ public class BranchCoverageBenchmarkCalculator extends BenchmarkCalculator<Doubl
 	}
 	
 	@Override
-	public void measure(String pLabel, Set<TestCase> pSuite) {
+	public void measure(String pLabel, Set<TestCase> pSuite, Integer evaluations) {
 		this.calculator.calculateCoverage(pSuite);
 		
 		this.labels.add(this.getRealLabel(pLabel));

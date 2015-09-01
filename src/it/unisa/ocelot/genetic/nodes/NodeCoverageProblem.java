@@ -29,7 +29,6 @@ public class NodeCoverageProblem extends StandardProblem {
 
 	private boolean debug;
 
-	@SuppressWarnings("rawtypes")
 	public NodeCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize)
 			throws Exception {
 		super(pParameters, pRanges, pArraySize);

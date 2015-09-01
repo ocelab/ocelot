@@ -26,6 +26,8 @@ public class Dominators<V, E> {
 	private Vector<V> vertexPreOrder;
 	private Hashtable<V, V> idom = null;
 	private Hashtable<V, Integer> preOrderMap;
+	private SimpleDirectedGraph<V, DefaultEdge> dominatorTree;
+
 
 	protected int getOrder(V vertex) {
 		return preOrderMap.get(vertex);
@@ -34,6 +36,8 @@ public class Dominators<V, E> {
 	protected V getIDom(V vertex) {
 		if (idom == null)
 			computeDominators();
+		if(vertex == null)
+			System.out.println("Cazzo");
 		return idom.get(vertex);
 	}
 
@@ -49,10 +53,8 @@ public class Dominators<V, E> {
 		this(graph, dfsPreOrder(graph, entry));
 	}
 
-	private static <V, E> Vector<V> dfsPreOrder(DirectedGraph<V, E> graph,
-			V exit) {
-		DepthFirstIterator<V, E> iter = new DepthFirstIterator<V, E>(graph,
-				exit);
+	private static <V, E> Vector<V> dfsPreOrder(DirectedGraph<V, E> graph, V exit) {
+		DepthFirstIterator<V, E> iter = new DepthFirstIterator<V, E>(graph, exit);
 		iter.setCrossComponentTraversal(false);
 		Vector<V> trav = new Vector<V>();
 		while (iter.hasNext()) {
@@ -78,6 +80,10 @@ public class Dominators<V, E> {
 		for (int i = 0; i < this.vertexPreOrder.size(); i++) {
 			preOrderMap.put(vertexPreOrder.get(i), i);
 		}
+		// computing dominator here!
+//		computeDominators();
+		this.dominatorTree = getDominatorTree();
+
 	}
 
 	protected void computeDominators() {
@@ -166,8 +172,7 @@ public class Dominators<V, E> {
 			return true;
 		V dom = getIDom(dominated);
 		// as long as dominated >= dominator
-		while (dom != null && getOrder(dom) >= getOrder(dominator)
-				&& !dom.equals(dominator)) {
+		while (dom != null && getOrder(dom) >= getOrder(dominator) && !dom.equals(dominator)) {
 			dom = getIDom(dom);
 		}
 		return dominator.equals(dom);
@@ -182,6 +187,7 @@ public class Dominators<V, E> {
 	 */
 	public Set<V> getStrictDominators(V node) {
 		computeDominators();
+//		System.out.println(node);
 		Set<V> strictDoms = new HashSet<V>();
 		V dominated = node;
 		V iDom = getIDom(node);
@@ -189,8 +195,37 @@ public class Dominators<V, E> {
 			strictDoms.add(iDom);
 			dominated = iDom;
 			iDom = getIDom(dominated);
-		}
+		} 
+		/* my custom addition */
+		strictDoms.add(node);
+		/* addition of current node on dominators */
 		return strictDoms;
+	}
+
+	/**
+	 * Returns the set of nodes that are dominated by an edge
+	 * 
+	 * @param edge
+	 *            the edge for which look dominated nodes
+	 * @return a set of nodes dominated
+	 */
+	public Set<V> getDominatedNodes(E edge) {
+		computeDominators();
+		Set<V> dominatedNodes = new HashSet<>();
+		V dominator = this.graph.getEdgeTarget(edge);
+
+//		SimpleDirectedGraph<V, DefaultEdge> dominatorTree = getDominatorTree();
+
+		DepthFirstIterator<V, DefaultEdge> depthFirstIterator = new DepthFirstIterator<>(
+				this.dominatorTree, dominator);
+
+		while (depthFirstIterator.hasNext()) {
+			V currentNode = depthFirstIterator.next();			
+			if (currentNode != dominator)
+				dominatedNodes.add(currentNode);
+		}
+
+		return dominatedNodes;
 	}
 
 	/**

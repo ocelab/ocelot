@@ -70,7 +70,7 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 			calculator.calculateCoverage(suite);
 			
 			if (calculator.getBranchCoverage() > lastCoverage) {
-				this.measureBenchmarks("Random", suite);
+				this.measureBenchmarks("Random", suite, null);
 				lastCoverage = calculator.getBranchCoverage();
 				
 				this.println(calculator.getBranchCoverage());
@@ -86,7 +86,7 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 			this.println("Time: " + (timeout-time));
 		}
 		
-		this.measureBenchmarks("End", suite);
+		this.measureBenchmarks("End", suite, null);
 				
 		return suite;
 	}

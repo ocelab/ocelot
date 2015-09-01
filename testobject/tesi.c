@@ -390,10 +390,7 @@ fcomplex Csqrt(fcomplex z) {
 	}
 }
 
-int triangle(int a, int b, int c, int* testme, int* testme2) {
-	if (testme[1] == testme[0])
-		return -11;
-
+int triangle(int a, int b, int c) {
 	if (a + b <= c)
 		return -2;
 
@@ -568,4 +565,23 @@ int check_ISBN(int X1, int X2, int X3, int X4, int X5, int X6, int X7,
 		RESULT = FALSE;
 
 	return RESULT;
+}
+
+int test_me(int a, int b, int c) {
+	if (a < 0 || c < 0)
+		return 0;
+
+	while (b > c) {
+		if (a > c) {
+			c++;
+			b -= c;
+		} else {
+			b -= a+1;
+		}
+		b = b+1-1;
+	}
+
+	c++;
+
+	return 1;
 }

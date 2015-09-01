@@ -24,6 +24,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 
 public class ExecuteWholeCoverage {
 	private static final String CONFIG_FILENAME = "config.properties";
+	private static final String OUTPUT_FOLDER = "results";
 
 	static {
 		System.loadLibrary("Test");
@@ -36,27 +37,22 @@ public class ExecuteWholeCoverage {
 		// Sets up the output file
 		File outputDirectory = new File(config.getOutputFolder());
 		outputDirectory.mkdirs();
-		FileOutputStream fos = new FileOutputStream(config.getOutputFolder()
-				+ "exp_res.txt");
+		FileOutputStream fos = new FileOutputStream(config.getOutputFolder() + "exp_res.txt");
 		TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
 		PrintStream ps = new PrintStream(myOut);
 		System.setOut(ps);
 
 		// Builds the CFG and sets the target
-		CFG cfg = CFGBuilder.build(config.getTestFilename(),
-				config.getTestFunction());
+		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 
-		
 		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
 		System.out.println("Cyclomatic complexity: " + mcCabePaths);
-		
+
 		if (config.getUI())
 			showUI(cfg);
 
-		TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
-				config, cfg);
-		TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler
-				.getInstance(config);
+		TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(config, cfg);
+		TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
 
 		BenchmarkCalculator timeBenchmark = new TimeBenchmarkCalculator();
 		BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
@@ -68,32 +64,32 @@ public class ExecuteWholeCoverage {
 
 		Set<TestCase> suite = generator.generateTestSuite();
 
-		String preFilename = config.getTestFunction() + "_" + config.getTestSuiteGenerator();
-		
-		String cumulativeResult = "";
-		cumulativeResult += timeBenchmark.getPrintableCumulativeResults() + "\n";
-		cumulativeResult += coverageBenchmark.getPrintableCumulativeResults() + "\n";
-		cumulativeResult += sizeBenchmark.getPrintableCumulativeResults() + "\n";
-		Utils.writeFile(preFilename + "_cumulative.txt", cumulativeResult);
-		
-		String result = "";
-		result += timeBenchmark.getPrintableResults() + "\n";
-		result += coverageBenchmark.getPrintableResults() + "\n";
-		result += sizeBenchmark.getPrintableResults() + "\n";
-		Utils.writeFile(preFilename + "_normal.txt", result);
-		
+		if (config.getPrintResults()) {
+			String preFilename = config.getTestFunction() + "_" + config.getTestSuiteGenerator();
+
+			String cumulativeResult = "";
+			cumulativeResult += timeBenchmark.getPrintableCumulativeResults() + "\n";
+			cumulativeResult += coverageBenchmark.getPrintableCumulativeResults() + "\n";
+			cumulativeResult += sizeBenchmark.getPrintableCumulativeResults() + "\n";
+			Utils.writeFile(OUTPUT_FOLDER + "/" + preFilename + "_cumulative.txt", cumulativeResult);
+
+			String result = "";
+			result += timeBenchmark.getPrintableResults() + "\n";
+			result += coverageBenchmark.getPrintableResults() + "\n";
+			result += sizeBenchmark.getPrintableResults() + "\n";
+			Utils.writeFile(OUTPUT_FOLDER + "/" + preFilename + "_normal.txt", result);
+		}
+
 		System.out.println(timeBenchmark);
 		System.out.println(coverageBenchmark);
 		System.out.println(sizeBenchmark);
 
 		Set<TestCase> minimizedSuite = minimizer.minimize(suite);
 
-		System.out
-				.println("-------------------------------------------------------");
+		System.out.println("-------------------------------------------------------");
 		System.out.println("Total test cases: " + suite.size());
 		System.out.println("Minimized test cases: " + minimizedSuite.size());
-		System.out
-				.println("-------------------------------------------------------");
+		System.out.println("-------------------------------------------------------");
 	}
 
 	public static void showUI(final CFG pCFG) {

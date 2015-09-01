@@ -91,7 +91,7 @@ public class Utils {
 	/**
 	 * Prints a separator to a more readable output
 	 */
-	public void printSeparator() {
+	public static void printSeparator() {
 		System.out.println("------------------------------------------");
 	}
 }

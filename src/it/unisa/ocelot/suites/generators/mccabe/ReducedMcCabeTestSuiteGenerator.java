@@ -102,7 +102,9 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 	
 				TestCase testCase = this.createTestCase(numericParams, suite.size());
 				suite.add(testCase);
-				this.measureBenchmarks("McCabe", suite);
+				
+				//TODO: Fix with number of evaluations!
+				this.measureBenchmarks("McCabe", suite, 0);
 				lastIterationTestCases.add(testCase);
 				
 				this.println("Fitness function: " + fitnessValue + ". ");
@@ -170,7 +172,9 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
 				suite.add(testCase);
-				this.measureBenchmarks("McCabe", suite);
+				
+				//TODO: Fix with number of evaluations!
+				this.measureBenchmarks("McCabe", suite, 0);
 			} else
 				this.println("Target not covered...");
 			

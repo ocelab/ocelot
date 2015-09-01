@@ -2,7 +2,9 @@ package it.unisa.ocelot.genetic;
 
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
+import it.unisa.ocelot.genetic.edges.CDG_BasedProblem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 

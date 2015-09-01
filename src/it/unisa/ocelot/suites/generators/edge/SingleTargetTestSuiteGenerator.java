@@ -45,7 +45,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 		calculator.calculateCoverage(suite);
 		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
 			coverSingleTargets(suite);
-			this.measureBenchmarks("Single targets", suite);
+			this.measureBenchmarks("Single targets", suite, null);
 		}
 				
 		return suite;

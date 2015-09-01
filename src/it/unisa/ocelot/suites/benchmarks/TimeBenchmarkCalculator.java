@@ -21,11 +21,11 @@ public class TimeBenchmarkCalculator extends BenchmarkCalculator<Integer> {
 	
 	@Override
 	public void start() {
-		this.measure("Start", null);
+		this.measure("Start", null, null);
 	}
 	
 	@Override
-	public void measure(String pLabel, Set<TestCase> pSuite) {
+	public void measure(String pLabel, Set<TestCase> pSuite, Integer evaluations) {
 		this.labels.add(this.getRealLabel(pLabel));
 		this.times.add(new Date().getTime());
 	}

@@ -24,9 +24,9 @@ public abstract class TestSuiteGenerator {
 			benchmarkCalculator.start();
 	}
 	
-	protected void measureBenchmarks(String pLabel, Set<TestCase> pSuite) {
+	protected void measureBenchmarks(String pLabel, Set<TestCase> pSuite, Integer evaluations) {
 		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
-			benchmarkCalculator.measure(pLabel, pSuite);
+			benchmarkCalculator.measure(pLabel, pSuite, evaluations);
 	}
 	
 	protected void removeLastBenchmark() {

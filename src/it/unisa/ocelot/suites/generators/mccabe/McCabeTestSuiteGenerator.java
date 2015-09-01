@@ -36,8 +36,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 	}
 
 	@Override
-	public Set<TestCase> generateTestSuite()
-			throws TestSuiteGenerationException {
+	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
 		Set<TestCase> suite = new HashSet<TestCase>();
 
 		this.startBenchmarks();
@@ -53,8 +52,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void coverMcCabePaths(Set<TestCase> suite)
-			throws TestSuiteGenerationException {
+	private void coverMcCabePaths(Set<TestCase> suite) throws TestSuiteGenerationException {
 		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
 		mcCabeCalculator.calculateMcCabePaths();
 		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator.getMcCabeEdgePaths();
@@ -87,41 +85,44 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 				this.println("Path not covered...");
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 			this.printSeparator();
-			
-			this.measureBenchmarks("McCabe path", suite);
+
+			this.measureBenchmarks("McCabe path", suite, exp.getNumberOfEvaluation());
 		}
 	}
 
 	private List<LabeledEdge> getUncoveredEdges(Set<TestCase> suite) {
-		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet()); 
+		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet());
 		for (TestCase tc : suite) {
 			uncoveredEdges.removeAll(tc.getCoveredEdges());
 		}
-		
+
 		return uncoveredEdges;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {		
+	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {
 		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
-		
+
 		Collections.shuffle(uncoveredEdges);
-		while (!uncoveredEdges.isEmpty() && calculator.getBranchCoverage() < config.getRequiredCoverage()) {
+		while (!uncoveredEdges.isEmpty()
+				&& calculator.getBranchCoverage() < config.getRequiredCoverage()) {
 			LabeledEdge targetEdge = uncoveredEdges.get(0);
-			uncoveredEdges.remove(0); //avoids infinite loop
+			uncoveredEdges.remove(0); // avoids infinite loop
 			CFGNode targetNode = cfg.getEdgeTarget(targetEdge);
-			
-			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
+
+			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config,
+					cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
 			try {
 				exp.basicRun();
-			} catch (JMException|ClassNotFoundException e) {
+			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
-			
+
 			this.printSeparator();
 			this.print("Current target: ");
 			this.println(targetNode);
+
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 				
@@ -134,13 +135,13 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
-			
+
 			uncoveredEdges.removeAll(testCase.getCoveredEdges());
-			
+
 			this.println("Parameters found: " + Arrays.toString(numericParams));
-			
-			this.measureBenchmarks("Single target", suite);
-			
+
+			this.measureBenchmarks("Single target", suite, exp.getNumberOfEvaluation());
+
 			calculator.calculateCoverage(suite);
 		}
 	}

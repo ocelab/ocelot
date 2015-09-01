@@ -3,6 +3,7 @@ package it.unisa.ocelot.simulator;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.FlowEdge;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 
@@ -19,6 +20,9 @@ public class CoverageCalculator {
 	private double blockCoverage;
 	
 	private Set<LabeledEdge> coveredEdges;
+	private Set<LabeledEdge> coveredBranches;
+	private Set<LabeledEdge> branchSet;
+	
 	public CoverageCalculator(CFG pCfg) {
 		this.cfg = pCfg;
 	}
@@ -54,19 +58,34 @@ public class CoverageCalculator {
 	
 	public void calculateCoverage(Set<TestCase> pTestCases) {
 		Set<LabeledEdge> coveredEdges = new HashSet<LabeledEdge>();
-		Set<CFGNode> coveredBlocks = new HashSet<CFGNode>();
+		Set<CFGNode> coveredStatements = new HashSet<CFGNode>();
 		for (TestCase testCase : pTestCases) {
 			coveredEdges.addAll(testCase.getCoveredEdges());
 		}
 		
 		for (LabeledEdge edge : coveredEdges) {
-			coveredBlocks.add(this.cfg.getEdgeSource(edge));
-			coveredBlocks.add(this.cfg.getEdgeTarget(edge));
+			coveredStatements.add(this.cfg.getEdgeSource(edge));
+			coveredStatements.add(this.cfg.getEdgeTarget(edge));
 		}
 		
 		this.coveredEdges = coveredEdges;
-		this.branchCoverage = ((double)coveredEdges.size()) / this.cfg.edgeSet().size();
-		this.blockCoverage = ((double)coveredBlocks.size()) / this.cfg.vertexSet().size();
+		
+		Set<LabeledEdge> coveredBranches = new HashSet<>();
+		for (LabeledEdge edge : coveredEdges) {
+			if (!(edge instanceof FlowEdge))
+				coveredBranches.add(edge);
+		}
+		this.coveredBranches = coveredBranches;
+		
+		Set<LabeledEdge> branchSet = new HashSet<>();
+		for (LabeledEdge edge : this.cfg.edgeSet()) {
+			if (!(edge instanceof FlowEdge))
+				branchSet.add(edge);
+		}
+		this.branchSet = branchSet;
+		
+		this.branchCoverage = ((double)this.coveredBranches.size()) / this.branchSet.size();
+		this.blockCoverage = ((double)coveredStatements.size()) / this.cfg.vertexSet().size();
 	}
 	
 	public double getBranchCoverage() {
@@ -74,13 +93,19 @@ public class CoverageCalculator {
 	}
 	
 	public Set<LabeledEdge> getCoveredEdges() {
-		return this.coveredEdges;
+		return this.coverageListener.getCoveredEdges();
 	}
 	
 	public Set<LabeledEdge> getUncoveredEdges() {
 		Set<LabeledEdge> uncovered = new HashSet<LabeledEdge>(this.cfg.edgeSet());
 		uncovered.removeAll(this.coveredEdges);
 		return uncovered;
+	}
+	
+	public Set<LabeledEdge> getUncoveredBranches(){
+		Set<LabeledEdge> uncoveredEges = new HashSet<>(this.branchSet);
+		uncoveredEges.removeAll(this.coveredBranches);
+		return uncoveredEges;
 	}
 	
 	public double getBlockCoverage() {

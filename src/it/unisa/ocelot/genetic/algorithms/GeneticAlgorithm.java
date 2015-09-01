@@ -35,6 +35,7 @@ import java.util.List;
 public class GeneticAlgorithm extends Algorithm {
 
 	IParallelEvaluator parallelEvaluator_;
+	private int no_evaluation;
 
 	/**
 	 * Constructor
@@ -48,6 +49,7 @@ public class GeneticAlgorithm extends Algorithm {
 		super(problem);
 
 		parallelEvaluator_ = evaluator;
+		no_evaluation = 0;
 	} // pgGA
 
 	/**
@@ -156,7 +158,13 @@ public class GeneticAlgorithm extends Algorithm {
 		SolutionSet resultPopulation = new SolutionSet(1);
 		resultPopulation.add(population.get(0));
 
-		System.out.println("Evaluations: " + evaluations);
+//		System.out.println("Evaluations: " + evaluations);
+		this.no_evaluation = evaluations;
 		return resultPopulation;
 	} // execute
+	
+	public int getNumberOfEvaluation(){
+		return this.no_evaluation;
+	}
+	
 } // pgGA

@@ -19,7 +19,7 @@ public abstract class BenchmarkCalculator<T> {
 	
 	public abstract void start();
 	
-	public abstract void measure(String pLabel, Set<TestCase> pSuite);
+	public abstract void measure(String pLabel, Set<TestCase> pSuite, Integer evalations);
 	
 	public String getPrintableResults() {
 		String result = "";

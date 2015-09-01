@@ -2,6 +2,7 @@ package it.unisa.ocelot.simulator.listeners;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.FlowEdge;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
@@ -15,6 +16,7 @@ public class CoverageCalculatorListener implements SimulatorListener {
 	private CFG cfg;
 	private Set<LabeledEdge> coveredEdges;
 	private List<CFGNode> coveredNodes;
+
 	public CoverageCalculatorListener(CFG pCFG) {
 		this.cfg = pCFG;
 		this.coveredEdges = new HashSet<LabeledEdge>();
@@ -42,25 +44,43 @@ public class CoverageCalculatorListener implements SimulatorListener {
 		if (!this.coveredNodes.contains(pNode))
 			this.coveredNodes.add(pNode);
 	}
-	
+
 	public Set<LabeledEdge> getCoveredEdges() {
 		return new HashSet<LabeledEdge>(this.coveredEdges);
 	}
-	
+
 	public Set<LabeledEdge> getUncoveredEdges() {
 		Set<LabeledEdge> allEdges = new HashSet<LabeledEdge>(this.cfg.edgeSet());
 		allEdges.removeAll(this.coveredEdges);
 		return allEdges;
 	}
-	
+
 	public double getBranchCoverage() {
-		Set<LabeledEdge> edges = cfg.edgeSet();
-		return this.coveredEdges.size() / (double)edges.size(); 
+		Set<LabeledEdge> branches = new HashSet<>();
+		for (LabeledEdge branch : this.cfg.edgeSet()) {
+			if (!(branch instanceof FlowEdge))
+				branches.add(branch);
+		}
+		return this.getCoveredBranches().size() / (double) branches.size();
 	}
-	
+
 	public double getBlockCoverage() {
 		Set<CFGNode> nodes = cfg.vertexSet();
-		return (this.coveredNodes.size()+1) / (double)nodes.size(); 
+		return (this.coveredNodes.size() + 1) / (double) nodes.size();
+	}
+
+	/**
+	 * Returns a list of covered branches (not include FlowEdges)
+	 * 
+	 * @return a list of branches
+	 */
+	public List<LabeledEdge> getCoveredBranches() {
+		List<LabeledEdge> coveredBranches = new ArrayList<>();
+		for (LabeledEdge coveredEdge : this.getCoveredEdges()) {
+			if (!(coveredEdge instanceof FlowEdge))
+				coveredBranches.add(coveredEdge);
+		}
+		return coveredBranches;
 	}
 
 }

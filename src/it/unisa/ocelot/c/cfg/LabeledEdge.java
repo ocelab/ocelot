@@ -15,6 +15,8 @@ public abstract class LabeledEdge extends DefaultEdge implements Comparable<Labe
 	private Object label;
 	private int id;
 	private static int availableId;
+	private int objectiveID;
+	private boolean isCovered;
 	
 	static {
 		availableId = 0;
@@ -30,6 +32,7 @@ public abstract class LabeledEdge extends DefaultEdge implements Comparable<Labe
 	public LabeledEdge() {
 		super();
 		this.id = LabeledEdge.nextId();
+		this.isCovered = false;
 	}
 	
 	/**
@@ -95,5 +98,34 @@ public abstract class LabeledEdge extends DefaultEdge implements Comparable<Labe
 	@Override
 	public int compareTo(LabeledEdge o) {
 		return new Integer(this.id).compareTo(o.id);
+	}
+	
+	/**
+	 * Return the ID number of this LabeledEdge
+	 * @return a progressive ID number
+	 */
+	public int getObjectiveID() {
+		return objectiveID;
+	}
+
+	/**
+	 * Set the ID number for this LabeledEdge
+	 * @param objectiveID the id to set
+	 */
+	public void setObjectiveID(int objectiveID) {
+		this.objectiveID = objectiveID;
+	}
+	
+	
+	public boolean isCovered() {
+		return isCovered;
+	}
+
+	public void setCovered() {
+		this.isCovered = true;
+	}
+	
+	public void setUncovered() {
+		this.isCovered = false;
 	}
 }

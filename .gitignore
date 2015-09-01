@@ -25,4 +25,23 @@ libTest.jnilib
 #output files
 outputs/
 
+/nbproject/private/
+/build/
+
+# jni files
+jni/main.c
+jni/main.h
+jni/makefile
+
+# netbeans file
+build.xml
+manifest.mf
+nbproject/*
+
+# class for random tries
+src/it/unisa/ocelot/runnable/McCabe.java
+
 *.csv
+
+#result_output
+results/

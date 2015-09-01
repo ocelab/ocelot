@@ -10,16 +10,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import jmetal.core.Solution;
 import net.sf.javailp.Linear;
 import net.sf.javailp.OptType;
 import net.sf.javailp.Problem;
 import net.sf.javailp.Result;
 import net.sf.javailp.Solver;
 import net.sf.javailp.SolverFactory;
-import net.sf.javailp.SolverFactoryGLPK;
 import net.sf.javailp.SolverFactoryLpSolve;
-import net.sf.javailp.SolverFactorySAT4J;
 import net.sf.javailp.VarType;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
