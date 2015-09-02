@@ -61,12 +61,13 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 		
+		CBridge.initialize(arguments);
 		if (debug)
 			System.out.println(Arrays.toString(arguments));
 
 		CBridge bridge = new CBridge();
 		EventsHandler handler = new EventsHandler();
-		bridge.getEvents(handler, arguments[0], arguments[1], arguments[2]);
+		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 //		EdgeDistanceListener edgeDistanceListener;

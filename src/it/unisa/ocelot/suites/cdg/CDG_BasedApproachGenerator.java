@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites;
+package it.unisa.ocelot.suites.cdg;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -15,6 +15,7 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
 	private void markBranchCoveredByExecution(Object[][][] arguments) {
 		CBridge bridge = new CBridge();
 		EventsHandler handler = new EventsHandler();
-		bridge.getEvents(handler, arguments[0], arguments[1], arguments[2]);
+		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		Simulator simulator = new Simulator(this.cfg, handler.getEvents());
 		simulator.addListener(coverageCalculatorListener);

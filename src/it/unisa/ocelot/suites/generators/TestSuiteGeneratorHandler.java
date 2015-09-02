@@ -2,13 +2,13 @@ package it.unisa.ocelot.suites.generators;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.suites.CDG_BasedApproachGenerator;
-import it.unisa.ocelot.suites.MOSATestSuiteGenerator;
+import it.unisa.ocelot.suites.cdg.CDG_BasedApproachGenerator;
 import it.unisa.ocelot.suites.generators.edge.SingleTargetTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.McCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.ReducedMcCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.VanillaMcCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.random.RandomTestSuiteGenerator;
+import it.unisa.ocelot.suites.many_objective.MOSATestSuiteGenerator;
 
 public class TestSuiteGeneratorHandler {
 	public static final String MCCABE_SUITE_GENERATOR = "McCabe";

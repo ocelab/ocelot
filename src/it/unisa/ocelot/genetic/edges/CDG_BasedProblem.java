@@ -16,6 +16,7 @@ import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
+import it.unisa.ocelot.util.Utils;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.encodings.solutionType.ArrayRealSolutionType;
@@ -49,12 +50,13 @@ public class CDG_BasedProblem extends StandardProblem {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 
+		CBridge.initialize(arguments);
 		if (debug)
-			System.out.println(Arrays.toString(arguments));
+			System.out.println(Utils.printParameters(arguments));
 
 		CBridge bridge = new CBridge();
 		EventsHandler handler = new EventsHandler();
-		bridge.getEvents(handler, arguments[0], arguments[1], arguments[2]);
+		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		// listener
 		DominatorListener dominatorListener = new DominatorListener(controlFlowGraph, target);

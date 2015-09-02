@@ -29,10 +29,8 @@ public class PathCoverageProblem extends StandardProblem {
 	private static final long serialVersionUID = 1930014794768729268L;
 
 	private CFG cfg;
-	private Class<Object>[] parameters;
 	private List<LabeledEdge> target;
 
-	@SuppressWarnings("rawtypes")
 	public PathCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize) throws Exception {
 		super(pParameters, pRanges, pArraySize);
 		this.cfg = pCfg;

@@ -47,7 +47,7 @@ public class CBridge {
 	public void getEvents(EventsHandler pHandler, Object[] pValues, Object[][] pArrays, Object[] pPointers) {
 		double[] values = new double[pValues.length];
 		for (int i = 0; i < pValues.length; i++)
-			values[i] = ((Number)pValues[i]).doubleValue();
+			values[i] = ((Number)(pValues[i])).doubleValue();
 		
 		double[][] arrays = new double[pArrays.length][];
 		for (int i = 0; i < pArrays.length; i++) {
