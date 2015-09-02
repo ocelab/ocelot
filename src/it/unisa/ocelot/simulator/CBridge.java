@@ -7,9 +7,6 @@ public class CBridge {
 	
 	public CBridge() {
 		this.coreId = 0;
-		n++;
-		//if (n % 100 == 0)
-		//	System.out.println(n);
 	}
 	
 	/**
@@ -17,6 +14,7 @@ public class CBridge {
 	 * @param pCoreID
 	 */
 	public CBridge(int pCoreID) {
+		this();
 		this.coreId = pCoreID;
 	}
 	
@@ -24,8 +22,7 @@ public class CBridge {
 		if (!initialized) {
 			while (true) {
 				try {
-					initialize(pParameters[0][0].length, pParameters[1].length, pParameters[2][0].length);
-					initialized = true;
+					initialize(pParameters[0][0].length, pParameters[1].length, pParameters[2][0].length);;
 					break;
 				} catch (RuntimeException e) {
 					System.err.println("Temporary fail: " + e.getMessage());
@@ -60,13 +57,16 @@ public class CBridge {
 		for (int i = 0; i < pPointers.length; i++)
 			pointers[i] = ((Number)pPointers[i]).doubleValue();
 		
+		n++;
+		if (n % 100 == 0)
+			System.out.println(n);
 		
 		this.getEvents(pHandler, values, arrays, pointers);
 	}
 	
 	public native void memoryDump();
 	
-	public synchronized native void getEvents(EventsHandler pHandler, double[] values, double[][] arrays, double[] pointers);
+	public native void getEvents(EventsHandler pHandler, double[] values, double[][] arrays, double[] pointers);
 	
 	public void onCrash() {
 		System.out.println("A crash occurred...");

@@ -481,11 +481,9 @@ gimp_rgb_to_hsv4 (const guchar *rgb,
   *value      = v;
 }
 
-int check_ISBN(int X1, int X2, int X3, int X4, int X5, int X6, int X7,
-		int X8, int X9, int X10, int X11, int X12, int X13, int X14) {
+int check_ISBN(char* current_value) {
 
-	int current_value[] = { 0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11,
-			X12, X13, X14, 0 }; // ADDED LINE!!!
+	current_value[15] = 0; 			//ADDED LINE!!!
 	boolean RESULT = TRUE;
 
 	int checksum;
@@ -568,4 +566,11 @@ int check_ISBN(int X1, int X2, int X3, int X4, int X5, int X6, int X7,
 		RESULT = FALSE;
 
 	return RESULT;
+}
+
+void ptrtest(int* w, int* x, int* y, int* z) {
+	if (w == x)
+		if (y == z)
+			if (w == z)
+				return 0;
 }

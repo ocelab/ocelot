@@ -18,14 +18,29 @@
 #include <unistd.h>
 #include <semaphore.h>
 
+#define NODEBUGINFO -324354
+
+#ifdef LOGGER
+#define LOG_SEPARATOR(logger) fputs("########################\n\n", logger)
+#define LOG_EVENT(event, logger) fprintf(logger, "Event:\n");\
+						 fprintf(logger, "Choice: %d\n", event.choice);\
+						 fprintf(logger, "distanceTrue: %f\n", event.distanceTrue);\
+						 fprintf(logger, "distanceFalse: %f\n", event.distanceFalse);\
+						 fputs("---------------\n", logger)
+#else
+#define LOG_SEPARATOR(logger) {}
+#define LOG_EVENT(event, logger) {}
+
+#endif
+
 /*
  * Class:     it_unisa_ocelot_simulator_CBridge
  * Method:    getEvents
  * Signature: (Lit/unisa/ocelot/simulator/EventsHandler;)V
  */
 
-void *shm_return;
-void *shm_call;
+volatile void *shm_return;
+volatile void *shm_call;
 
 int shared_return_id;
 int shared_call_id;
@@ -36,71 +51,133 @@ int childControl;
 int parentControl;
 int releaser;
 
-pid_t child_processes[OCELOT_CORES];
+pid_t child_processes;
+
+FILE* loggerParent;
+FILE* loggerChild;
 
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize
-		(JNIEnv *env, jobject self, jint values, jint arrays, jint pointers) {
-	//***********************************************************************
-	// SHARED MEMORY
-	//***********************************************************************
-	key_t return_id = (int)(rand()*9999);
-	key_t call_id = shared_return_id + 1;
-	int size;
+		(JNIEnv *env, jclass cbridge, jint values, jint arrays, jint pointers) {
+	int i;
 
-	/*
-	 * Create the segment.
-	 */
+	jfieldID initializedID = (*env)->GetStaticFieldID(env, cbridge, "initialized", "Z");
+	jboolean initialized = (*env)->GetStaticBooleanField(env, cbridge, initializedID);
 
-	size = sizeof(int) + sizeof(_T_ocelot_event) * MAX_EVENTS_NUMBER;
-	shared_return_id = shmget(return_id, size, IPC_CREAT|IPC_EXCL|0666);
-	if (shared_return_id < 0) {
-		char message[100];
-		sprintf(&message, "Unable to open RETURN shared memory. Error: %d", errno);
-		_f_ocelot_throw_runtimeexception(env, &message);
+	if (initialized == JNI_TRUE)
 		return;
+
+	loggerParent = fopen("OCELOT_LOGGER_P", "w");
+	loggerChild = fopen("OCELOT_LOGGER_C", "w");
+	fputs("Logger session started.\n", loggerParent);
+	fputs("Logger session started.\n", loggerChild);
+	LOG_SEPARATOR(loggerParent);
+	LOG_SEPARATOR(loggerChild);
+
+	child_processes = 0;
+
+	int size_call = sizeof(int) + sizeof(int)*3 + sizeof(double)*(int)values + sizeof(double)*(int)arrays*OCELOT_ARRAYS_SIZE + sizeof(double)*(int)pointers;
+	int size_return = sizeof(int) + sizeof(_T_ocelot_event) * MAX_EVENTS_NUMBER;
+
+	int pid = _f_ocelot_alloc_process(env, i, size_call, size_return);
+	if (pid < 0) {
+		char message[100];
+		if (pid == -1)
+			sprintf(message, "Unable to allocate memory for process %d. Error: %d", i, errno);
+		else if (pid == -2)
+			sprintf(message, "Unable to gain locks for process %d. Error: %d", i, errno);
+		else
+			sprintf(message, "Unable to allocate the process %d. Unknown Error.", i, errno);
+		_f_ocelot_throw_runtimeexception(env, message);
+		goto fail;
+	}
+	else {
+		child_processes = pid;
+		_f_ocelot_debug("PARENT: Locked child %d", i);
+		LOCK_CHILD();
 	}
 
-	size = sizeof(int) + sizeof(int)*3 + sizeof(double)*(int)values + sizeof(double)*(int)arrays*OCELOT_ARRAYS_SIZE + sizeof(double)*(int)pointers;
-	shared_call_id = shmget(call_id, size, IPC_CREAT|IPC_EXCL|0666);
-	if (shared_call_id < 0) {
-		char message[100];
-		sprintf(&message, "Unable to open CALL shared memory. Error: %d", errno);
-		_f_ocelot_throw_runtimeexception(env, &message);
-		return;
+	(*env)->SetStaticBooleanField(env, cbridge, initializedID, JNI_TRUE);
+
+	return;
+
+fail:
+	if (child_processes != 0) {
+		kill(child_processes, SIGKILL);
+	}
+	return;
+}
+
+int _f_ocelot_alloc_process(JNIEnv* env, int coreId, int size_call, int size_return) {
+	int good;
+	int tries = 100;
+
+	do {
+		tries--;
+		good = 1;
+
+		key_t return_id = (int)(rand()*9999);
+		key_t call_id = return_id + 1;
+
+		/*
+		 * Create the segment.
+		 */
+		shared_return_id = shmget(return_id, size_return, IPC_CREAT|IPC_EXCL|0666);
+		if (shared_return_id < 0) {
+			good = 0;
+			continue;
+		}
+
+		shared_call_id = shmget(call_id, size_call, IPC_CREAT|IPC_EXCL|0666);
+		if (shared_call_id < 0) {
+			good = 0;
+			shmctl(shared_return_id, IPC_RMID, NULL);
+			continue;
+		}
+
+	} while (!good && tries > 0);
+
+	if (!good){
+		return -1;
 	}
 
+	char nameC[50];
+	char nameP[50];
+	char nameR[50];
 
-	FILE* fileCC = fopen ("/tmp/.ocelot_c.lock", "w");
-	FILE* filePC = fopen ("/tmp/.ocelot_p.lock", "w");
-	FILE* fileRC = fopen ("/tmp/.ocelot_r.lock", "w");
+	sprintf(nameC, "/tmp/.ocelot_c%d.lock",coreId);
+	sprintf(nameP, "/tmp/.ocelot_p%d.lock",coreId);
+	sprintf(nameR, "/tmp/.ocelot_r%d.lock",coreId);
 
-    //childControl = open("/tmp/.ocelot_c.lock", O_CREAT | O_RDWR, 0666);
-    //parentControl = open("/tmp/.ocelot_p.lock", O_CREAT | O_RDWR, 0666);
-    //releaser = open("/tmp/.ocelot_r.lock", O_CREAT | O_RDWR, 0666);
+	FILE* fileCC = fopen (nameC, "w");
+	FILE* filePC = fopen (nameP, "w");
+	FILE* fileRC = fopen (nameR, "w");
 
 	childControl = fileno(fileCC);
 	parentControl = fileno(filePC);
 	releaser = fileno(fileRC);
 
-    if (childControl < 0 || parentControl < 0 || releaser < 0) {
-    	char message[100];
-		sprintf(&message, "Unable set the locks. Error: %d", errno);
-		_f_ocelot_throw_runtimeexception(env, &message);
-		return;
-    }
+	if (childControl < 0 || parentControl < 0 || releaser < 0) {
+		fclose(fileCC);
+		fclose(filePC);
+		fclose(fileRC);
+		return -2;
+	}
 
-	child_processes[0] = _f_ocelot_fork(env);
-
-	LOCK_CHILD;
+	return _f_ocelot_fork(env, coreId);
 }
 
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_memoryDump(JNIEnv *env, jobject self) {
+	jclass cbridge = (*env)->GetObjectClass(env, self);
+
+	jfieldID coreIdField = (*env)->GetFieldID(env, cbridge, "coreId", "I");
+	jint coreId = (*env)->GetIntField(env, self, coreIdField);
+
 	int i;
 	shm_call = shmat(shared_call_id, 0, 0);
 	shm_return = shmat(shared_return_id, 0, SHM_RDONLY);
 
-	_T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
-	_T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
+	volatile _T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
+	volatile _T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
 
 	fprintf(stderr, "------------ START MEMORY DUMP ------------\n");
 	fprintf(stderr, "*** CALL MEMORY ***\n");
@@ -135,10 +212,6 @@ close:
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 		(JNIEnv *env, jobject self,
 				jobject eventHandler, jdoubleArray values, jobjectArray arrays, jdoubleArray pointers) {
-
-	//Has the lock on the final passage of the child, when he wants to restart the cycle
-	WAIT_PASSAGE;
-	_f_ocelot_debug("PARENT: Locked releaser\n",0);
 	//***********************************************************************
 	// JNI STARTUP
 	//***********************************************************************
@@ -149,8 +222,9 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	jfieldID coreIdField = (*env)->GetFieldID(env, cbridge, "coreId", "I");
 	jint coreId = (*env)->GetIntField(env, self, coreIdField);
 
-	//TODO ATTENTION: modify here in order to make everything work properly with multithreading
-	coreId = 0;
+	//Has the lock on the final passage of the child, when he wants to restart the cycle
+	WAIT_PASSAGE();
+	_f_ocelot_debug("PARENT: Locked releaser\n",NODEBUGINFO);
 
 	//Gets the "add" method of the EventHandler class
 	jmethodID addMethod = (*env)->GetMethodID(env, eventHandlerClass, "add", "(IDD)V");
@@ -164,12 +238,12 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 
 	if (shm_call < 0 || shm_return < 0) {
 		char message[100];
-		sprintf(&message, "Unable to attach one of the shared memory segments. Error: %d", errno);
-		_f_ocelot_throw_runtimeexception(env, &message);
+		sprintf(message, "Unable to attach one of the shared memory segments. Error: %d", errno);
+		_f_ocelot_throw_runtimeexception(env, message);
 		goto close;
 	}
 
-	_T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
+	volatile _T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
 
 	int lenValues = (*env)->GetArrayLength(env, values);
 	int lenArrays = (*env)->GetArrayLength(env, arrays);
@@ -194,38 +268,38 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	MEMSET(call_memory.signal, OCELOT_SIGNAL_CALL);
 
 	//Releases the lock for the child, which can start its computation
-	_f_ocelot_debug("PARENT: unlocking child...\n",0);
-	UNLOCK_CHILD;
+	_f_ocelot_debug("PARENT: unlocking child...\n",NODEBUGINFO);
+	UNLOCK_CHILD();
 
-	_f_ocelot_debug("PARENT: Locking parent...\n",0);
+	_f_ocelot_debug("PARENT: Locking parent...\n",NODEBUGINFO);
 	//Waits the moment when the child finishes and releases the lock of the parent
-	LOCK_PARENT;
-	_f_ocelot_debug("PARENT: Locked parent\n",0);
-
-	//Locks the child once again: the child is waiting the release of "PASSAGE"
-	LOCK_CHILD;
-	_f_ocelot_debug("PARENT: Locked child\n",0);
+	LOCK_PARENT();
+	_f_ocelot_debug("PARENT: Locked parent\n",NODEBUGINFO);
 
 	//Releases the passage. The child waits for the control of the parent.
-	RELEASE_PASSAGE;
-	_f_ocelot_debug("PARENT: Released passage\n",0);
+	RELEASE_PASSAGE();
+	_f_ocelot_debug("PARENT: Released passage\n",NODEBUGINFO);
+
+	//Locks the child once again: the child is waiting the release of "PASSAGE"
+	LOCK_CHILD();
+	_f_ocelot_debug("PARENT: Locked child\n",NODEBUGINFO);
 
 	int status;
 	int signal;
-	pid_t update = waitpid(child_processes[coreId], &status, WNOHANG);
+	pid_t update = waitpid(child_processes, &status, WNOHANG);
 	signal = MEMGET(call_memory.signal);
 
 	if (update < 0) {
 		_f_ocelot_throw_runtimeexception(env, "An unexpected error occured while waiting for the process to terminate!");
 
 		//Respawn the process
-		child_processes[coreId] = _f_ocelot_fork(env);
+		child_processes = _f_ocelot_fork(env, coreId);
 		goto finally;
 	} else if (update > 0) {
 		_f_ocelot_throw_runtimeexception(env, "An unexpected error occured in the native code!");
 
 		//Respawn the process
-		child_processes[coreId] = _f_ocelot_fork(env);
+		child_processes = _f_ocelot_fork(env, coreId);
 
 		goto finally;
 	} else {
@@ -248,32 +322,38 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	}
 
 
-	_T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
+	volatile _T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
 	for (i = 0; i < MEMGET(return_memory.size); i++) {
-		_T_ocelot_event event = MEMGET(return_memory.events+i);
+		volatile _T_ocelot_event event = MEMGET(return_memory.events+i);
+		LOG_EVENT(event, loggerParent);
 		if (event.kind == OCELOT_KIND_STDEV) {
 			(*env)->CallVoidMethod(env, eventHandler, addMethod, event.choice, event.distanceTrue, event.distanceFalse);
 		} else {
 			(*env)->CallVoidMethod(env, eventHandler, addCaseMethod, event.choice, event.distanceTrue, (jboolean)event.distanceFalse);
 		}
 	}
+	LOG_SEPARATOR(loggerParent);
 
-	_f_ocelot_debug("PARENT: All done!\n",0);
+	_f_ocelot_debug("PARENT: All done!\n",NODEBUGINFO);
 finally:
 	MEMSET(call_memory.signal, OCELOT_SIGNAL_NOTREADY);
 
 	//Releases the lock of the parent. Now the child is in its initial state (like the parent)
-	UNLOCK_PARENT;
-	_f_ocelot_debug("PARENT: Unlocked parent!\n",0);
+	UNLOCK_PARENT();
+	_f_ocelot_debug("PARENT: Unlocked parent!\n",NODEBUGINFO);
 close:
-	shmdt(shm_call);
-	shmdt(shm_return);
+	if (shmdt(shm_call) < 0) {
+		_f_ocelot_throw_runtimeexception(env, "Unable to detach call memory");
+	}
+	if (shmdt(shm_return) < 0) {
+		_f_ocelot_throw_runtimeexception(env, "Unable to detach return memory");
+	}
 }
 
 /*
  * Utility that returns a useful representation of the shared call memory.
  */
-_T_ocelot_call_memory _f_ocelot_shared_call(void* shm) {
+volatile _T_ocelot_call_memory _f_ocelot_shared_call(void* shm) {
 	_T_ocelot_call_memory result;
 
 	result.signal = (unsigned char*)shm;
@@ -288,7 +368,7 @@ _T_ocelot_call_memory _f_ocelot_shared_call(void* shm) {
 /*
  * Utility that returns a useful representation of the shared return memory.
  */
-_T_ocelot_return_memory _f_ocelot_shared_return(void* shm) {
+volatile _T_ocelot_return_memory _f_ocelot_shared_return(void* shm) {
 	_T_ocelot_return_memory result;
 
 	result.size = (int*)shm;
@@ -302,7 +382,7 @@ _T_ocelot_return_memory _f_ocelot_shared_return(void* shm) {
  * Forks and creates a child. This function describes the behavoir of the child, who waits for a signal in call memory
  * and, when received, starts the normal procedure.
  */
-pid_t _f_ocelot_fork(JNIEnv* env) {
+pid_t _f_ocelot_fork(JNIEnv* env, int coreId) {
 	pid_t pid = fork();
 	jnienv = env;
 
@@ -312,40 +392,43 @@ pid_t _f_ocelot_fork(JNIEnv* env) {
 		shm_return = shmat(shared_return_id, 0, 0);
 
 		//Gains control over the parent
-		_f_ocelot_debug("CHILD: Locking parent...\n",0);
-		LOCK_PARENT;
-		_f_ocelot_debug("CHILD: Locked parent!\n",0);
+		_f_ocelot_debug("CHILD%d: Locking parent...\n",coreId);
+		LOCK_PARENT();
+		_f_ocelot_debug("CHILD%d: Locked parent!\n",coreId);
 
 		//Waits the parent to release the control of the child
-		LOCK_CHILD;
-		_f_ocelot_debug("CHILD: Locked child!\n",0);
+		LOCK_CHILD();
+		_f_ocelot_debug("CHILD%d: Locked child!\n",coreId);
 		while (kill(parent_pid, 0) == 0) {
 			//Note: the check of parent status has to be performed right before the call. This is
 			//because it could happen that the resources are released only because the parent
 			//process died.
-			_f_ocelot_on_signal(0);
+			_f_ocelot_on_signal(coreId);
 			//Control of self not needed anymore
-			UNLOCK_CHILD;
-			_f_ocelot_debug("CHILD: Unlocked child!\n",0);
 
 			//Releases the control for the parent
-			UNLOCK_PARENT;
-			_f_ocelot_debug("CHILD: Unlocked parent!\n",0);
+			UNLOCK_PARENT();
+			_f_ocelot_debug("CHILD%d: Unlocked parent!\n",coreId);
 
-			_f_ocelot_debug("CHILD: Waiting passage...\n",0);
+			_f_ocelot_debug("CHILD%d: Waiting passage...\n",coreId);
 			//Waits for the parent to complete the reading
-			WAIT_PASSAGE;
-			RELEASE_PASSAGE;
-			_f_ocelot_debug("CHILD: Passage done!\n",0);
+			WAIT_PASSAGE();
+
+			UNLOCK_CHILD();
+			_f_ocelot_debug("CHILD%d: Unlocked child!\n",coreId);
+
 
 			//Gains control over the parent
-			_f_ocelot_debug("CHILD: Locking parent...\n",0);
-			LOCK_PARENT;
-			_f_ocelot_debug("CHILD: Locked parent!\n",0);
+			_f_ocelot_debug("CHILD%d: Locking parent...\n",coreId);
+			LOCK_PARENT();
+			_f_ocelot_debug("CHILD%d: Locked parent!\n",coreId);
+
+			RELEASE_PASSAGE();
+			_f_ocelot_debug("CHILD%d: Passage done!\n",coreId);
 
 			//Waits that the parent releases the control of self
-			LOCK_CHILD;
-			_f_ocelot_debug("CHILD: Locked child!\n",0);
+			LOCK_CHILD();
+			_f_ocelot_debug("CHILD%d: Locked child!\n",coreId);
 		}
 
 		shmdt(shm_call);
@@ -360,18 +443,18 @@ pid_t _f_ocelot_fork(JNIEnv* env) {
 	return pid;
 }
 
-void _f_ocelot_on_signal(int signum) {
-	_T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
+void _f_ocelot_on_signal(int coreId) {
+	volatile _T_ocelot_call_memory call_memory = _f_ocelot_shared_call(shm_call);
 
-	int valuesN = MEMGET(call_memory.values);
-	int arraysN = MEMGET(call_memory.arrays);
-	int pointersN = MEMGET(call_memory.pointers);
+	volatile int valuesN = MEMGET(call_memory.values);
+	volatile int arraysN = MEMGET(call_memory.arrays);
+	volatile int pointersN = MEMGET(call_memory.pointers);
 
-	double* values = call_memory.data;
-	double* arrays = call_memory.data + valuesN;
-	double* pointers = call_memory.data + valuesN + arraysN*OCELOT_ARRAYS_SIZE;
+	volatile double* values = call_memory.data;
+	volatile double* arrays = call_memory.data + valuesN;
+	volatile double* pointers = call_memory.data + valuesN + arraysN*OCELOT_ARRAYS_SIZE;
 
-	int result = _f_ocelot_do_stuff(jnienv, valuesN, arraysN, pointersN, values, arrays, pointers);
+	int result = _f_ocelot_do_stuff(coreId, jnienv, valuesN, arraysN, pointersN, values, arrays, pointers);
 
 	switch (result) {
 	case 0:
@@ -383,7 +466,7 @@ void _f_ocelot_on_signal(int signum) {
 	}
 }
 
-int _f_ocelot_do_stuff(JNIEnv* env, int valuesN, int arraysN, int pointersN,
+int _f_ocelot_do_stuff(int coreId, JNIEnv* env, int valuesN, int arraysN, int pointersN,
 		double* values, double* arrays, double* pointers) {
 
 	_f_ocelot_init();
@@ -397,14 +480,16 @@ int _f_ocelot_do_stuff(JNIEnv* env, int valuesN, int arraysN, int pointersN,
 		return OCELOT_ERR_TOOMANYEVENTS;
 	}
 
-	_T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
+	volatile _T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
 	MEMSET(return_memory.size, _v_ocelot_events->len);
 	int i;
 	for (i = 0; i < _v_ocelot_events->len; i++) {
 		_T_ocelot_event event = g_array_index(_v_ocelot_events, _T_ocelot_event, i);
-
+		LOG_EVENT(event, loggerChild);
 		memcpy(return_memory.events+i, &event, sizeof(_T_ocelot_event));
 	}
+
+	LOG_SEPARATOR(loggerChild);
 
 	_f_ocelot_end();
 
@@ -468,10 +553,34 @@ void _f_ocelot_throw_runtimeexception(JNIEnv* env, char* message) {
 
 void _f_ocelot_debug(char* info, int num) {
 	return;
-	if (num != 0)
+	if (num != NODEBUGINFO)
 		fprintf(stderr, info, num);
 	else
 		fprintf(stderr, info);
+}
+
+void _f_ocelot_lock(int fd) {
+	struct flock f1;
+
+	f1.l_type = F_WRLCK;
+	f1.l_whence = SEEK_SET;
+	f1.l_start = 0;
+	f1.l_len = 0;
+	f1.l_pid = getpid();
+
+	fcntl(fd, F_SETLKW, &f1);
+}
+
+void _f_ocelot_unlock(int fd) {
+	struct flock f1;
+
+	f1.l_type = F_UNLCK;
+	f1.l_whence = SEEK_SET;
+	f1.l_start = 0;
+	f1.l_len = 0;
+	f1.l_pid = getpid();
+
+	fcntl(fd, F_SETLKW, &f1);
 }
 
 /****************************************************************************************
