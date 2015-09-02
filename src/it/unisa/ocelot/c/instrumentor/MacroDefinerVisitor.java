@@ -198,6 +198,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			String[] callParameters = new String[parametersStringTypes.length];
 			String macro = "";
 			
+			macro += "#define OCELOT_CORES " + this.config.getThreads() + "\n";
 			macro += "#define OCELOT_ARRAYS_SIZE " + this.config.getTestArraysSize() + "\n";
 			macro += "#include \"CBridge.h\"\n";
 			macro += "#define OCELOT_TYPES {";

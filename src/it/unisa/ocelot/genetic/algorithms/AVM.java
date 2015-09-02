@@ -23,12 +23,9 @@ package it.unisa.ocelot.genetic.algorithms;
 import jmetal.core.*;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
-import jmetal.util.parallel.IParallelEvaluator;
-import jmetal.util.wrapper.XParam;
 import jmetal.util.wrapper.XParamArray;
 
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * A multithreaded generational genetic algorithm

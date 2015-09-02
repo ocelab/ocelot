@@ -4,15 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import it.unisa.ocelot.c.types.CType;
+import it.unisa.ocelot.simulator.CBridge;
+import it.unisa.ocelot.simulator.SimulationException;
 
 import org.apache.commons.lang3.Range;
 
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.encodings.solutionType.ArrayParametersSolutionType;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
+import jmetal.util.JMException;
 
 public abstract class StandardProblem extends Problem {
+	private static final int MAX_TRIES = 10;
 	private static final long serialVersionUID = -462606769605747252L;
 	
 	protected CType[] parameters;
@@ -23,7 +26,10 @@ public abstract class StandardProblem extends Problem {
 	protected double[][] lowerLimits;
 	protected double[][] upperLimits;
 	
+	protected Map<Thread, CBridge> bridges;
+	
 	public StandardProblem(CType[] pParameters, Range<Double>[] pRanges, int pArraySize) throws Exception {
+		this.bridges = new HashMap<Thread, CBridge>();
 		this.arraySize = pArraySize;
 		
 		int numberOfReferences = 0;
@@ -101,6 +107,10 @@ public abstract class StandardProblem extends Problem {
 		}
 		
 		this.parameters = pParameters;
+		
+		System.out.println(pParameters.length-numberOfReferences);
+		System.out.println(numberOfReferences);
+		CBridge.initialize(pParameters.length-numberOfReferences, numberOfReferences, numberOfReferences);
 	}
 	
 	protected Object[][][] getParameters(Solution solution) {
@@ -135,5 +145,34 @@ public abstract class StandardProblem extends Problem {
 	public void onError(Solution solution, Throwable e) {
 		solution.setObjective(0, Double.POSITIVE_INFINITY);
 		System.err.println("An error occurred: " + e.getMessage());
+	}
+	
+	protected CBridge getCurrentBridge() {
+		CBridge result = this.bridges.get(Thread.currentThread());
+		
+		if (result == null) {
+			result = new CBridge(this.bridges.size());
+			this.bridges.put(Thread.currentThread(), result); 
+		}
+		
+		return result;
+	}
+	
+	public abstract void evaluateSolution(Solution solution) throws JMException, SimulationException;
+	
+	@Override
+	public final void evaluate(Solution solution) throws JMException {
+		int tries = MAX_TRIES;
+		
+		while (tries > 0) {
+			try {
+				this.evaluateSolution(solution);
+				return;
+			} catch (SimulationException e) {
+				tries--;
+			}
+		}
+		
+		throw new JMException("Unable to evaluate the solution " + solution.getDecisionVariables().toString());
 	}
 }

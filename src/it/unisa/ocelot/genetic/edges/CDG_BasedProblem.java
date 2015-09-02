@@ -14,6 +14,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_objective.DominatorListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.util.Utils;
@@ -46,15 +47,14 @@ public class CDG_BasedProblem extends StandardProblem {
 	}
 
 	@Override
-	public void evaluate(Solution solution) throws JMException {
+	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 
-		CBridge.initialize(arguments);
 		if (debug)
 			System.out.println(Utils.printParameters(arguments));
 
-		CBridge bridge = new CBridge();
+		CBridge bridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
 		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 

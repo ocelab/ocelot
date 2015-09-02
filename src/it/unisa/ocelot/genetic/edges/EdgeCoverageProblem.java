@@ -10,6 +10,7 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
@@ -54,11 +55,10 @@ public class EdgeCoverageProblem extends StandardProblem {
 		this.target = pNode;
 	}
 
-	public void evaluate(Solution solution) throws JMException {
+	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
-		CBridge.initialize(arguments);
-		CBridge bridge = new CBridge();
+		CBridge bridge = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
 		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target);

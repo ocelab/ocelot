@@ -53,11 +53,10 @@ public class PathCoverageProblem extends StandardProblem {
 		this.target = pPath;
 	}
 
-	public void evaluate(Solution solution) throws JMException {
+	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
-		CBridge.initialize(arguments);
-		CBridge bridge = new CBridge();
+		CBridge bridge = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
 		PathDistanceListener listener = new PathDistanceListener(this.cfg,
@@ -74,12 +73,7 @@ public class PathCoverageProblem extends StandardProblem {
 
 		simulator.addListener(listener);
 
-		try {
-			simulator.simulate();
-		} catch (SimulationException e) {
-			bridge.memoryDump();
-			System.out.println("Mmmh...");
-		}
+		simulator.simulate();
 
 		solution.setObjective(0,
 				listener.getPathDistance() + listener.getNormalizedBranchDistance());

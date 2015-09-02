@@ -9,6 +9,9 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.MOSA;
 import it.unisa.ocelot.genetic.OcelotExperiment;
+import it.unisa.ocelot.genetic.StandardSettings;
+import it.unisa.ocelot.genetic.settings.MOSASettings;
+import it.unisa.ocelot.genetic.settings.SettingsFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,8 +60,13 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 			if (ranges != null)
 				problem = new MOSABranchCoverageProblem(this.cfg, this.parametersTypes, config.getTestArraysSize(), 
 						ranges, branches);
+			else
+				throw new RuntimeException("Error: please, set the ranges for the parameters for MOSA algorithm");
+			
+			if (config.getAlgorithm().equals(SettingsFactory.AVM))
+				throw new RuntimeException("Error: MOSA cannot run with AVM algorithm!");
 
-			MOSABranchCoverageSettings settings = new MOSABranchCoverageSettings(problem, config);
+			StandardSettings settings = new MOSASettings(problem, config, branches);
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			problem.setDebug(config.getDebug());
 			algorithm[0] = settings.configure();

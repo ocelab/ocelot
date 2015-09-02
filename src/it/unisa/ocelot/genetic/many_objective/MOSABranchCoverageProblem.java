@@ -9,6 +9,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	public MOSABranchCoverageProblem(CFG cfg, CType[] parameters, int pArraySize,
 			Range<Double>[] ranges, List<LabeledEdge> branches) throws Exception {
 		super(parameters, ranges, pArraySize);
+		numberOfObjectives_ = branches.size();
 		this.cfg = cfg;
 		this.targetBranches = new ArrayList<>(branches);
 	}
@@ -57,15 +59,14 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 *            The solution to evaluate
 	 */
 	@Override
-	public void evaluate(Solution solution) throws JMException {
+	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 		
-		CBridge.initialize(arguments);
 		if (debug)
 			System.out.println(Arrays.toString(arguments));
 
-		CBridge bridge = new CBridge();
+		CBridge bridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
 		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 

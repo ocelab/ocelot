@@ -24,7 +24,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 
 public class ExecuteWholeCoverage {
 	private static final String CONFIG_FILENAME = "config.properties";
-	private static final String OUTPUT_FOLDER = "RESULTS";
+	private static final String OUTPUT_FOLDER = "results";
 
 	static {
 		System.loadLibrary("Test");
@@ -45,7 +45,6 @@ public class ExecuteWholeCoverage {
 		// Builds the CFG and sets the target
 		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 
-		
 		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
 		System.out.println("Cyclomatic complexity: " + mcCabePaths);
 
@@ -90,6 +89,9 @@ public class ExecuteWholeCoverage {
 		System.out.println("-------------------------------------------------------");
 		System.out.println("Total test cases: " + suite.size());
 		System.out.println("Minimized test cases: " + minimizedSuite.size());
+<<<<<<< HEAD
+		System.out.println("-------------------------------------------------------");
+=======
 		System.out
 				.println("-------------------------------------------------------");
 		
@@ -99,6 +101,7 @@ public class ExecuteWholeCoverage {
 			System.out.println(Utils.printParameters(tc.getParameters()));
 			System.out.println("#########");
 		}
+>>>>>>> 494bfbe0f044ef2d7cf1cb51d1ade0460dcdc4dd
 	}
 
 	public static void showUI(final CFG pCFG) {

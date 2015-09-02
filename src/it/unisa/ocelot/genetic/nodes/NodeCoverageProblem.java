@@ -1,6 +1,5 @@
 package it.unisa.ocelot.genetic.nodes;
 
-import java.util.Arrays;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
@@ -9,16 +8,13 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
 
 import org.apache.commons.lang3.Range;
 
-import jmetal.core.Problem;
 import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
-import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
 public class NodeCoverageProblem extends StandardProblem {
@@ -52,11 +48,10 @@ public class NodeCoverageProblem extends StandardProblem {
 		this.target = pNode;
 	}
 
-	public void evaluate(Solution solution) throws JMException {
+	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
-		CBridge.initialize(arguments);
-		CBridge bridge = new CBridge();
+		CBridge bridge = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
 		NodeDistanceListener bdalListener = new NodeDistanceListener(cfg, target);

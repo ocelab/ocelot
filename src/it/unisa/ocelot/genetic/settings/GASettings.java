@@ -28,21 +28,12 @@ public class GASettings extends StandardSettings {
 		super(pProblem, pConfig);
 	}
 	
-	public Algorithm configure() throws JMException {
-        Algorithm algorithm;
+	public Algorithm configure(Algorithm algorithm) throws JMException {
         Operator selection;
         Operator crossover;
         Operator mutation;
         
         HashMap<String, Object> parameters;
-
-        IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
-
-        // Creating the problem
-        if (problem_ instanceof CDG_BasedProblem)
-        	algorithm = new CDG_GA(problem_, parallelEvaluator);
-        else 
-        	algorithm = new GeneticAlgorithm(problem_, parallelEvaluator);;
         
         algorithm.setInputParameter("populationSize", populationSize);
         algorithm.setInputParameter("maxEvaluations", maxEvaluations);
@@ -75,5 +66,19 @@ public class GASettings extends StandardSettings {
         algorithm.addOperator("selection", selection);
 
         return algorithm;
+	}
+	
+	public Algorithm configure() throws JMException {
+		Algorithm algorithm;
+		
+		IParallelEvaluator parallelEvaluator = new MultithreadedEvaluator(threads);
+		
+		// Creating the problem
+        if (problem_ instanceof CDG_BasedProblem)
+        	algorithm = new CDG_GA(problem_, parallelEvaluator);
+        else 
+        	algorithm = new GeneticAlgorithm(problem_, parallelEvaluator);
+        
+		return configure(algorithm);
     }
 }

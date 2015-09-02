@@ -1,24 +1,13 @@
 package it.unisa.ocelot.genetic;
 
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
-import it.unisa.ocelot.genetic.edges.CDG_BasedProblem;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import jmetal.core.Algorithm;
-import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.experiments.Settings;
-import jmetal.operators.crossover.SBXGenericCrossover;
-import jmetal.operators.mutation.GenericPolynomialMutation;
-import jmetal.operators.mutation.PolynomialMutationParams;
-import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
-import jmetal.util.parallel.IParallelEvaluator;
-import jmetal.util.parallel.MultithreadedEvaluator;
 
 public abstract class StandardSettings extends Settings {
     protected int populationSize;

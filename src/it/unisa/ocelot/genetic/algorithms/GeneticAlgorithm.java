@@ -20,13 +20,16 @@ package it.unisa.ocelot.genetic.algorithms;
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import it.unisa.ocelot.simulator.CBridge;
 import jmetal.core.*;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.parallel.IParallelEvaluator;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A multithreaded generational genetic algorithm
