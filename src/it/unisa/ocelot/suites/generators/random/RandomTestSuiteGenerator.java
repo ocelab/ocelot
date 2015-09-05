@@ -33,16 +33,12 @@ import jmetal.util.JMException;
 
 
 public class RandomTestSuiteGenerator extends TestSuiteGenerator {
-	private ConfigManager config;
-	private CFG cfg;
-	private CoverageCalculator calculator;
 	private Random random;
 	private Range<Double>[] ranges;
 	
 	public RandomTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
+		super(pCFG);
 		this.config = pConfigManager;
-		this.cfg = pCFG;
-		this.calculator = new CoverageCalculator(cfg);
 		this.random = new Random();
 		this.ranges = this.config.getTestRanges();
 	}
@@ -100,17 +96,6 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 	
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.calculator.calculateCoverage(pParams);
-		
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
-		tc.setParameters(pParams);
-		
-		return tc;
-	}
-	
 	//TODO Make this method work. Now it doesn't, due to the major change of parameters
 	private Object[][][] random(CType[] pParamTypes) {
 		Object[][][] parameters = new Object[pParamTypes.length][][];
@@ -134,20 +119,5 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 		}
 		
 		return parameters; 
-	}
-	
-	private void printSeparator() {
-		if (this.config.getPrintResults())
-			System.out.println("------------------------------------------");
-	}
-	
-	private void print(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.print(pObject);
-	}
-	
-	private void println(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.println(pObject);
 	}
 }

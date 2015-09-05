@@ -1,6 +1,10 @@
 package it.unisa.ocelot.suites.generators;
 
 import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 
@@ -10,9 +14,14 @@ import java.util.Set;
 
 public abstract class TestSuiteGenerator {
 	protected List<BenchmarkCalculator> benchmarkCalculators;
+	protected ConfigManager config;
+	public CoverageCalculator calculator;
+	public CFG cfg;
 	
-	public TestSuiteGenerator() {
+	public TestSuiteGenerator(CFG pCFG) {
 		this.benchmarkCalculators = new ArrayList<BenchmarkCalculator>();
+		this.cfg = pCFG;
+		this.calculator = new CoverageCalculator(pCFG);
 	}
 	
 	public void addBenchmark(BenchmarkCalculator pCalculator) {
@@ -35,4 +44,40 @@ public abstract class TestSuiteGenerator {
 	}
 	
 	public abstract Set<TestCase> generateTestSuite() throws TestSuiteGenerationException;
+	
+	protected void printSeparator() {
+		if (this.config.getPrintResults())
+			System.out
+					.println("-------------------------------------------------------------------------------");
+	}
+
+	protected void print(Object pObject) {
+		if (this.config.getPrintResults())
+			System.out.print(pObject);
+	}
+
+	protected void println(Object pObject) {
+		if (this.config.getPrintResults())
+			System.out.println(pObject);
+	}
+
+	protected List<LabeledEdge> getUncoveredEdges(Set<TestCase> suite) {
+		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet()); 
+		for (TestCase tc : suite) {
+			uncoveredEdges.removeAll(tc.getCoveredEdges());
+		}
+		
+		return uncoveredEdges;
+	}
+
+	protected TestCase createTestCase(Object[][][] pParams, int id) {
+		this.calculator.calculateCoverage(pParams);
+	
+		TestCase tc = new TestCase();
+		tc.setId(id);
+		tc.setCoveredEdges(calculator.getCoveredEdges());
+		tc.setParameters(pParams);
+	
+		return tc;
+	}
 }

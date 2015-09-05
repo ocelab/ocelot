@@ -1,9 +1,12 @@
 package it.unisa.ocelot.c.cfg;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -82,7 +85,7 @@ public class Dominators<V, E> {
 		}
 		// computing dominator here!
 //		computeDominators();
-		this.dominatorTree = getDominatorTree();
+		computeDominatorTree();
 
 	}
 
@@ -129,6 +132,20 @@ public class Dominators<V, E> {
 				}
 			}
 		} while (changed);
+	}
+	
+	protected void computeDominatorTree() {
+		SimpleDirectedGraph<V, DefaultEdge> domTree = new SimpleDirectedGraph<V, DefaultEdge>(
+				DefaultEdge.class);
+		for (V node : graph.vertexSet()) {
+			domTree.addVertex(node);
+			V idom = getIDom(node);
+			if (idom != null && !node.equals(idom)) {
+				domTree.addVertex(idom);
+				domTree.addEdge(idom, node);
+			}
+		}
+		this.dominatorTree = domTree;
 	}
 
 	private V intersectIDoms(V v1, V v2) {
@@ -235,16 +252,20 @@ public class Dominators<V, E> {
 	 */
 	public SimpleDirectedGraph<V, DefaultEdge> getDominatorTree() {
 		computeDominators();
-		SimpleDirectedGraph<V, DefaultEdge> domTree = new SimpleDirectedGraph<V, DefaultEdge>(
-				DefaultEdge.class);
-		for (V node : graph.vertexSet()) {
-			domTree.addVertex(node);
-			V idom = getIDom(node);
-			if (idom != null && !node.equals(idom)) {
-				domTree.addVertex(idom);
-				domTree.addEdge(idom, node);
-			}
+		computeDominatorTree();
+		return this.dominatorTree;
+	}
+	
+	public List<V> getNonDominators() {
+		List<V> result = new ArrayList<V>();
+		
+		SimpleDirectedGraph<V, DefaultEdge> dominatorTree = this.getDominatorTree();
+		
+		for (V testNode : dominatorTree.vertexSet()) {
+			if (dominatorTree.outgoingEdgesOf(testNode).size() == 0)
+				result.add(testNode);
 		}
-		return domTree;
+		
+		return result;
 	}
 }

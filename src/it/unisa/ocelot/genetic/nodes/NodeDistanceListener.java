@@ -8,6 +8,7 @@ import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,14 +23,15 @@ public class NodeDistanceListener implements SimulatorListener {
 	private CFG cfg;
 	private CFGNode nearest;
 	private List<ExecutionEvent> nearestEvents;
-	private int shortestPath;
+	private Set<CFGNode> dominators;
 	private CFGNode target;
 	
-	public NodeDistanceListener(CFG pCFG, CFGNode pTarget) {
+	public NodeDistanceListener(CFG pCFG, CFGNode pTarget, Set<CFGNode> pDominators) {
 		this.cfg = pCFG;
-		this.shortestPath = Integer.MAX_VALUE;
 		this.nearestEvents = new ArrayList<ExecutionEvent>();
 		this.target = pTarget;
+		
+		this.dominators = new HashSet<CFGNode>(pDominators);
 	}
 
 	@Override
@@ -58,41 +60,43 @@ public class NodeDistanceListener implements SimulatorListener {
 
 	@Override
 	public void onNodeVisit(CFGNode pNode) {
-		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, pNode, this.target);
-		if (path != null && path.size() < this.shortestPath) {
+		if (this.dominators.contains(pNode)) {
+			this.dominators.remove(pNode);
 			this.nearest = pNode;
-			this.shortestPath = path.size();
 		}
 	}
 	
 	public int getApproachLevel() {
-		return shortestPath;
+		return this.dominators.size();
 	}
 	
-	public double getNormalizedBranchDistance() {
+	public double getBranchDistance() {
 		if (getApproachLevel() == 0)
 			return 0D;
 		
-		double distance;
 		if (nearestEvents.size() == 1) {
 			ExecutionEvent event = nearestEvents.get(0);
 			
 			//One of the two is 0, the other is our branch distance, because it is the
 			//distance from the nearest node.
-			distance = Math.max(event.distanceFalse, event.distanceTrue);
+			return Math.max(event.distanceFalse, event.distanceTrue);
 		} else {
-			double minDistance = Double.MAX_VALUE;
-			Set<LabeledEdge> departingEdges = this.cfg.outgoingEdgesOf(this.nearest);
 			
-			//TODO: There is a BUG here!!! FIX IT!
+			List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, this.nearest, this.target);
+			LabeledEdge nearestEdge = path.get(0);
+			
 			for (ExecutionEvent event : nearestEvents) {
-				CaseExecutionEvent caseEvent = (CaseExecutionEvent)event;
-				if (!caseEvent.chosen && caseEvent.distanceTrue < minDistance)
-					minDistance = caseEvent.distanceTrue;
+				if (event.getEdge().equals(nearestEdge))
+					return Math.max(event.distanceTrue, event.distanceFalse);
 			}
 			
-			distance =  minDistance;
+			assert false: "An error occurred in NodeDistanceListener...";
+			return 10000.0;
 		}
+	}
+	
+	public double getNormalizedBranchDistance() {
+		double distance = this.getBranchDistance();
 		
 		return distance/(distance+1);
 	}

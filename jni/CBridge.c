@@ -66,10 +66,12 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize
 	if (initialized == JNI_TRUE)
 		return;
 
+#ifdef LOGGER
 	loggerParent = fopen("OCELOT_LOGGER_P", "w");
 	loggerChild = fopen("OCELOT_LOGGER_C", "w");
 	fputs("Logger session started.\n", loggerParent);
 	fputs("Logger session started.\n", loggerChild);
+#endif
 	LOG_SEPARATOR(loggerParent);
 	LOG_SEPARATOR(loggerChild);
 

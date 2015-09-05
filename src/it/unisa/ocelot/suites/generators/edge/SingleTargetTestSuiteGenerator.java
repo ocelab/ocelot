@@ -25,15 +25,11 @@ import jmetal.core.Variable;
 import jmetal.util.JMException;
 
 
-public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
-	private ConfigManager config;
-	private CFG cfg;
-	private CoverageCalculator calculator;
-	
+public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {	
 	public SingleTargetTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
+		super(pCFG);
+		
 		this.config = pConfigManager;
-		this.cfg = pCFG;
-		this.calculator = new CoverageCalculator(cfg);
 	}
 	
 	@Override
@@ -87,31 +83,5 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {
 			
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 		}
-	}
-	
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.calculator.calculateCoverage(pParams);
-		
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
-		tc.setParameters(pParams);
-		
-		return tc;
-	}
-	
-	private void printSeparator() {
-		if (this.config.getPrintResults())
-			System.out.println("------------------------------------------");
-	}
-	
-	private void print(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.print(pObject);
-	}
-	
-	private void println(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.println(pObject);
 	}
 }

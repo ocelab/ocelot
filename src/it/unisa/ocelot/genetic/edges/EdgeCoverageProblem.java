@@ -1,10 +1,11 @@
 package it.unisa.ocelot.genetic.edges;
 
-import java.util.Arrays;
+import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGNode;
 import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
+import it.unisa.ocelot.c.cfg.Dominators;
 import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
@@ -12,15 +13,11 @@ import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.NodePrinterListener;
 import it.unisa.ocelot.util.Utils;
 
 import org.apache.commons.lang3.Range;
 
-import jmetal.core.Problem;
 import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
-import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
 public class EdgeCoverageProblem extends StandardProblem {
@@ -28,10 +25,10 @@ public class EdgeCoverageProblem extends StandardProblem {
 
 	private CFG cfg;
 	private LabeledEdge target;
+	private Set<CFGNode> dominators;
 
 	private boolean debug;
 
-	@SuppressWarnings("rawtypes")
 	public EdgeCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize)
 			throws Exception {
 		super(pParameters, pRanges, pArraySize);
@@ -51,8 +48,14 @@ public class EdgeCoverageProblem extends StandardProblem {
 		return cfg.getStart().navigate(cfg);
 	}
 
-	public void setTarget(LabeledEdge pNode) {
-		this.target = pNode;
+	public void setTarget(LabeledEdge pEdge) {
+		this.target = pEdge;
+		
+		CFGNode parent = this.cfg.getEdgeSource(pEdge);
+		
+		Dominators<CFGNode, LabeledEdge> dominators = new Dominators<CFGNode, LabeledEdge>(this.cfg, this.cfg.getStart());
+		
+		this.dominators = dominators.getStrictDominators(parent);
 	}
 
 	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
@@ -61,7 +64,7 @@ public class EdgeCoverageProblem extends StandardProblem {
 		CBridge bridge = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
-		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target);
+		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target, dominators);
 		
 		try {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);

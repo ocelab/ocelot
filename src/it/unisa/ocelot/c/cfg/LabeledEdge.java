@@ -1,7 +1,7 @@
 package it.unisa.ocelot.c.cfg;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 
-import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 
 /**
@@ -9,7 +9,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @author simone
  *
  */
-public abstract class LabeledEdge extends DefaultEdge implements Comparable<LabeledEdge> {
+public abstract class LabeledEdge extends DefaultWeightedEdge implements Comparable<LabeledEdge> {
 	private static final long serialVersionUID = -1013876340016911304L;
 	
 	private Object label;

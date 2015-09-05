@@ -27,14 +27,9 @@ import jmetal.util.JMException;
  *
  */
 public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
-	private ConfigManager manager;
-	private CFG cfg;
-	private CoverageCalculator coverageCalculator;
-
 	public VanillaMcCabeTestSuiteGenerator(ConfigManager configManager, CFG cfg) {
-		this.manager = configManager;
-		this.cfg = cfg;
-		this.coverageCalculator = new CoverageCalculator(cfg);
+		super(cfg);
+		this.config = configManager;
 	}
 
 	@Override
@@ -58,7 +53,7 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
 			@SuppressWarnings("unchecked")
 			PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
-					manager, cfg.getParameterTypes(), aMcCabePath);
+					config, cfg.getParameterTypes(), aMcCabePath);
 
 			exp.initExperiment();
 
@@ -95,32 +90,4 @@ public class VanillaMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 
 		}
 	}
-
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.coverageCalculator.calculateCoverage(pParams);
-
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(coverageCalculator.getCoveredEdges());
-		tc.setParameters(pParams);
-
-		return tc;
-	}
-
-	private void printSeparator() {
-		if (this.manager.getPrintResults())
-			System.out
-					.println("-------------------------------------------------------------------------------");
-	}
-
-	private void print(Object pObject) {
-		if (this.manager.getPrintResults())
-			System.out.print(pObject);
-	}
-
-	private void println(Object pObject) {
-		if (this.manager.getPrintResults())
-			System.out.println(pObject);
-	}
-
 }

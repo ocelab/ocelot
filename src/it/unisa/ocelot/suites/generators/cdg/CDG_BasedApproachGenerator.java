@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites.cdg;
+package it.unisa.ocelot.suites.generators.cdg;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -31,16 +31,13 @@ import jmetal.util.JMException;
 import org.eclipse.cdt.core.settings.model.util.Comparator;
 
 public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
-	private ConfigManager config;
-	private CFG cfg;
-	private CoverageCalculator calculator;
 	private CoverageCalculatorListener coverageCalculatorListener;
 	private final List<LabeledEdge> branches;
 
 	public CDG_BasedApproachGenerator(ConfigManager config, CFG cfg) {
+		super(cfg);
 		this.config = config;
-		this.cfg = cfg;
-		this.calculator = new CoverageCalculator(cfg);
+		
 		this.coverageCalculatorListener = new CoverageCalculatorListener(cfg);
 		this.branches = cfg.getBranchesFromCFG();
 	}
@@ -124,32 +121,5 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
 		for (LabeledEdge branch : branchCoveredByExecution) {
 			branch.setCovered();
 		}
-	}
-
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.calculator.calculateCoverage(pParams);
-
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
-		tc.setParameters(pParams);
-
-		return tc;
-	}
-
-	private void printSeparator() {
-		if (this.config.getPrintResults())
-			System.out
-					.println("-------------------------------------------------------------------------------");
-	}
-
-	private void print(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.print(pObject);
-	}
-
-	private void println(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.println(pObject);
 	}
 }

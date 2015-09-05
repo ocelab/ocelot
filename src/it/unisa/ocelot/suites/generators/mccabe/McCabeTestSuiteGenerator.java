@@ -25,14 +25,10 @@ import jmetal.core.Variable;
 import jmetal.util.JMException;
 
 public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
-	private ConfigManager config;
-	private CFG cfg;
-	private CoverageCalculator calculator;
 
 	public McCabeTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
+		super(pCFG);
 		this.config = pConfigManager;
-		this.cfg = pCFG;
-		this.calculator = new CoverageCalculator(cfg);
 	}
 
 	@Override
@@ -90,15 +86,6 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 		}
 	}
 
-	private List<LabeledEdge> getUncoveredEdges(Set<TestCase> suite) {
-		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet());
-		for (TestCase tc : suite) {
-			uncoveredEdges.removeAll(tc.getCoveredEdges());
-		}
-
-		return uncoveredEdges;
-	}
-
 	@SuppressWarnings("unchecked")
 	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {
 		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
@@ -144,32 +131,5 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 
 			calculator.calculateCoverage(suite);
 		}
-	}
-
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.calculator.calculateCoverage(pParams);
-
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
-		tc.setParameters(pParams);
-
-		return tc;
-	}
-
-	private void printSeparator() {
-		if (this.config.getPrintResults())
-			System.out
-					.println("-------------------------------------------------------------------------------");
-	}
-
-	private void print(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.print(pObject);
-	}
-
-	private void println(Object pObject) {
-		if (this.config.getPrintResults())
-			System.out.println(pObject);
 	}
 }

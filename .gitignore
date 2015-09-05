@@ -45,3 +45,5 @@ src/it/unisa/ocelot/runnable/McCabe.java
 
 #result_output
 results/
+RESULTS/
+testobject/

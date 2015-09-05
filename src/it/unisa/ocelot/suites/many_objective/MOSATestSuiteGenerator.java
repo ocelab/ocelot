@@ -20,13 +20,10 @@ import jmetal.util.JMException;
 
 public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 	private ConfigManager config;
-	private CFG cfg;
-	private CoverageCalculator calculator;
 
 	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
+		super(cfg);
 		this.config = config;
-		this.cfg = cfg;
-		this.calculator = new CoverageCalculator(cfg);
 	}
 
 	@Override
@@ -46,7 +43,6 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 		return suite;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void coverMultiObjectiveBranches(Set<TestCase> suite)
 			throws TestSuiteGenerationException {
 
@@ -77,16 +73,5 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 			this.measureBenchmarks("MOSA Target", suite, numberOfEvaluations.get(i));
 		}
 
-	}
-	
-	private TestCase createTestCase(Object[][][] pParams, int id) {
-		this.calculator.calculateCoverage(pParams);
-
-		TestCase tc = new TestCase();
-		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
-		tc.setParameters(pParams);
-
-		return tc;
 	}
 }
