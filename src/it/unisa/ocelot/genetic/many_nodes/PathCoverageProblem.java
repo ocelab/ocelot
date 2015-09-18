@@ -87,16 +87,24 @@ public class PathCoverageProblem extends StandardProblem {
 		Map<CFGNode, Integer> singleBranchDistances = new HashMap<CFGNode, Integer>();
 		
 		//Calculates single distances between each pair of near target nodes
-		CFGNode current = this.targetNodes.get(0);
+//		CFGNode current = this.targetNodes.get(0);
+//		for (int i = 1; i < this.targetNodes.size(); i++) {
+//			DijkstraShortestPath<CFGNode, LabeledEdge> shortestPath = 
+//					new DijkstraShortestPath<CFGNode, LabeledEdge>(this.cfg, current, this.targetNodes.get(i));
+//			
+//			singleBranchDistances.put(current, (int)shortestPath.getPathLength());
+//			
+//			current = this.targetNodes.get(i);
+//		}
+//		singleBranchDistances.put(current, 0);
+		
 		for (int i = 1; i < this.targetNodes.size(); i++) {
-			DijkstraShortestPath<CFGNode, LabeledEdge> shortestPath = 
-					new DijkstraShortestPath<CFGNode, LabeledEdge>(this.cfg, current, this.targetNodes.get(i));
+			CFGNode source = this.targetNodes.get(i-1);
+			CFGNode target = this.targetNodes.get(i);
 			
-			singleBranchDistances.put(current, (int)shortestPath.getPathLength());
-			
-			current = this.targetNodes.get(i);
+			singleBranchDistances.put(source, this.dominators.get(target).size());
 		}
-		singleBranchDistances.put(current, 0);
+		singleBranchDistances.put(this.targetNodes.get(this.targetNodes.size()-1), 0);
 		
 		//Sets up the total distance between each node in the target nodes and the last one
 		this.fixedApproachLevels.put(this.targetNodes.get(this.targetNodes.size()-1), 0);

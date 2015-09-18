@@ -54,6 +54,9 @@ public class ExecuteWholeCoverage {
 
 		TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(config, cfg);
 		TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
+		
+		System.out.println("Generator: " + generator.getClass().getSimpleName());
+		System.out.println("Minimizer: " + minimizer.getClass().getSimpleName());
 
 		BenchmarkCalculator timeBenchmark = new TimeBenchmarkCalculator();
 		BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
