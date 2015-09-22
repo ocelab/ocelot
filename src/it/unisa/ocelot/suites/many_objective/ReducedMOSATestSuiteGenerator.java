@@ -2,6 +2,11 @@ package it.unisa.ocelot.suites.many_objective;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGNode;
+import it.unisa.ocelot.c.cfg.Dominators;
+import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.edge_graph.EdgeGraph;
+import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageExperiment;
@@ -9,19 +14,22 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.jgrapht.graph.DefaultEdge;
 
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
-public class MOSATestSuiteGenerator extends TestSuiteGenerator {
+public class ReducedMOSATestSuiteGenerator extends TestSuiteGenerator {
 	private ConfigManager config;
 
-	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
+	public ReducedMOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
 		super(cfg);
 		this.config = config;
 	}
@@ -31,7 +39,6 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 			throws TestSuiteGenerationException {
 
 		Set<TestCase> suite = new HashSet<TestCase>();
-		this.startBenchmarks();
 
 		coverMultiObjectiveBranches(suite);
 //		this.measureBenchmarks("MOSA algorithm", suite);
@@ -48,8 +55,32 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 
 		SolutionSet archiveSolutions = new SolutionSet();
 		
+		
+		//Creates an edge-graph for the CFG, gets all the non-dominator nodes and retrieves the original edges from
+		//the wrappers in a list that will be used
+		EdgeGraph<CFGNode, LabeledEdge> graph = new EdgeGraph<CFGNode, LabeledEdge>(cfg, cfg.getStart(), cfg.getEnd());
+		
+		Dominators<EdgeWrapper<LabeledEdge>, DefaultEdge> dominators = 
+				new Dominators<EdgeWrapper<LabeledEdge>, DefaultEdge>(graph, graph.getStart());
+		
+		List<EdgeWrapper<LabeledEdge>> nonDominators = dominators.getNonDominators();
+		nonDominators.remove(graph.getEnd());
+		
+		List<LabeledEdge> realTargets = new ArrayList<LabeledEdge>();
+		
+		this.startBenchmarks();
+		
+		int id = 0;
+		for (EdgeWrapper<LabeledEdge> wrapper : nonDominators) {
+			LabeledEdge target = wrapper.getWrappedEdge();
+			target.setObjectiveID(id);
+			realTargets.add(target);
+			id++;
+		}
+		
+		//Starts the experiment
 		MOSABranchCoverageExperiment mosaExperiment = new MOSABranchCoverageExperiment(
-				cfg, cfg.getBranchesFromCFG(), config, cfg.getParameterTypes());
+				cfg, realTargets, config, cfg.getParameterTypes());
  
 		mosaExperiment.initExperiment();
 		try {

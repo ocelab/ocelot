@@ -334,7 +334,11 @@ public class MOSA extends Algorithm {
 
 		for (int i = 0; i < numberOfObjects; i++) {
 			// sort the population by current object
+			//try {
 			solutionSet.sort(new ObjectiveComparator(i));
+			//} catch (IllegalArgumentException e) {
+			//	System.out.println("ERROR");
+			//}
 			minObjective = solutionSet.get(0).getObjective(i);
 			maxObjective = solutionSet.get(size - 1).getObjective(i);
 

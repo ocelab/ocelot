@@ -10,6 +10,7 @@ import it.unisa.ocelot.suites.generators.mccabe.VanillaMcCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.paths.DynamicPathsTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.random.RandomTestSuiteGenerator;
 import it.unisa.ocelot.suites.many_objective.MOSATestSuiteGenerator;
+import it.unisa.ocelot.suites.many_objective.ReducedMOSATestSuiteGenerator;
 
 public class TestSuiteGeneratorHandler {
 	public static final String MCCABE_SUITE_GENERATOR = "McCabe";
@@ -19,6 +20,7 @@ public class TestSuiteGeneratorHandler {
 	public static final String VANILLA_MCCABE_SUITE_GENERATOR = "Vanilla";
 	public static final String RANDOM_SUITE_GENERATOR = "Random";
 	public static final String MOSA_TEST_SUITE_GENERATOR = "Mosa";
+	public static final String REDUCED_MOSA_TEST_SUITE_GENERATOR = "ReducedMosa";
 	public static final String CDG_BASED_APPROACH_SUITE_GENERATOR = "Harman";
 	public static final String DYNAMIC_PATHS_APPROACH = "DynamicPaths";
 	
@@ -43,6 +45,8 @@ public class TestSuiteGeneratorHandler {
 			return new CDG_BasedApproachGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(DYNAMIC_PATHS_APPROACH))
 			return new DynamicPathsTestSuiteGenerator(pConfigManager, pCFG);
+		else if (name.equalsIgnoreCase(REDUCED_MOSA_TEST_SUITE_GENERATOR))
+			return new ReducedMOSATestSuiteGenerator(pConfigManager, pCFG);
 		
 		return null;
 	}

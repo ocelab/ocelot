@@ -72,17 +72,16 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
-			suite.add(testCase);
 
 			this.println("Fitness function: " + fitnessValue + ". ");
-			if (fitnessValue == 0.0)
+			if (fitnessValue == 0.0) {
 				this.println("Path covered!");
-			else
+				suite.add(testCase);
+				this.measureBenchmarks("McCabe path", suite, exp.getNumberOfEvaluation());
+			} else
 				this.println("Path not covered...");
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 			this.printSeparator();
-
-			this.measureBenchmarks("McCabe path", suite, exp.getNumberOfEvaluation());
 		}
 	}
 
@@ -112,22 +111,21 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator {
 
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
-				
-			this.print("Fitness function: " + fitnessValue + ". ");
-			if (fitnessValue == 0.0)
-				this.println("Target covered!");
-			else
-				this.println("Target not covered...");
 			
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
-			suite.add(testCase);
+				
+			this.print("Fitness function: " + fitnessValue + ". ");
+			if (fitnessValue == 0.0) {
+				this.println("Target covered!");
+				suite.add(testCase);
+				this.measureBenchmarks("Single target", suite, exp.getNumberOfEvaluation());
+			} else
+				this.println("Target not covered...");
 
 			uncoveredEdges.removeAll(testCase.getCoveredEdges());
 
 			this.println("Parameters found: " + Arrays.toString(numericParams));
-
-			this.measureBenchmarks("Single target", suite, exp.getNumberOfEvaluation());
 
 			calculator.calculateCoverage(suite);
 		}

@@ -510,10 +510,14 @@ void _f_ocelot_init_arrays(JNIEnv* env, int arrayN, double* array, int* types) {
 			int valueInt = (int)array[index];
 			double valueDouble = array[index];
 			char valueChar = (char)array[index];
+			unsigned int valueUInt = (unsigned int)array[index];
+			unsigned char valueUChar = (unsigned char)array[index];
 
 			int* _v_ocelot_pointers_int = (int*)(_v_ocelot_pointers[i]);
 			double* _v_ocelot_pointers_double = _v_ocelot_pointers[i];
 			char* _v_ocelot_pointers_char = (char*)(_v_ocelot_pointers[i]);
+			unsigned int* _v_ocelot_pointers_uint = (unsigned int*)(_v_ocelot_pointers[i]);
+			unsigned char* _v_ocelot_pointers_uchar = (unsigned char*)(_v_ocelot_pointers[i]);
 
 			switch (types[j]) {
 			case TYPE_INT:
@@ -524,6 +528,12 @@ void _f_ocelot_init_arrays(JNIEnv* env, int arrayN, double* array, int* types) {
 				break;
 			case TYPE_CHAR:
 				_v_ocelot_pointers_char[j] = valueChar;
+				break;
+			case TYPE_UNSIGNEDINT:
+				_v_ocelot_pointers_uint[j] = valueUInt;
+				break;
+			case TYPE_UNSIGNEDCHAR:
+				_v_ocelot_pointers_uchar[j] = valueUChar;
 				break;
 			default:
 				_v_ocelot_pointers_double[j] = valueDouble;

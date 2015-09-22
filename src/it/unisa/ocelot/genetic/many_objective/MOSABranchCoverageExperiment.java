@@ -39,7 +39,7 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 	// all branches to cover (except FlowEdges)
 	private List<LabeledEdge> branches;
 
-	public MOSABranchCoverageExperiment(CFG cfg, ConfigManager configManager, CType[] types) {
+	public MOSABranchCoverageExperiment(CFG cfg, List<LabeledEdge> pBranches, ConfigManager configManager, CType[] types) {
 		super(configManager.getResultsFolder(), configManager.getExperimentRuns());
 
 		this.cfg = cfg;
@@ -48,7 +48,7 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 
 		this.algorithmNameList_ = new String[] { "MOSA" };
 		// this.branches = getTargetsFromCFG();
-		this.branches = cfg.getBranchesFromCFG();
+		this.branches = pBranches;
 	}
 
 	@Override

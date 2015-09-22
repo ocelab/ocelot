@@ -17,6 +17,10 @@ extern "C" {
 #define TYPE_DOUBLE 1
 #define TYPE_CHAR 2
 #define TYPE_LONG 3
+#define TYPE_UNSIGNEDINT 4
+#define TYPE_UNSIGNEDDOUBLE 5
+#define TYPE_UNSIGNEDCHAR 6
+#define TYPE_UNSIGNEDLONG 6
 
 #define MAX_EVENTS_NUMBER 1000
 #define TIMEOUT 30

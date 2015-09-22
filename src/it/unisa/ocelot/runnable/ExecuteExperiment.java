@@ -31,9 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 public class ExecuteExperiment {
 	private static final String CONFIG_FILENAME = "config.properties";
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-		TestSuiteGeneratorHandler.MCCABE_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.RANDOM_SUITE_GENERATOR,
-		//TestSuiteGeneratorHandler.VANILLA_MCCABE_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.REDUCED_MOSA_TEST_SUITE_GENERATOR,
+		//TestSuiteGeneratorHandler.MCCABE_SUITE_GENERATOR
 	};
 
 	static {

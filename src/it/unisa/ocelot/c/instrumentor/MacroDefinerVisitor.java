@@ -205,9 +205,24 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			String[] elements = new String[numberOfPointers];
 			int arrayTypesId = 0;
 			for (int i = 0; i < parametersStringTypes.length; i++) {
-				if (parametersStringNames[i].contains("*")) {
-					elements[arrayTypesId] = "TYPE_"+parametersStringTypes[i].replaceAll("\\*", "").toUpperCase();
-					arrayTypesId++;
+				String parameterStringName = parametersStringNames[i].replaceAll("\\*\\s*", "");
+				String parameterStringType = parametersStringTypes[i];
+				
+				IParameter parameterRealType = this.parameters.get(parameterStringName);
+				IType type = getType(parameterRealType.getType());
+				
+				if (type instanceof CStructure) {
+					//TODO Handle pointers to structures
+				} else {
+					if (parametersStringNames[i].contains("*")) {
+						String typeString = type.toString().replaceAll("\\*", "");
+						typeString = typeString.replaceAll("const", "");
+						typeString = typeString.replaceAll(" ", "");
+						typeString = typeString.toUpperCase();
+						
+						elements[arrayTypesId] = "TYPE_"+ typeString;
+						arrayTypesId++;
+					}
 				}
 			}
 			macro += StringUtils.join(elements, ',');
