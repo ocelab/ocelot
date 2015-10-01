@@ -1,7 +1,7 @@
 package it.unisa.ocelot.suites.minimization;
 
 import it.unisa.ocelot.TestCase;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,6 +1,6 @@
 package jmetal.util;
 
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
 import java.util.ArrayList;
 import java.util.Comparator;

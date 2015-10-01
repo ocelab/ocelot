@@ -1,4 +1,10 @@
-package it.unisa.ocelot.c.cfg;
+package it.unisa.ocelot.c.cfg.nodes;
+
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.edges.CaseEdge;
+import it.unisa.ocelot.c.cfg.edges.FalseEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 
 import java.util.ArrayList;
 import java.util.List;

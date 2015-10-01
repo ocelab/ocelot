@@ -2,7 +2,7 @@ package it.unisa.ocelot.c.instrumentor;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
-import it.unisa.ocelot.c.cfg.CaseEdge;
+import it.unisa.ocelot.c.cfg.edges.CaseEdge;
 
 import java.util.ArrayList;
 import java.util.List;

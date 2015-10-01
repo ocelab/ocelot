@@ -1,6 +1,6 @@
 package it.unisa.ocelot;
 
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
 import java.util.Set;
 

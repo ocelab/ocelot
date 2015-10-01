@@ -8,7 +8,7 @@ import javax.management.JMException;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;

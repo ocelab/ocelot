@@ -1,5 +1,7 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+
 import java.util.ArrayList;
 import java.util.List;
 

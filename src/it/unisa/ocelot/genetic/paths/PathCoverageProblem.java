@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;

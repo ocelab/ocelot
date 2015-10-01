@@ -1,9 +1,9 @@
 package it.unisa.ocelot.simulator.listeners;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.FlowEdge;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.FlowEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 

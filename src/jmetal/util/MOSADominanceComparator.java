@@ -1,6 +1,6 @@
 package jmetal.util;
 
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
 
 import java.util.ArrayList;

@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
-import it.unisa.ocelot.c.cfg.Dominators;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.simulator.CBridge;
@@ -124,8 +124,8 @@ public class PathCoverageProblem extends StandardProblem {
 		CBridge bridge = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
-		ManyNodesDistanceListenerDomTree listener = 
-				new ManyNodesDistanceListenerDomTree(this.cfg, this.targetNodes, this.fixedApproachLevels, this.dominators);
+		ManyNodesDistanceListener listener = 
+				new ManyNodesDistanceListener(this.cfg, this.targetNodes, this.fixedApproachLevels, this.dominators);
 
 		try {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);

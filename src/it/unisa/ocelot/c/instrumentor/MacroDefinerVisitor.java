@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
@@ -21,9 +24,12 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IType;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTDeclarationStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTKnRFunctionDeclarator;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTSimpleDeclaration;
+import org.eclipse.cdt.internal.core.dom.parser.c.CPointerType;
 import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
 import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
 
@@ -39,20 +45,32 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	private String[] neededParameters;
 	private List<IType> functionParameters;
 	private Map<String, IParameter> parameters;
+	
+	private Map<String, IType> externalReferences;
+	
+	private List<String> localVariables;
+	private List<String> usedVariables;
+	
 	private ConfigManager config;
 	
-	public MacroDefinerVisitor(String pFunctionName) {
+	public MacroDefinerVisitor(String pFunctionName, Map<String, IType> externalReferences) {
 		this.shouldVisitDeclarations = true;
 		this.shouldVisitDeclarators = true;
 		this.shouldVisitTranslationUnit = true;
 		this.shouldVisitStatements = true;
 		this.shouldVisitDeclSpecifiers = true;
+		this.shouldVisitNames = true;
 		
 		this.functionName = pFunctionName;
+		
+		this.externalReferences = externalReferences;
 		
 		this.functionParameters = new ArrayList<IType>();
 		
 		this.parameters = new HashMap<String, IParameter>();
+		
+		this.localVariables = new ArrayList<String>();
+		this.usedVariables = new ArrayList<String>();
 		
 		this.callMacro = "";
 		
@@ -140,8 +158,12 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	 */
 	@Override
 	public int leave(IASTDeclaration pDeclaration) {
+		
 		int result = super.leave(pDeclaration);
 		if (pDeclaration instanceof CASTFunctionDefinition) {
+			System.out.println(this.usedVariables);
+			System.out.println(this.localVariables);
+			
 			CASTFunctionDefinition function = (CASTFunctionDefinition)pDeclaration;
 			
 			IASTName functionName;
@@ -192,6 +214,13 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					numberOfPointers++;
 			}
 			
+			for (Entry<String, IType> type : this.externalReferences.entrySet()) {
+				IType realType = getType(type.getValue());
+				
+				if (realType instanceof CPointerType)
+					numberOfPointers++;
+			}
+			
 			int totalVariables = parametersStringTypes.length;
 			int numberOfNonPointers = totalVariables - numberOfPointers;
 			
@@ -225,6 +254,21 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					}
 				}
 			}
+			
+			for (Entry<String, IType> type : this.externalReferences.entrySet()) {
+				IType realType = getType(type.getValue());
+				if (realType instanceof CPointerType) {
+					String typeString = realType.toString().replaceAll("\\*", "");
+					typeString = typeString.replaceAll("const", "");
+					typeString = typeString.replaceAll(" ", "");
+					typeString = typeString.toUpperCase();
+					
+					elements[arrayTypesId] = "TYPE_"+ typeString;
+					arrayTypesId++;
+				}
+			}
+			
+			
 			macro += StringUtils.join(elements, ',');
 			macro += "}\n";
 			macro += "#define EXECUTE_OCELOT_TEST ";
@@ -259,7 +303,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 							inputArgument++;
 						} else {
 							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointer[(int)(" + argcall + ")];\\\n";
+							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
 							pointerArgument++;
 							//TODO Test!
 						}
@@ -283,6 +327,55 @@ public class MacroDefinerVisitor extends ASTVisitor {
 				}
 				outputArgument++;
 			}
+			
+			for (Entry<String, IType> entry : this.externalReferences.entrySet()) {
+				IType type = entry.getValue();
+				IType realType = type;
+				String variableName = entry.getKey();
+				
+				int pointers = 0;
+				
+				while (realType instanceof CPointerType) {
+					realType = ((CPointerType)realType).getType();
+					pointers++;
+				}
+				
+				if (realType instanceof CStructure) {
+					VarStructTree tree = new VarStructTree(variableName, (CStructure)type);
+					List<StructNode> basics = tree.getBasicVariables();
+					for (StructNode var : basics) {
+						this.functionParameters.add(var.type);
+						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
+						
+						if (!var.isPointer()) {
+							macro += fieldType;
+							macro += " __str"+inputArgument;
+							macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
+							macro += var.getCompleteName() + " = __str" + inputArgument + ";\\\n";
+						
+							inputArgument++;
+						} else {
+							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
+							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
+							pointerArgument++;
+							//TODO Test!
+						}
+					}
+				} else {
+					this.functionParameters.add(type);
+					
+					if (pointers == 0) {
+						macro += variableName + " = OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
+						
+						inputArgument++;
+					} else {
+						String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
+						macro += variableName + " = &_v_ocelot_pointers[(int)(" + argcall + ")];\\\n"; //Assign
+						pointerArgument++;
+					}
+				}
+			}
+						
 			macro += "OCELOT_TESTFUNCTION (" + StringUtils.join(callParameters, ",") + ");";
 			
 			this.callMacro = macro;

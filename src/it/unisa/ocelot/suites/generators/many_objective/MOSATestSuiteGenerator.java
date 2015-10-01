@@ -1,4 +1,4 @@
-package it.unisa.ocelot.suites.many_objective;
+package it.unisa.ocelot.suites.generators.many_objective;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -7,6 +7,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.HashSet;
@@ -18,8 +19,9 @@ import jmetal.core.SolutionSet;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
-public class MOSATestSuiteGenerator extends TestSuiteGenerator {
+public class MOSATestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private ConfigManager config;
+	private boolean satisfied;
 
 	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
 		super(cfg);
@@ -27,10 +29,10 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 	}
 
 	@Override
-	public Set<TestCase> generateTestSuite()
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite)
 			throws TestSuiteGenerationException {
 
-		Set<TestCase> suite = new HashSet<TestCase>();
+		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 		this.startBenchmarks();
 
 		coverMultiObjectiveBranches(suite);
@@ -39,8 +41,16 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator {
 		calculator.calculateCoverage(suite);
 		System.out.println("Coverage of MOSA test suite = "
 				+ calculator.getBranchCoverage());
+		
+		if (calculator.getBranchCoverage() >= this.config.getRequiredCoverage()) {
+			this.satisfied = true;
+		}
 			
 		return suite;
+	}
+	
+	public boolean isSatisfied() {
+		return satisfied;
 	}
 
 	private void coverMultiObjectiveBranches(Set<TestCase> suite)

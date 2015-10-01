@@ -1,5 +1,6 @@
 package it.unisa.ocelot.genetic;
 
+import it.unisa.ocelot.genetic.algorithms.CDG_GA;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;

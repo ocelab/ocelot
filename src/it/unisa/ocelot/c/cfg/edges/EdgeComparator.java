@@ -1,4 +1,6 @@
-package it.unisa.ocelot.c.cfg;
+package it.unisa.ocelot.c.cfg.edges;
+
+import it.unisa.ocelot.c.cfg.CFG;
 
 import java.util.Comparator;
 

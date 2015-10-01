@@ -1,8 +1,8 @@
 package it.unisa.ocelot.c.cfg.paths;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 
 import java.util.ArrayList;
 import java.util.Collection;

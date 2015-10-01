@@ -1,21 +1,28 @@
 package it.unisa.ocelot.conf;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 
 public class ConfigManager {
+	private static final String STATIC_CONTENT = "---------STATIC+CONTENT";
 	private static ConfigManager instance;
 	private static String filename;
+	private static String content;
+	
+	private String myFilename;
 	
 	private Properties properties;
 	
@@ -29,6 +36,12 @@ public class ConfigManager {
 	 */
 	public static void setFilename(String pFilename) {
 		filename = pFilename;
+		content = null;
+	}
+	
+	public static void setDirectContent(String pContent) {
+		content = pContent;
+		filename = STATIC_CONTENT + UUID.randomUUID();
 	}
 	
 	/**
@@ -37,15 +50,34 @@ public class ConfigManager {
 	 * @throws IOException If there is an error opening the file
 	 */
 	public static ConfigManager getInstance() throws IOException {
-		if (instance == null)
-			instance = new ConfigManager();
+		if (instance == null || !instance.myFilename.equals(filename)) {
+			if (!filename.startsWith(STATIC_CONTENT))
+				instance = new ConfigManager(filename);
+			else {
+				instance = new ConfigManager();
+				instance.directLoadContent(filename, content);
+			}
+		}
 		
 		return instance;
 	}
 	
-	private ConfigManager() throws IOException {
+	private ConfigManager(String filename) throws IOException {
 		this.properties = new Properties();
 		this.properties.load(new FileInputStream(filename));
+		
+		this.myFilename = filename;
+	}
+	
+	public ConfigManager() {
+		this.myFilename = "";
+	}
+	
+	public void directLoadContent(String pFilename, String pContent) throws IOException {
+		this.properties = new Properties();
+		this.properties.load(new StringReader(pContent));
+		
+		this.myFilename = pFilename;
 	}
 	
 	/**
@@ -325,5 +357,16 @@ public class ConfigManager {
 	
 	public String getAlgorithm() {
 		return this.properties.getProperty("suite.generator.algorithm", "GeneticAlgorithm");
+	}
+	
+	public List<String> getCascadeGenerators() {
+		String cascade = this.properties.getProperty("suite.generator.cascade", "");
+		String[] array = cascade.split("\\,");
+		
+		List<String> list = new ArrayList<>();
+		for (String generator : array)
+			list.add(generator);
+		
+		return list;
 	}
 }

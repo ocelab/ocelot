@@ -1,4 +1,4 @@
-package it.unisa.ocelot.c.cfg;
+package it.unisa.ocelot.c.cfg.edges;
 
 import it.unisa.ocelot.simulator.ExecutionEvent;
 
@@ -8,23 +8,25 @@ import it.unisa.ocelot.simulator.ExecutionEvent;
  * @author simone
  *
  */
-public class FalseEdge extends LabeledEdge {
+public class FlowEdge extends LabeledEdge {
 	private static final long serialVersionUID = -6097816767281519267L;
 	
-	public FalseEdge() {
-		super(false);
+	public FlowEdge() {
+		super("");
 	}
 
 	@Override
 	public boolean matchesExecution(ExecutionEvent pEvent) {
-		if (pEvent == null)
-			return false;
-		
-		return pEvent.choice == 0;
+		return true;
 	}
 
 	@Override
 	public boolean needsEvent() {
-		return true;
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "FlowEdge";
 	}
 }

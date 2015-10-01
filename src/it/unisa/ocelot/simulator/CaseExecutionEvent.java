@@ -1,6 +1,6 @@
 package it.unisa.ocelot.simulator;
 
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
 public class CaseExecutionEvent extends ExecutionEvent {
 	public boolean chosen;

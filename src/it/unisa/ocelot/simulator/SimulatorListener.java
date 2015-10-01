@@ -2,8 +2,8 @@ package it.unisa.ocelot.simulator;
 
 import java.util.List;
 
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 
 public interface SimulatorListener {
 	public void onEdgeVisit(LabeledEdge pEdge);

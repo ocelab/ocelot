@@ -1,4 +1,6 @@
-package it.unisa.ocelot.c.cfg;
+package it.unisa.ocelot.c.cfg.nodes;
+
+import it.unisa.ocelot.c.cfg.CFG;
 
 import java.util.ArrayList;
 import java.util.List;

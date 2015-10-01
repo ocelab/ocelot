@@ -2,13 +2,14 @@ package it.unisa.ocelot.suites.generators;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +44,11 @@ public abstract class TestSuiteGenerator {
 			benchmarkCalculator.removeLast();
 	}
 	
-	public abstract Set<TestCase> generateTestSuite() throws TestSuiteGenerationException;
+	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
+		return this.generateTestSuite(new HashSet<TestCase>());
+	}
+	
+	public abstract Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException;
 	
 	protected void printSeparator() {
 		if (this.config.getPrintResults())

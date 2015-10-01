@@ -1,5 +1,12 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.cfg.edges.CaseEdge;
+import it.unisa.ocelot.c.cfg.edges.FalseEdge;
+import it.unisa.ocelot.c.cfg.edges.FlowEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
 import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
 import it.unisa.ocelot.c.types.CDouble;
 import it.unisa.ocelot.c.types.CInteger;
@@ -72,7 +79,11 @@ public class CFGVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTTranslationUnit tu) {
-		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName);
+		ExternalReferencesVisitor referencesVisitor = new ExternalReferencesVisitor(this.functionName);
+		
+		tu.accept(referencesVisitor);
+		
+		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName, referencesVisitor.getExternalReferences());
 		tu.accept(typesDefiner);
 		
 		CType[] parameterTypes = new CType[typesDefiner.getFunctionParameters().size()];

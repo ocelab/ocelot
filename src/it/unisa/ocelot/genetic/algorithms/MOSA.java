@@ -1,7 +1,7 @@
-package it.unisa.ocelot.genetic;
+package it.unisa.ocelot.genetic.algorithms;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
 import it.unisa.ocelot.util.Front;
 

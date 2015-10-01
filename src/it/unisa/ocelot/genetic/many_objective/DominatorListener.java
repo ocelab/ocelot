@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.Dominators;
-import it.unisa.ocelot.c.cfg.FalseEdge;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
-import it.unisa.ocelot.c.cfg.TrueEdge;
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
+import it.unisa.ocelot.c.cfg.edges.FalseEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 

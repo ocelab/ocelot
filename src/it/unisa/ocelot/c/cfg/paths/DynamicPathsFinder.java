@@ -5,10 +5,10 @@ import java.util.List;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.KShortestPaths;
 
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.TooManyInfeasiblePathsException;
 import it.unisa.ocelot.c.cfg.WeightedCFG;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 
 public class DynamicPathsFinder {
 	private static final int MAX_FAILED_PATHS = 20;

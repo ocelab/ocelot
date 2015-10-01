@@ -2,46 +2,51 @@ package it.unisa.ocelot.suites.generators.mccabe;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.paths.PathSearchSimplex;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
-import it.unisa.ocelot.genetic.many_nodes.PathCoverageExperiment;
+import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import jmetal.util.JMException;
 
-public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
+public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
+	private boolean satisfied;
+
 	public ReducedMcCabeTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
 		this.config = pConfigManager;
 	}
 
 	@Override
-	public Set<TestCase> generateTestSuite()
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite)
 			throws TestSuiteGenerationException {
-		Set<TestCase> suite = new HashSet<TestCase>();
+		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 
 		this.startBenchmarks();
 
 		coverMcCabePaths(suite);
 
 		calculator.calculateCoverage(suite);
-		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
-			coverSingleTargets(suite);
+		if (calculator.getBranchCoverage() >= this.config.getRequiredCoverage()) {
+			this.satisfied = true;
 		}
 
 		return suite;
+	}
+	
+	public boolean isSatisfied() {
+		return satisfied;
 	}
 
 	private void coverMcCabePaths(Set<TestCase> suite)
@@ -55,7 +60,7 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				mcCabeCalculator.getMcCabeVectorPaths(), 
 				config.getReducedMcCabeCoverageTimes());
 		
-		searchPath.solve();
+		searchPath.solve(this.getUncoveredEdges(suite));
 		mcCabePaths = searchPath.getChosenPaths();
 		
 		boolean improvement = true;
@@ -121,52 +126,6 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator {
 				this.removeLastBenchmark();
 				suite.removeAll(lastIterationTestCases);
 			}
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {
-		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
-		
-		Collections.shuffle(uncoveredEdges);
-		while (!uncoveredEdges.isEmpty()) {
-			LabeledEdge targetEdge = uncoveredEdges.remove(0); //avoids infinite loop
-			
-			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
-			exp.initExperiment();
-			try {
-				exp.basicRun();
-			} catch (JMException|ClassNotFoundException e) {
-				throw new TestSuiteGenerationException(e.getMessage());
-			}
-			
-			this.printSeparator();
-			this.print("Current target: ");
-			this.println(targetEdge);
-			
-			double fitnessValue = exp.getFitnessValue();
-			VariableTranslator translator = new VariableTranslator(exp.getSolution());
-			
-			this.print("Fitness function: " + fitnessValue + ". ");
-			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
-			TestCase testCase = this.createTestCase(numericParams, suite.size());
-			
-			if (fitnessValue == 0.0) {
-				this.println("Target covered!");
-				suite.add(testCase);
-				
-				//TODO: Fix with number of evaluations!
-				this.measureBenchmarks("McCabe", suite, 0);
-			} else
-				this.println("Target not covered...");
-			
-			uncoveredEdges.removeAll(testCase.getCoveredEdges());
-			
-			this.println("Parameters found: ");
-			this.println(Arrays.toString(numericParams[0][0]));
-			for (int k = 0; k < numericParams[1].length; k++)
-				this.println(Arrays.toString(numericParams[1][k]));
-			this.println(Arrays.toString(numericParams[2][0]));
 		}
 	}
 }

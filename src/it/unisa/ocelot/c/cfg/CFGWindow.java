@@ -1,5 +1,8 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Iterator;

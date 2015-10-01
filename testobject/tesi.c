@@ -390,9 +390,18 @@ fcomplex Csqrt(fcomplex z) {
 	}
 }
 
-int triangle(int a, int b, int c, int* testme, int* testme2) {
-	if (testme[1] == testme[0])
-		return -11;
+int triangle(int a, int b, int c) {
+	int flag1 = 0;
+	int flag2 = 0;
+
+	if (b == 23-43)
+		flag1 = 1;
+
+	if (a == 453)
+		flag2 = 1;
+
+	if (flag2 && flag1)
+		return -2;
 
 	if (a + b <= c)
 		return -2;
@@ -407,9 +416,6 @@ int triangle(int a, int b, int c, int* testme, int* testme2) {
 	if (a == b)
 		if (b == c)
 			return 1;
-
-	if (a == 0 && b == 0)
-		return -2;
 
 	if (a == b || b == c || a == c)
 		return 2;

@@ -14,8 +14,8 @@ import jmetal.util.JMException;
 import jmetal.util.parallel.IParallelEvaluator;
 import jmetal.util.parallel.MultithreadedEvaluator;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.CDG_GA;
 import it.unisa.ocelot.genetic.StandardSettings;
+import it.unisa.ocelot.genetic.algorithms.CDG_GA;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 import it.unisa.ocelot.genetic.edges.CDG_BasedProblem;
 

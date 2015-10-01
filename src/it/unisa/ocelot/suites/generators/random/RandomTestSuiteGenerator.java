@@ -2,9 +2,9 @@ package it.unisa.ocelot.suites.generators.random;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.types.CDouble;
 import it.unisa.ocelot.c.types.CInteger;
 import it.unisa.ocelot.c.types.CType;
@@ -15,6 +15,7 @@ import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
@@ -32,9 +33,10 @@ import jmetal.core.Variable;
 import jmetal.util.JMException;
 
 
-public class RandomTestSuiteGenerator extends TestSuiteGenerator {
+public class RandomTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private Random random;
 	private Range<Double>[] ranges;
+	private boolean satisfied;
 	
 	public RandomTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
@@ -44,9 +46,28 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 	}
 	
 	@Override
-	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
-		Set<TestCase> suite = new HashSet<TestCase>();
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException {
+		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 		
+		this.startBenchmarks();
+		
+		calculator.calculateCoverage(suite);
+		
+		this.generateRandomSuite(suite);
+		
+		calculator.calculateCoverage(suite);
+		if (calculator.getBranchCoverage() >= this.config.getRequiredCoverage()) {
+			this.satisfied = true;
+		}
+		
+		return suite;
+	}
+	
+	public boolean isSatisfied() {
+		return satisfied;
+	}
+	
+	private void generateRandomSuite(Set<TestCase> suite) throws TestSuiteGenerationException {
 		long time = 0;
 		long timeout = System.currentTimeMillis() + this.config.getRandomTimeLimit()*1000;
 		if (this.config.getRandomTimeLimit() < 0)
@@ -56,8 +77,6 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 		if (sizeout < 0)
 			sizeout = Integer.MAX_VALUE;
 		
-		this.startBenchmarks();
-		calculator.calculateCoverage(suite);
 		double lastCoverage = 0.0;
 		while (calculator.getBranchCoverage() < this.config.getRequiredCoverage() &&
 				suite.size() <= sizeout &&
@@ -83,8 +102,6 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator {
 		}
 		
 		this.measureBenchmarks("End", suite, null);
-				
-		return suite;
 	}
 	
 	@SuppressWarnings("unchecked")

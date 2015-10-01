@@ -2,11 +2,11 @@ package it.unisa.ocelot.suites.generators.cdg;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CaseEdge;
-import it.unisa.ocelot.c.cfg.EdgeComparator;
-import it.unisa.ocelot.c.cfg.FalseEdge;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
-import it.unisa.ocelot.c.cfg.TrueEdge;
+import it.unisa.ocelot.c.cfg.edges.CaseEdge;
+import it.unisa.ocelot.c.cfg.edges.EdgeComparator;
+import it.unisa.ocelot.c.cfg.edges.FalseEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.CDG_BasedExperiment;
@@ -16,6 +16,7 @@ import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
@@ -30,9 +31,10 @@ import jmetal.util.JMException;
 
 import org.eclipse.cdt.core.settings.model.util.Comparator;
 
-public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
+public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private CoverageCalculatorListener coverageCalculatorListener;
 	private final List<LabeledEdge> branches;
+	private boolean satisfied;
 
 	public CDG_BasedApproachGenerator(ConfigManager config, CFG cfg) {
 		super(cfg);
@@ -43,9 +45,9 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
 	}
 
 	@Override
-	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException {
 
-		Set<TestCase> suite = new HashSet<>();
+		Set<TestCase> suite = new HashSet<>(pSuite);
 
 		this.startBenchmarks();
 
@@ -58,8 +60,16 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator {
 		// restore all branches as uncovered for next experiments
 		for (LabeledEdge edge : this.branches)
 			edge.setUncovered();
+		
+		if (calculator.getBranchCoverage() >= this.config.getRequiredCoverage()) {
+			this.satisfied = true;
+		}
 
 		return suite;
+	}
+	
+	public boolean isSatisfied() {
+		return satisfied;
 	}
 
 	private void coverEdges(Set<TestCase> suite) throws TestSuiteGenerationException {

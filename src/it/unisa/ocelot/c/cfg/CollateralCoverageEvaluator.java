@@ -1,5 +1,9 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

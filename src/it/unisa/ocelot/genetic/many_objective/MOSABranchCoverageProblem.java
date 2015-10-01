@@ -1,8 +1,8 @@
 package it.unisa.ocelot.genetic.many_objective;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;

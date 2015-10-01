@@ -34,6 +34,18 @@ public class EdgeGraph<V, E> extends ListenableDirectedGraph<EdgeWrapper<E>, Def
 		return end;
 	}
 	
+	public EdgeWrapper<E> getWrapper(E pEdge) {
+		for (EdgeWrapper<E> wrapper : this.vertexSet()) {
+			if (wrapper.getWrappedEdge() == null) {
+				if (pEdge == null)
+					return wrapper;
+			} else if (wrapper.getWrappedEdge().equals(pEdge))
+				return wrapper;
+		}
+		
+		return null;
+	}
+	
 	private void generate(DirectedGraph<V, E> pGraph, V pStart, V pEnd) {
 		EdgeWrapper<E> start = new EdgeWrapper<E>(null);
 		this.addVertex(start);

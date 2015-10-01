@@ -1,11 +1,10 @@
 package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.c.cfg.CFG;
-
 import it.unisa.ocelot.c.cfg.CFGBuilder;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.CFGNodeNavigator;
 import it.unisa.ocelot.c.cfg.CFGVisitor;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;

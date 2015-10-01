@@ -1,12 +1,14 @@
 package it.unisa.ocelot.genetic.many_nodes;
 
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +24,6 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 	
 	private Map<CFGNode, Set<CFGNode>> dominators;
 	
-	private int shortestPath;
-	private LabeledEdge nearestEdge;
 	private CFGNode nearestNode;
 	
 	private List<ExecutionEvent> nearestEvents;
@@ -41,9 +41,8 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 		this.currentTarget = this.targetNodes.get(this.targetNodeIndex);
 		
 		this.nearestEvents = new ArrayList<ExecutionEvent>();
-		this.shortestPath = Integer.MAX_VALUE;
 		
-		this.dominators = pDominators;
+		this.dominators = new HashMap<CFGNode, Set<CFGNode>>(pDominators);
 	}
 
 	@Override
@@ -83,24 +82,19 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 			} catch (IndexOutOfBoundsException e) {
 				currentTarget = null;
 			}
-			this.shortestPath = Integer.MAX_VALUE;
 		}
 		
 		if (currentTarget == null)
 			return;
 		
-		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg,
-				pNode, this.currentTarget);
-		if (path != null && path.size() < this.shortestPath) {
+		Set<CFGNode> dominators = this.dominators.get(currentTarget);
+		if (dominators.contains(pNode)) {
+			dominators.remove(pNode);
 			this.nearestNode = pNode;
-			if (path.size() > 0)
-				this.nearestEdge = path.get(0);
-			else
-				this.nearestEdge = null;
-			this.shortestPath = path.size();
 		}
 	}
 	
+	//TODO fix here
 	public int getApproachLevel() {
 		//If the last target node is reached, return 0
 		if (this.currentTarget == null)
@@ -108,7 +102,7 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 		
 		int additionalAL = this.fixedApproachLevels.get(this.currentTarget);
 		
-		int al = this.shortestPath;
+		int al = this.dominators.get(this.currentTarget).size();
 		
 		return additionalAL + al;
 	}
@@ -128,6 +122,11 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 		if (this.getApproachLevel() == 0) {
 			return 0D;
 		}
+		
+		LabeledEdge nearestEdge;
+		
+		List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, this.nearestNode, this.currentTarget);
+		nearestEdge = path.get(0);
 
 		// approach level more than 0
 		if (nearestEvents.size() == 1) {
@@ -136,7 +135,7 @@ public class ManyNodesDistanceListener implements SimulatorListener {
 			distance = Math.max(event.distanceTrue, event.distanceFalse);
 		} else {
 			for (ExecutionEvent event : this.nearestEvents) {
-				if (event.getEdge().equals(this.nearestEdge))
+				if (event.getEdge().equals(nearestEdge))
 					distance = Math.max(event.distanceTrue, event.distanceFalse);
 			}
 			assert distance != 0 : "non-positive distance error!";

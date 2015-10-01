@@ -1,4 +1,4 @@
-package it.unisa.ocelot.c.cfg;
+package it.unisa.ocelot.c.cfg.dominators;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
  * @param <E>
  *            Edges of graph
  */
-public class Dominators<V, E> {
+public class Dominators<V, E> implements IDominators<V> {
 	private DirectedGraph<V, E> graph;
 	private Vector<V> vertexPreOrder;
 	private Hashtable<V, V> idom = null;

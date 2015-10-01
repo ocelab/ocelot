@@ -9,9 +9,9 @@ import java.util.Set;
 import jmetal.util.JMException;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.TooManyInfeasiblePathsException;
 import it.unisa.ocelot.c.cfg.WeightedCFG;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.paths.DynamicPathsFinder;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
@@ -19,6 +19,7 @@ import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
+@Deprecated
 public class DynamicPathsTestSuiteGenerator extends TestSuiteGenerator {	
 	public DynamicPathsTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
@@ -26,9 +27,9 @@ public class DynamicPathsTestSuiteGenerator extends TestSuiteGenerator {
 	}
 	
 	@Override
-	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException {
 		WeightedCFG weighted = new WeightedCFG(this.cfg);
-		Set<TestCase> suite = new HashSet<TestCase>();
+		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 		
 		DynamicPathsFinder pathFinder = new DynamicPathsFinder(weighted);
 		

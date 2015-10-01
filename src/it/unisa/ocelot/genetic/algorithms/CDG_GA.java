@@ -1,4 +1,4 @@
-package it.unisa.ocelot.genetic;
+package it.unisa.ocelot.genetic.algorithms;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -27,7 +27,6 @@ public class CDG_GA extends Algorithm {
 		no_evaluations = 0;
 	}
 
-	@SuppressWarnings("unchecked")
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		int populationSize;
 		int maxEvaluations;

@@ -2,9 +2,9 @@ package it.unisa.ocelot.suites.generators.edge;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGNode;
-import it.unisa.ocelot.c.cfg.LabeledEdge;
 import it.unisa.ocelot.c.cfg.McCabeCalculator;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
@@ -12,6 +12,7 @@ import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 import java.util.ArrayList;
@@ -25,26 +26,36 @@ import jmetal.core.Variable;
 import jmetal.util.JMException;
 
 
-public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator {	
+public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
+	private boolean satisfied;
+	
 	public SingleTargetTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
+		
+		satisfied = false;
 		
 		this.config = pConfigManager;
 	}
 	
 	@Override
-	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
-		Set<TestCase> suite = new HashSet<TestCase>();
+	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException {
+		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 		
 		this.startBenchmarks();
 		
+		coverSingleTargets(suite);
+		
 		calculator.calculateCoverage(suite);
-		if (calculator.getBranchCoverage() < this.config.getRequiredCoverage()) {
-			coverSingleTargets(suite);
-			this.measureBenchmarks("Single targets", suite, null);
+		if (calculator.getBranchCoverage() >= this.config.getRequiredCoverage()) {
+			this.satisfied = true;
 		}
 				
 		return suite;
+	}
+	
+	@Override
+	public boolean isSatisfied() {
+		return satisfied;
 	}
 	
 	@SuppressWarnings("unchecked")
