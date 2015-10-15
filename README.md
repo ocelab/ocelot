@@ -8,5 +8,10 @@ OCELOT provides two main runnable classes:
 
 
 # Notes
-OCELOT currently requires GLib-2.0.
 
+OCELOT currently requires GLib-2.0.
+OCELOT also uses (for some specific algorithms) lp-solve. Please, see the notes in order to install properly the library. 
+
+# Installing notes for lp-solve
+
+http://lpsolve.sourceforge.net/5.5/Java/README.html#install

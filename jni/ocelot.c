@@ -51,7 +51,7 @@ double _f_ocelot_reg_fcall_pointer(void* fcall) {
 }
 
 double _f_ocelot_get_fcall() {
-	if (_v_ocelot_fcalls->size != 0) {
+	if (OCLIST_SIZE(_v_ocelot_fcalls) != 0) {
 		double element = OCLIST_GET(_v_ocelot_fcalls, 0, double);
 		OCLIST_SHIFT(_v_ocelot_fcalls);
 		return element;

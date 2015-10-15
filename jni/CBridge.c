@@ -493,15 +493,15 @@ int _f_ocelot_do_stuff(int coreId, JNIEnv* env, int valuesN, int arraysN, int po
 
 	EXECUTE_OCELOT_TEST
 
-	if (_v_ocelot_events->size > MAX_EVENTS_NUMBER) {
+	if (OCLIST_SIZE(_v_ocelot_events) > MAX_EVENTS_NUMBER) {
 		_f_ocelot_end();
 		return OCELOT_ERR_TOOMANYEVENTS;
 	}
 
 	volatile _T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
-	MEMSET(return_memory.size, _v_ocelot_events->size);
+	MEMSET(return_memory.size, OCLIST_SIZE(_v_ocelot_events));
 	int i;
-	for (i = 0; i < _v_ocelot_events->size; i++) {
+	for (i = 0; i < OCLIST_SIZE(_v_ocelot_events); i++) {
 		_T_ocelot_event event = OCLIST_GET(_v_ocelot_events, i, _T_ocelot_event);
 		LOG_EVENT(event, loggerChild);
 		memcpy(return_memory.events+i, &event, sizeof(_T_ocelot_event));
