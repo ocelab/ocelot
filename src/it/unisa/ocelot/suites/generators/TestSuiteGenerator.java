@@ -4,14 +4,19 @@ import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.OcelotExperiment;
+import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import jmetal.core.Solution;
 
 public abstract class TestSuiteGenerator {
 	protected List<BenchmarkCalculator> benchmarkCalculators;
@@ -84,5 +89,22 @@ public abstract class TestSuiteGenerator {
 		tc.setParameters(pParams);
 	
 		return tc;
+	}
+	
+	protected void addSerendipitousTestCases(OcelotExperiment exp, Set<TestCase> suite) {
+		Set<Solution> solutions = exp.getSerendipitousSolutions();
+		
+		for (Solution solution : solutions) {
+			VariableTranslator translator = new VariableTranslator(solution);
+			
+			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
+			TestCase testCase = this.createTestCase(numericParams, suite.size());
+				
+			this.print("Serendipitous coverage!");
+			suite.add(testCase);
+			this.measureBenchmarks("Serendipitous", suite, exp.getNumberOfEvaluation());
+	
+			this.println("Parameters found: " + Arrays.toString(numericParams));
+		}
 	}
 }

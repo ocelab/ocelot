@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jmetal.core.Solution;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
@@ -64,40 +65,57 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 
 			this.print("Current target: ");
 			this.println(currentTarget);
-			
-			double prevCoverage = calculator.getBranchCoverage();
-			
+						
 			exp.initExperiment();
+			exp.setSerendipitousPotentials(new HashSet<>(this.getUncoveredEdges(suite)));
 			try {
 				exp.basicRun();
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
+			
+			this.addSerendipitousTestCases(exp, suite);
 
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
+			
+			for (Solution solution : exp.getSerendipitousSolutions()) {
+				VariableTranslator currentTranslator = new VariableTranslator(solution);
+				Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
+				calculator.calculateCoverage(serendipitousParameters);
+				mcCabeCalculator.addPath(calculator.getCoveredPath());
+			}
 
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			
-			calculator.calculateCoverage(numericParams);
 
 			this.println("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
+				calculator.calculateCoverage(numericParams);
 				mcCabeCalculator.addPath(calculator.getCoveredPath());
 				suite.add(testCase);
+				this.measureBenchmarks("McCabe target", suite, exp.getNumberOfEvaluation());
 			} else {
 				this.println("Target not covered...");
 				System.out.println("Useless test case. Discarded.");
 			}
-			this.measureBenchmarks("McCabe target", suite, exp.getNumberOfEvaluation());
 			
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 			this.printSeparator();
 			
 			currentTarget = mcCabeCalculator.getNextTarget();
+			if (currentTarget != null && !getUncoveredEdges(suite).contains(currentTarget)) {
+				System.out.println(this.cfg.getEdgeSource(currentTarget));
+				System.out.println("ERRORE");
+			}
+			
+			calculator.calculateCoverage(suite);
+			System.out.println("Partial coverage: " + calculator.getBranchCoverage());
 		}
+		
+		this.measureBenchmarks("End", suite, 0);
 	}
 }

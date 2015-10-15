@@ -3,6 +3,7 @@ package it.unisa.ocelot.suites.generators;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.suites.generators.cdg.CDG_BasedApproachGenerator;
+import it.unisa.ocelot.suites.generators.edge.MemoryEdgeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.edge.SingleTargetTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.many_objective.MOSATestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.many_objective.ReducedMOSATestSuiteGenerator;
@@ -40,6 +41,8 @@ public class TestSuiteGeneratorHandler {
 			return new McCabeTestSuiteGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(ALL_EDGES_SUITE_GENERATOR))
 			return new SingleTargetTestSuiteGenerator(pConfigManager, pCFG);
+		else if (name.equalsIgnoreCase(MEMORY_EDGES_SUITE_GENERATOR))
+			return new MemoryEdgeTestSuiteGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(REDUCED_MCCABE_SUITE_GENERATOR))
 			return new ReducedMcCabeTestSuiteGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(REDUCED_MCCABE_PARTIALS_SUITE_GENERATOR))

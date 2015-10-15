@@ -30,6 +30,10 @@ public class EdgeDistanceListener implements SimulatorListener {
 	private List<ExecutionEvent> nearestEvents;
 	
 	private Set<CFGNode> dominators;
+	
+	private boolean forceCovered;
+	private Set<LabeledEdge> serendipitousPotentials;
+	private Set<LabeledEdge> serendipitousCovered;
 
 	/**
 	 * Constructor of EdgeDistanceListener class
@@ -47,15 +51,26 @@ public class EdgeDistanceListener implements SimulatorListener {
 		this.nearestEvents = new ArrayList<ExecutionEvent>();
 		
 		this.dominators = new HashSet<CFGNode>(pDominators);
+		this.forceCovered = false;
+		
+		this.serendipitousCovered = new HashSet<>();
+		this.serendipitousPotentials = new HashSet<>();
 	}
 
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge) {
-		// pass
+		if (pEdge.equals(targetEdge))
+			forceCovered = true;
+		
+		if (this.serendipitousPotentials.contains(pEdge))
+			this.serendipitousCovered.add(pEdge);
 	}
 
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge, ExecutionEvent pEvent) {
+		if (this.serendipitousPotentials.contains(pEdge))
+			this.serendipitousCovered.add(pEdge);
+		
 		CFGNode node = this.cfg.getEdgeSource(pEdge);
 
 		if (node.equals(this.nearestNode)) {
@@ -68,6 +83,8 @@ public class EdgeDistanceListener implements SimulatorListener {
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge, ExecutionEvent pEvent,
 			List<ExecutionEvent> pCases) {
+		if (this.serendipitousPotentials.contains(pEdge))
+			this.serendipitousCovered.add(pEdge);
 
 		CFGNode node = this.cfg.getEdgeSource(pEdge);
 
@@ -83,6 +100,9 @@ public class EdgeDistanceListener implements SimulatorListener {
 	 * @return an approach level int value
 	 */
 	public int getApproachLevel() {
+		if (forceCovered)
+			return 0;
+		
 		return this.dominators.size();
 	}
 
@@ -95,6 +115,9 @@ public class EdgeDistanceListener implements SimulatorListener {
 	}
 	
 	public double getBranchDistance() {
+		if (forceCovered)
+			return 0;
+		
 		if (this.getApproachLevel() == 0) {
 			// execution has reached the parent node of edge target
 			if (this.nearestEvents.size() == 1) {
@@ -156,4 +179,12 @@ public class EdgeDistanceListener implements SimulatorListener {
 		return this.getApproachLevel() + this.getNormalizedBranchDistance();
 	}
 
+	public void setSerendipitousPotentials(
+			Set<LabeledEdge> serendipitousPotentials) {
+		this.serendipitousPotentials = serendipitousPotentials;
+	}
+	
+	public Set<LabeledEdge> getSerendipitousCovered() {
+		return serendipitousCovered;
+	}
 }

@@ -8,6 +8,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.c.types.CType;
+import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
@@ -20,12 +21,14 @@ import org.apache.commons.lang3.Range;
 import jmetal.core.Solution;
 import jmetal.util.JMException;
 
-public class EdgeCoverageProblem extends StandardProblem {
+public class EdgeCoverageProblem extends StandardProblem implements SerendipitousProblem<LabeledEdge> {
 	private static final long serialVersionUID = 1930014794768729268L;
 
 	private CFG cfg;
 	private LabeledEdge target;
 	private Set<CFGNode> dominators;
+	private Set<LabeledEdge> serendipitousPotentials;
+	private Set<LabeledEdge> serendipitousCovered;
 
 	private boolean debug;
 
@@ -42,6 +45,11 @@ public class EdgeCoverageProblem extends StandardProblem {
 
 	public CFG getCFG() {
 		return cfg;
+	}
+	
+	public void setSerendipitousPotentials(Set<LabeledEdge> serendipitousPotentials) {
+		this.serendipitousPotentials = serendipitousPotentials;
+		this.serendipitousPotentials.remove(this.target);
 	}
 
 	public CFGNodeNavigator navigate() {
@@ -65,6 +73,7 @@ public class EdgeCoverageProblem extends StandardProblem {
 
 		EventsHandler handler = new EventsHandler();
 		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target, dominators);
+		bdalListener.setSerendipitousPotentials(this.serendipitousPotentials);
 		
 		try {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
@@ -79,6 +88,9 @@ public class EdgeCoverageProblem extends StandardProblem {
 
 		simulator.simulate();
 		
+		this.serendipitousCovered = bdalListener.getSerendipitousCovered();
+		this.serendipitousPotentials.removeAll(this.serendipitousCovered);
+		
 		double objective = bdalListener.getNormalizedBranchDistance()
 				+ bdalListener.getApproachLevel();
 		
@@ -86,5 +98,9 @@ public class EdgeCoverageProblem extends StandardProblem {
 		
 		if (debug)
 			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);
+	}
+	
+	public Set<LabeledEdge> getSerendipitousCovered() {
+		return serendipitousCovered;
 	}
 }

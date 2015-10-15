@@ -20,25 +20,34 @@ package it.unisa.ocelot.genetic.algorithms;
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import it.unisa.ocelot.simulator.CBridge;
-import jmetal.core.*;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
+import it.unisa.ocelot.genetic.SerendipitousProblem;
+import jmetal.core.Algorithm;
+import jmetal.core.Operator;
+import jmetal.core.Problem;
+import jmetal.core.Solution;
+import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
-import jmetal.util.parallel.IParallelEvaluator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * A multithreaded generational genetic algorithm
  */
 
-public class GeneticAlgorithm extends Algorithm {
-
+public class GeneticAlgorithm extends Algorithm implements SerendipitousAlgorithm<LabeledEdge> {
+	private static final long serialVersionUID = -2679014653669190929L;
+	
 	private int no_evaluation;
+
+	private Set<Solution> serendipitousSolutions;
+	private Set<LabeledEdge> serendipitousPotentials;
 
 	/**
 	 * Constructor
@@ -50,6 +59,9 @@ public class GeneticAlgorithm extends Algorithm {
 	 */
 	public GeneticAlgorithm(Problem problem) {
 		super(problem);
+		
+		this.serendipitousSolutions = new HashSet<Solution>();
+		this.serendipitousPotentials = new HashSet<LabeledEdge>();
 
 		no_evaluation = 0;
 	} // pgGA
@@ -106,7 +118,10 @@ public class GeneticAlgorithm extends Algorithm {
 		}
 
 		for (Solution solution : solutionList) {
+			prepareSerendipitous();
 			problem_.evaluate(solution);
+			checkSerendipitous(solution);
+			
 			population.add(solution);
 			evaluations++;
 		}
@@ -140,7 +155,10 @@ public class GeneticAlgorithm extends Algorithm {
 
 
 			for (Solution solution : solutions) {
+				prepareSerendipitous();
 				problem_.evaluate(solution);
+				checkSerendipitous(solution);
+				
 				offspringPopulation.add(solution);
 				if (solution.getObjective(0) == 0.0)
 					targetCovered = true;
@@ -168,6 +186,36 @@ public class GeneticAlgorithm extends Algorithm {
 	
 	public int getNumberOfEvaluation(){
 		return this.no_evaluation;
+	}
+	
+	private void prepareSerendipitous() {
+		if (problem_ instanceof SerendipitousProblem<?>) {
+			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
+			
+			problem.setSerendipitousPotentials(this.serendipitousPotentials);
+		}
+	}
+	
+	private void checkSerendipitous(Solution solution) {
+		if (problem_ instanceof SerendipitousProblem<?>) {
+			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
+			
+			if (problem.getSerendipitousCovered().size() > 0) {
+				this.serendipitousPotentials.removeAll(problem.getSerendipitousCovered());
+				
+				this.serendipitousSolutions.add(solution);
+			}
+		}
+	}
+
+	@Override
+	public Set<Solution> getSerendipitousSolutions() {
+		return this.serendipitousSolutions;
+	}
+
+	@Override
+	public void setSerendipitousPotentials(Set<LabeledEdge> pPotentials) {
+		this.serendipitousPotentials = pPotentials;
 	}
 	
 } // pgGA

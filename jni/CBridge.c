@@ -24,7 +24,7 @@
 #define LOCKNAME_P "/tmp/.ocelot_p%d.lock"
 #define LOCKNAME_R "/tmp/.ocelot_r%d.lock"
 
-#define LOGGER
+//#define LOGGER
 
 #ifdef LOGGER
 #define LOG_SEPARATOR(logger) fputs("########################\n\n", logger)

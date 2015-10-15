@@ -60,11 +60,14 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 			
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
+			exp.setSerendipitousPotentials(new HashSet<>(uncoveredEdges));
 			try {
 				exp.basicRun();
-			} catch (JMException|ClassNotFoundException e) {
+			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
+			
+			this.addSerendipitousTestCases(exp, suite);
 			
 			this.printSeparator();
 			this.print("Current target: ");
@@ -83,7 +86,7 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 			
-			uncoveredEdges.removeAll(testCase.getCoveredEdges());
+			uncoveredEdges = this.getUncoveredEdges(suite);
 			
 			this.measureBenchmarks("Target", suite, 0);
 			

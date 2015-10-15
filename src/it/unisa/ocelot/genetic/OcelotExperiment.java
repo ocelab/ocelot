@@ -1,5 +1,9 @@
 package it.unisa.ocelot.genetic;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.algorithms.CDG_GA;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 import jmetal.core.Algorithm;
@@ -18,6 +22,8 @@ import jmetal.experiments.Settings;
 public abstract class OcelotExperiment extends Experiment {
 	protected Algorithm algorithm;
 	private Solution solution;
+	private Set<LabeledEdge> serendipitousPotentials;
+	private Set<Solution> serendipitousSolutions;
 
 	public OcelotExperiment(String pResultsFolder, int pRuns) {
 		this.experimentName_ = "TargetCoverage";
@@ -35,6 +41,9 @@ public abstract class OcelotExperiment extends Experiment {
 		this.algorithmSettings_ = new Settings[numberOfAlgorithms];
 
 		this.independentRuns_ = pRuns;
+		
+		this.serendipitousPotentials = new HashSet<>();
+		this.serendipitousSolutions = new HashSet<>();
 	}
 
 	@Override
@@ -46,12 +55,30 @@ public abstract class OcelotExperiment extends Experiment {
 	}
 
 	public abstract void algorithmSettings(Algorithm[] pAlgorithm);
+	
+	public void setSerendipitousPotentials(Set<LabeledEdge> pPotentials) {
+		this.serendipitousPotentials = pPotentials;
+	}
 
 	public Solution basicRun() throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
+		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
+			SerendipitousAlgorithm<LabeledEdge> algorithm = ((SerendipitousAlgorithm) this.algorithm);
+			
+			algorithm.setSerendipitousPotentials(this.serendipitousPotentials);
+		}
 		SolutionSet solutionSet = this.algorithm.execute();
 		this.solution = solutionSet.get(0);
+		
+		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
+			this.serendipitousSolutions = ((SerendipitousAlgorithm) this.algorithm).getSerendipitousSolutions();
+		}
+		
 		return this.solution;
+	}
+	
+	public Set<Solution> getSerendipitousSolutions() {
+		return this.serendipitousSolutions;
 	}
 
 	public double getFitnessValue() {

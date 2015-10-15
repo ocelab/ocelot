@@ -71,11 +71,14 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config,
 					cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
+			exp.setSerendipitousPotentials(new HashSet<LabeledEdge>(this.getUncoveredEdges(suite)));
 			try {
 				exp.basicRun();
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
+			
+			this.addSerendipitousTestCases(exp, suite);
 
 			this.printSeparator();
 			this.print("Current target: ");
@@ -95,11 +98,10 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 			} else
 				this.println("Target not covered...");
 
-			uncoveredEdges.removeAll(testCase.getCoveredEdges());
-
 			this.println("Parameters found: " + Arrays.toString(numericParams));
 
 			calculator.calculateCoverage(suite);
+			uncoveredEdges.removeAll(calculator.getCoveredEdges());
 		}
 	}
 }
