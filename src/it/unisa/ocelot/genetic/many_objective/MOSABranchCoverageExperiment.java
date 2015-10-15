@@ -64,7 +64,7 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 				throw new RuntimeException("Error: please, set the ranges for the parameters for MOSA algorithm");
 			
 			if (config.getAlgorithm().equals(SettingsFactory.AVM)) {
-				System.err.println("Warning: MOSA cannot run with AVM algorithm! Using GA instead.");
+				System.err.println("Warning: MOSA will run with its own algorithm (AVM ignored)!");
 			}
 
 			StandardSettings settings = new MOSASettings(problem, config, branches);

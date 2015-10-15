@@ -26,6 +26,7 @@ import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.parallel.IParallelEvaluator;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,6 @@ import java.util.Map;
 
 public class GeneticAlgorithm extends Algorithm {
 
-	IParallelEvaluator parallelEvaluator_;
 	private int no_evaluation;
 
 	/**
@@ -48,10 +48,9 @@ public class GeneticAlgorithm extends Algorithm {
 	 * @param evaluator
 	 *            Parallel evaluator
 	 */
-	public GeneticAlgorithm(Problem problem, IParallelEvaluator evaluator) {
+	public GeneticAlgorithm(Problem problem) {
 		super(problem);
 
-		parallelEvaluator_ = evaluator;
 		no_evaluation = 0;
 	} // pgGA
 
@@ -85,7 +84,7 @@ public class GeneticAlgorithm extends Algorithm {
 		maxEvaluations = ((Integer) getInputParameter("maxEvaluations"))
 				.intValue();
 
-		parallelEvaluator_.startEvaluator(problem_);
+//		parallelEvaluator_.startEvaluator(problem_);
 
 		// Initialize the variables
 		population = new SolutionSet(populationSize);
@@ -100,13 +99,14 @@ public class GeneticAlgorithm extends Algorithm {
 
 		// Create the initial solutionSet
 		Solution newSolution;
+		List<Solution> solutionList = new ArrayList<>();
 		for (int i = 0; i < populationSize; i++) {
 			newSolution = new Solution(problem_);
-			parallelEvaluator_.addSolutionForEvaluation(newSolution);
+			solutionList.add(newSolution);
 		}
 
-		List<Solution> solutionList = parallelEvaluator_.parallelEvaluation();
 		for (Solution solution : solutionList) {
+			problem_.evaluate(solution);
 			population.add(solution);
 			evaluations++;
 		}
@@ -121,6 +121,7 @@ public class GeneticAlgorithm extends Algorithm {
 			offspringPopulation.add(new Solution(population.get(1)));
 
 			Solution[] parents = new Solution[2];
+			List<Solution> solutions = new ArrayList<>();
 			for (int i = 0; i < (populationSize / 2) - 1; i++) {
 				if (evaluations < maxEvaluations) {
 					// obtain parents
@@ -132,14 +133,14 @@ public class GeneticAlgorithm extends Algorithm {
 							.execute(parents);
 					mutationOperator.execute(offSpring[0]);
 					mutationOperator.execute(offSpring[1]);
-					parallelEvaluator_.addSolutionForEvaluation(offSpring[0]);
-					parallelEvaluator_.addSolutionForEvaluation(offSpring[1]);
+					solutions.add(offSpring[0]);
+					solutions.add(offSpring[1]);
 				} // if
 			} // for
 
-			List<Solution> solutions = parallelEvaluator_.parallelEvaluation();
 
 			for (Solution solution : solutions) {
+				problem_.evaluate(solution);
 				offspringPopulation.add(solution);
 				if (solution.getObjective(0) == 0.0)
 					targetCovered = true;
@@ -155,7 +156,6 @@ public class GeneticAlgorithm extends Algorithm {
 			population.sort(comparator);
 		} // while
 
-		parallelEvaluator_.stopEvaluator();
 
 		// Return a population with the best individual
 		SolutionSet resultPopulation = new SolutionSet(1);

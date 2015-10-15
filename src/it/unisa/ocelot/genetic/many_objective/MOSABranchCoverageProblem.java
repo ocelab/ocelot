@@ -68,7 +68,12 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 
 		CBridge bridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
-		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		try {
+			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		} catch (RuntimeException e) {
+			this.onError(solution, e);
+			return;
+		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 //		EdgeDistanceListener edgeDistanceListener;

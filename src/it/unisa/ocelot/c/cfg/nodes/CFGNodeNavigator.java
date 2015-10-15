@@ -78,6 +78,10 @@ public class CFGNodeNavigator {
 		return this.currentNode;
 	}
 	
+	public LabeledEdge edge() {
+		return this.edges.get(this.edges.size()-1);
+	}
+	
 	/**
 	 * Returns the path navigated
 	 * @return

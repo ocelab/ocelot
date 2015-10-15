@@ -77,7 +77,7 @@ public class GASettings extends StandardSettings {
         if (problem_ instanceof CDG_BasedProblem)
         	algorithm = new CDG_GA(problem_, parallelEvaluator);
         else 
-        	algorithm = new GeneticAlgorithm(problem_, parallelEvaluator);
+        	algorithm = new GeneticAlgorithm(problem_);
         
 		return configure(algorithm);
     }

@@ -2,6 +2,7 @@
 #include "ocelot.h"
 #include "main.h"
 #include "pointers.h"
+#include "lists.h"
 
 _t_ocelot_array *_v_ocelot_pointers;
 
@@ -76,14 +77,14 @@ typedef struct {
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents(JNIEnv *, jobject, jobject, jdoubleArray, jobjectArray, jdoubleArray);
 JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize(JNIEnv *, jobject, jint, jint, jint);
 
-volatile _T_ocelot_call_memory   _f_ocelot_shared_call(void*);
-volatile _T_ocelot_return_memory _f_ocelot_shared_return(void*);
+volatile _T_ocelot_call_memory   _f_ocelot_shared_call(volatile void*);
+volatile _T_ocelot_return_memory _f_ocelot_shared_return(volatile void*);
 
 pid_t _f_ocelot_fork(JNIEnv*,int);
 
 int _f_ocelot_alloc_process(JNIEnv*, int, int, int);
 void _f_ocelot_on_signal(int);
-int _f_ocelot_do_stuff(int,JNIEnv*,int,int,int,double*,double*,double*);
+int _f_ocelot_do_stuff(int,JNIEnv*,int,int,int,volatile double*,volatile double*,volatile double*);
 jdouble _f_ocelot_numval(JNIEnv*, jobject);
 void _f_ocelot_init_arrays(JNIEnv*, int, double*, int*);
 void _f_ocelot_throw_runtimeexception(JNIEnv*, char*);

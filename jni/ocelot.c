@@ -2,13 +2,14 @@
 #include <math.h>
 
 void _f_ocelot_init() {
-	_v_ocelot_events = g_array_new(FALSE, FALSE, sizeof(_T_ocelot_event));
-	_v_ocelot_fcalls = g_array_new(FALSE, FALSE, sizeof(double));
+	_v_ocelot_events = OCLIST_ALLOC(_T_ocelot_event);
+	_v_ocelot_fcalls = OCLIST_ALLOC(double);
 }
 
 void _f_ocelot_end() {
-	g_array_free(_v_ocelot_events, TRUE);
-	g_array_free(_v_ocelot_fcalls, TRUE);
+	OCLIST_FREE(_v_ocelot_events);
+	OCLIST_FREE(_v_ocelot_fcalls);
+
 	free(_v_ocelot_pointers);
 }
 
@@ -19,7 +20,7 @@ int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
 
 	event.distanceTrue = distanceTrue;
 	event.distanceFalse = distanceFalse;
-	g_array_append_val(_v_ocelot_events, event);
+	OCLIST_APPEND(_v_ocelot_events, event);
 
 	return result;
 }
@@ -31,28 +32,28 @@ int _f_ocelot_trace_case(int branch, double distanceTrue, int isChosen) {
 	event.distance = distanceTrue;
 	event.chosen = (double)isChosen;
 
-	g_array_append_val(_v_ocelot_events, event);
+	OCLIST_APPEND(_v_ocelot_events, event);
 
 	return 0;
 }
 
 double _f_ocelot_reg_fcall_numeric(double fcall) {
 	printf("Function call numeric");
-	g_array_append_val(_v_ocelot_fcalls, fcall);
+	OCLIST_APPEND(_v_ocelot_fcalls, fcall);
 	return fcall;
 }
 
 double _f_ocelot_reg_fcall_pointer(void* fcall) {
 	printf("Function call pointer");
-	g_array_append_val(_v_ocelot_fcalls, *fcall);
+	OCLIST_APPEND(_v_ocelot_fcalls, *(double*)fcall);
 
 	return (double)*(double*)fcall;
 }
 
 double _f_ocelot_get_fcall() {
-	if (_v_ocelot_fcalls->len != 0) {
-		double element = g_array_index(_v_ocelot_fcalls, double, 0);
-		g_array_remove_index(_v_ocelot_fcalls, 0);
+	if (_v_ocelot_fcalls->size != 0) {
+		double element = OCLIST_GET(_v_ocelot_fcalls, 0, double);
+		OCLIST_SHIFT(_v_ocelot_fcalls);
 		return element;
 	} else {
 		return 0;

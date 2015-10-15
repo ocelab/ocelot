@@ -6,22 +6,29 @@ import it.unisa.ocelot.suites.generators.cdg.CDG_BasedApproachGenerator;
 import it.unisa.ocelot.suites.generators.edge.SingleTargetTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.many_objective.MOSATestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.many_objective.ReducedMOSATestSuiteGenerator;
+import it.unisa.ocelot.suites.generators.mccabe.DynamicMcCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.McCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.ReducedMcCabePartialsTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.mccabe.ReducedMcCabeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.random.RandomTestSuiteGenerator;
 
 public class TestSuiteGeneratorHandler {
-	public static final String MCCABE_SUITE_GENERATOR = "McCabe";
+	public static final String RANDOM_SUITE_GENERATOR = "Random";
+	
 	public static final String ALL_EDGES_SUITE_GENERATOR = "AllEdges";
 	public static final String MEMORY_EDGES_SUITE_GENERATOR = "MemoryEdges";
+	
+	public static final String MCCABE_SUITE_GENERATOR = "McCabe";
 	public static final String REDUCED_MCCABE_SUITE_GENERATOR = "ReducedMcCabe";
 	public static final String REDUCED_MCCABE_PARTIALS_SUITE_GENERATOR = "ReducedMcCabePartials";
-	//generator for only McCabe Path without considering non covered branches 
-	public static final String RANDOM_SUITE_GENERATOR = "Random";
+	public static final String DYNAMIC_MCCABE_SUITE_GENERATOR = "DynamicMcCabe";
+	//generator for only McCabe Path without considering non covered branches
+	
 	public static final String MOSA_TEST_SUITE_GENERATOR = "Mosa";
 	public static final String REDUCED_MOSA_TEST_SUITE_GENERATOR = "ReducedMosa";
+	
 	public static final String CDG_BASED_APPROACH_SUITE_GENERATOR = "Harman";
+	
 	public static final String CASCADE_APPROACH = "Cascade";
 	
 	public static TestSuiteGenerator getInstance(ConfigManager pConfigManager, CFG pCFG) {
@@ -45,6 +52,8 @@ public class TestSuiteGeneratorHandler {
 			return new CDG_BasedApproachGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(REDUCED_MOSA_TEST_SUITE_GENERATOR))
 			return new ReducedMOSATestSuiteGenerator(pConfigManager, pCFG);
+		else if (name.equalsIgnoreCase(DYNAMIC_MCCABE_SUITE_GENERATOR))
+			return new DynamicMcCabeTestSuiteGenerator(pConfigManager, pCFG);
 		else if (name.equalsIgnoreCase(CASCADE_APPROACH)) {
 			CascadeTestSuiteGenerator cascadeGenerator = new CascadeTestSuiteGenerator(pConfigManager,pCFG);
 			

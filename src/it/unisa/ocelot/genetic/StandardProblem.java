@@ -1,5 +1,6 @@
 package it.unisa.ocelot.genetic;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,7 +111,6 @@ public abstract class StandardProblem extends Problem {
 		
 		System.out.println(pParameters.length-numberOfReferences);
 		System.out.println(numberOfReferences);
-		CBridge.initialize(pParameters.length-numberOfReferences, numberOfReferences, numberOfReferences);
 	}
 	
 	protected Object[][][] getParameters(Solution solution) {
@@ -163,6 +163,17 @@ public abstract class StandardProblem extends Problem {
 	@Override
 	public final void evaluate(Solution solution) throws JMException {
 		int tries = MAX_TRIES;
+		
+		Object[][][] arguments = this.getParameters(solution);
+		
+		for (Object obj : arguments[2][0]) {
+			Integer pointerRef = (Integer)obj;
+			if (pointerRef < 0 || pointerRef >= numberOfArrays) {
+				System.err.println("Warning: invalid pointer for " + Arrays.toString(arguments[2][0]));
+				solution.setObjective(0, Double.MAX_VALUE);
+				return;
+			}
+		}
 		
 		while (tries > 0) {
 			try {

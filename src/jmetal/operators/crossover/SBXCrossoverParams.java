@@ -116,6 +116,7 @@ public class SBXCrossoverParams extends Crossover {
 						
 						yL = x1.getLowerBound(i);
 						yu = x1.getUpperBound(i);
+						
 						rand = PseudoRandom.randDouble();
 						beta = 1.0 + (2.0 * (y1 - yL) / (y2 - y1));
 						alpha = 2.0 - java.lang.Math.pow(beta,

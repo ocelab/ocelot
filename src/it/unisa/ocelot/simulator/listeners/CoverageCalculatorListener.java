@@ -14,12 +14,12 @@ import java.util.Set;
 
 public class CoverageCalculatorListener implements SimulatorListener {
 	private CFG cfg;
-	private Set<LabeledEdge> coveredEdges;
+	private List<LabeledEdge> coveredEdges;
 	private List<CFGNode> coveredNodes;
 
 	public CoverageCalculatorListener(CFG pCFG) {
 		this.cfg = pCFG;
-		this.coveredEdges = new HashSet<LabeledEdge>();
+		this.coveredEdges = new ArrayList<LabeledEdge>();
 		this.coveredNodes = new ArrayList<CFGNode>();
 	}
 
@@ -47,6 +47,10 @@ public class CoverageCalculatorListener implements SimulatorListener {
 
 	public Set<LabeledEdge> getCoveredEdges() {
 		return new HashSet<LabeledEdge>(this.coveredEdges);
+	}
+	
+	public List<LabeledEdge> getCoveredPath() {
+		return this.coveredEdges;
 	}
 
 	public Set<LabeledEdge> getUncoveredEdges() {

@@ -65,6 +65,7 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 		try {
 			archiveSolutions = mosaExperiment.multiObjectiveRun();
 		} catch (JMException | ClassNotFoundException e) {
+			e.printStackTrace();
 			throw new TestSuiteGenerationException(e.getMessage());
 		}
 
@@ -82,6 +83,5 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 			
 			this.measureBenchmarks("MOSA Target", suite, numberOfEvaluations.get(i));
 		}
-
 	}
 }

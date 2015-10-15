@@ -96,6 +96,10 @@ public class CoverageCalculator {
 		return this.coverageListener.getCoveredEdges();
 	}
 	
+	public List<LabeledEdge> getCoveredPath() {
+		return this.coverageListener.getCoveredPath();
+	}
+	
 	public Set<LabeledEdge> getUncoveredEdges() {
 		Set<LabeledEdge> uncovered = new HashSet<LabeledEdge>(this.cfg.edgeSet());
 		uncovered.removeAll(this.coveredEdges);

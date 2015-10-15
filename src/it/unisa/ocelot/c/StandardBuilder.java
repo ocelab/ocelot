@@ -11,10 +11,14 @@ import it.unisa.ocelot.c.makefile.WindowsMakefileGenerator;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.util.Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.aspectj.util.FileUtil;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;

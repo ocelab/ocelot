@@ -1,8 +1,8 @@
-#include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "pointers.h"
+#include "lists.h"
 
 #ifndef _Included_OcelotHeader
 #define _Included_OcelotHeader
@@ -81,8 +81,8 @@ double _f_ocelot_or(double, double);
 double _f_ocelot_istrue(double);
 double _f_ocelot_isfalse(double);
 
-GArray *_v_ocelot_events;
-GArray *_v_ocelot_fcalls;
+_T_ocelot_list *_v_ocelot_events;
+_T_ocelot_list *_v_ocelot_fcalls;
 
 #ifdef __cplusplus
 }

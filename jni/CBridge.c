@@ -20,6 +20,12 @@
 
 #define NODEBUGINFO -324354
 
+#define LOCKNAME_C "/tmp/.ocelot_c%d.lock"
+#define LOCKNAME_P "/tmp/.ocelot_p%d.lock"
+#define LOCKNAME_R "/tmp/.ocelot_r%d.lock"
+
+#define LOGGER
+
 #ifdef LOGGER
 #define LOG_SEPARATOR(logger) fputs("########################\n\n", logger)
 #define LOG_EVENT(event, logger) fprintf(logger, "Event:\n");\
@@ -56,16 +62,11 @@ pid_t child_processes;
 FILE* loggerParent;
 FILE* loggerChild;
 
-JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize
+JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_privInit
 		(JNIEnv *env, jclass cbridge, jint values, jint arrays, jint pointers) {
 	int i;
 
-	jfieldID initializedID = (*env)->GetStaticFieldID(env, cbridge, "initialized", "Z");
-	jboolean initialized = (*env)->GetStaticBooleanField(env, cbridge, initializedID);
-
-	if (initialized == JNI_TRUE)
-		return;
-
+	_f_ocelot_debug("HEY, YOU CALLED ME", NODEBUGINFO);
 #ifdef LOGGER
 	loggerParent = fopen("OCELOT_LOGGER_P", "w");
 	loggerChild = fopen("OCELOT_LOGGER_C", "w");
@@ -88,17 +89,16 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_initialize
 		else if (pid == -2)
 			sprintf(message, "Unable to gain locks for process %d. Error: %d", i, errno);
 		else
-			sprintf(message, "Unable to allocate the process %d. Unknown Error.", i, errno);
+			sprintf(message, "Unable to allocate the process %d. Unknown Error.", i);
 		_f_ocelot_throw_runtimeexception(env, message);
 		goto fail;
-	}
-	else {
+	} else {
+		_f_ocelot_debug("PID: %d", pid);
+
 		child_processes = pid;
 		_f_ocelot_debug("PARENT: Locked child %d", i);
 		LOCK_CHILD();
 	}
-
-	(*env)->SetStaticBooleanField(env, cbridge, initializedID, JNI_TRUE);
 
 	return;
 
@@ -146,9 +146,9 @@ int _f_ocelot_alloc_process(JNIEnv* env, int coreId, int size_call, int size_ret
 	char nameP[50];
 	char nameR[50];
 
-	sprintf(nameC, "/tmp/.ocelot_c%d.lock",coreId);
-	sprintf(nameP, "/tmp/.ocelot_p%d.lock",coreId);
-	sprintf(nameR, "/tmp/.ocelot_r%d.lock",coreId);
+	sprintf(nameC, LOCKNAME_C,coreId);
+	sprintf(nameP, LOCKNAME_P,coreId);
+	sprintf(nameR, LOCKNAME_R,coreId);
 
 	FILE* fileCC = fopen (nameC, "w");
 	FILE* filePC = fopen (nameP, "w");
@@ -240,7 +240,7 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 
 	if (shm_call < 0 || shm_return < 0) {
 		char message[100];
-		sprintf(message, "Unable to attach one of the shared memory segments. Error: %d", errno);
+		sprintf(message, "OCELOT ERROR: Unable to attach one of the shared memory segments. Error: %d", errno);
 		_f_ocelot_throw_runtimeexception(env, message);
 		goto close;
 	}
@@ -292,13 +292,27 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 	signal = MEMGET(call_memory.signal);
 
 	if (update < 0) {
-		_f_ocelot_throw_runtimeexception(env, "An unexpected error occured while waiting for the process to terminate!");
+		_f_ocelot_throw_runtimeexception(env, "OCELOT ERROR: An unexpected error occured while waiting for the process to terminate!");
 
 		//Respawn the process
 		child_processes = _f_ocelot_fork(env, coreId);
 		goto finally;
 	} else if (update > 0) {
-		_f_ocelot_throw_runtimeexception(env, "An unexpected error occured in the native code!");
+		char message[1000];
+		if (WIFEXITED(status)) {
+			int exit_status = WEXITSTATUS(status);
+			sprintf(message, "OCELOT ERROR: Child process exited unexpectedly. Status: %d", exit_status);
+		} else if (WIFSIGNALED(status)) {
+			int term_signal = WTERMSIG(status);
+			if (!WCOREDUMP(status))
+				sprintf(message, "OCELOT ERROR: Child process terminated by a signal. Signal: %d", term_signal);
+			else
+				sprintf(message, "OCELOT ERROR: Child process terminated by a signal and produced a core dump. Signal: %d", term_signal);
+		} else {
+			sprintf(message, "OCELOT ERROR: Unknown status. Status: %d", status);
+		}
+
+		_f_ocelot_throw_runtimeexception(env, message);
 
 		//Respawn the process
 		child_processes = _f_ocelot_fork(env, coreId);
@@ -309,15 +323,15 @@ JNIEXPORT void JNICALL Java_it_unisa_ocelot_simulator_CBridge_getEvents
 			//times = 0; //Break the cycle
 		} else if (signal < 0) {
 			if (status == OCELOT_ERR_TOOMANYEVENTS) {
-				_f_ocelot_throw_runtimeexception(env, "Events overflow. Please, ensure that there is no infinite loop; try to increase MAX_EVENTS_NUMBER to solve this.");
+				_f_ocelot_throw_runtimeexception(env, "OCELOT ERROR: Events overflow. Please, ensure that there is no infinite loop; try to increase MAX_EVENTS_NUMBER to solve this.");
 				goto finally;
 			} else {
-				_f_ocelot_throw_runtimeexception(env, "An unexpected error occured in the native code!");
+				_f_ocelot_throw_runtimeexception(env, "OCELOT ERROR: An unexpected error occurred in the native code!");
 				goto finally;
 			}
 		} else if (signal != OCELOT_SIGNAL_CALL) {
 			char msg[1000];
-			sprintf(msg, "An unexpected signal in the native code: %d!", signal);
+			sprintf(msg, "OCELOT ERROR: An unexpected signal in the native code: %d!", signal);
 			_f_ocelot_throw_runtimeexception(env, msg);
 			goto finally;
 		}
@@ -355,7 +369,7 @@ close:
 /*
  * Utility that returns a useful representation of the shared call memory.
  */
-volatile _T_ocelot_call_memory _f_ocelot_shared_call(void* shm) {
+volatile _T_ocelot_call_memory _f_ocelot_shared_call(volatile void* shm) {
 	_T_ocelot_call_memory result;
 
 	result.signal = (unsigned char*)shm;
@@ -370,7 +384,7 @@ volatile _T_ocelot_call_memory _f_ocelot_shared_call(void* shm) {
 /*
  * Utility that returns a useful representation of the shared return memory.
  */
-volatile _T_ocelot_return_memory _f_ocelot_shared_return(void* shm) {
+volatile _T_ocelot_return_memory _f_ocelot_shared_return(volatile void* shm) {
 	_T_ocelot_return_memory result;
 
 	result.size = (int*)shm;
@@ -433,6 +447,8 @@ pid_t _f_ocelot_fork(JNIEnv* env, int coreId) {
 			_f_ocelot_debug("CHILD%d: Locked child!\n",coreId);
 		}
 
+		_f_ocelot_debug("CHILD KILLED!", NODEBUGINFO);
+
 		shmdt(shm_call);
 		shmdt(shm_return);
 
@@ -469,7 +485,7 @@ void _f_ocelot_on_signal(int coreId) {
 }
 
 int _f_ocelot_do_stuff(int coreId, JNIEnv* env, int valuesN, int arraysN, int pointersN,
-		double* values, double* arrays, double* pointers) {
+		volatile double* values, volatile double* arrays, volatile double* pointers) {
 
 	_f_ocelot_init();
 	int octypes[] = OCELOT_TYPES;
@@ -477,16 +493,16 @@ int _f_ocelot_do_stuff(int coreId, JNIEnv* env, int valuesN, int arraysN, int po
 
 	EXECUTE_OCELOT_TEST
 
-	if (_v_ocelot_events->len > MAX_EVENTS_NUMBER) {
+	if (_v_ocelot_events->size > MAX_EVENTS_NUMBER) {
 		_f_ocelot_end();
 		return OCELOT_ERR_TOOMANYEVENTS;
 	}
 
 	volatile _T_ocelot_return_memory return_memory = _f_ocelot_shared_return(shm_return);
-	MEMSET(return_memory.size, _v_ocelot_events->len);
+	MEMSET(return_memory.size, _v_ocelot_events->size);
 	int i;
-	for (i = 0; i < _v_ocelot_events->len; i++) {
-		_T_ocelot_event event = g_array_index(_v_ocelot_events, _T_ocelot_event, i);
+	for (i = 0; i < _v_ocelot_events->size; i++) {
+		_T_ocelot_event event = OCLIST_GET(_v_ocelot_events, i, _T_ocelot_event);
 		LOG_EVENT(event, loggerChild);
 		memcpy(return_memory.events+i, &event, sizeof(_T_ocelot_event));
 	}

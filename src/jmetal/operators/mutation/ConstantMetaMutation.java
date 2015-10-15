@@ -43,8 +43,9 @@ public class ConstantMetaMutation extends Mutation {
 				double y = x.getValue(var);
 				if (this.mutationElements_.size() > 0) {
 					int randIndex = PseudoRandom.randInt(0, this.mutationElements_.size()-1);
-				
-					x.setValue(var, this.mutationElements_.get(randIndex));
+					double element = this.mutationElements_.get(randIndex);
+					if (element < x.getUpperBound(var) && element > x.getLowerBound(var))
+					x.setValue(var, element);
 				}
 			} else {
 				if (realOperator_ instanceof PolynomialMutation)

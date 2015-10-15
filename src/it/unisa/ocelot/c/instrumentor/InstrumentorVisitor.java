@@ -34,6 +34,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.IASTTypeIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
@@ -98,8 +99,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 			if (!function.getDeclarator().getName().getRawSignature().equals(this.functionName))
 				return PROCESS_SKIP;
 		} else if (name instanceof IASTSimpleDeclaration) {
-			if (((IASTSimpleDeclaration) name).getDeclSpecifier() instanceof CASTCompositeTypeSpecifier) {
+			if (name.getRawSignature().startsWith("typedef "))
 				this.typedefs.add(name);
+			if (((IASTSimpleDeclaration) name).getDeclSpecifier() instanceof CASTCompositeTypeSpecifier) {
 				name.setParent(null);
 			}
 			//name.setParent(null);
@@ -300,7 +302,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 				expression instanceof IASTArraySubscriptExpression ||
 				expression instanceof IASTConditionalExpression ||
 				expression instanceof IASTCastExpression ||
-				expression instanceof IASTFieldReference) {
+				expression instanceof IASTFieldReference ||
+				expression instanceof IASTTypeIdExpression) {
 			if (!pTransPerformed) {
 				IASTExpression[] arguments = new IASTExpression[1];
 				arguments[0] = expression; 
@@ -318,6 +321,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 			try {
 				throw new Exception("ERROR: Unhandled expression of type " + expression.getClass().getName());
 			} catch (Exception e) {
+				System.err.println(expression.getRawSignature());
 				e.printStackTrace();
 			}
 		}
@@ -357,7 +361,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTExpression expression) {
-		this.transformDistanceExpression(expression, false, false);
+		//this.transformDistanceExpression(expression, false, false);
 		return PROCESS_SKIP;
 	}
 	

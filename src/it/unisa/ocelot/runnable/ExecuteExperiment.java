@@ -3,8 +3,9 @@ package it.unisa.ocelot.runnable;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
-import it.unisa.ocelot.c.cfg.CFGWindow;
+import it.unisa.ocelot.c.types.CTypeHandler;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
@@ -20,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,9 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 public class ExecuteExperiment {
 	private static final String CONFIG_FILENAME = "config.properties";
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.REDUCED_MOSA_TEST_SUITE_GENERATOR,
-		//TestSuiteGeneratorHandler.MCCABE_SUITE_GENERATOR
+		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
 	};
 
 	static {
@@ -64,6 +63,12 @@ public class ExecuteExperiment {
 		System.out.println("Cyclomatic complexity: " + mcCabePaths);
 		System.out.println("Number of branches: " + cfg.edgeSet().size());
 		System.out.println("Number of nodes: " + cfg.vertexSet().size());
+		
+		CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
+		CBridge.initialize(
+				typeHandler.getValues().size(), 
+				typeHandler.getPointers().size(),
+				typeHandler.getPointers().size());
 
 		for (int i = 0; i < config.getExperimentRuns(); i++) {
 			runOnce(i);
