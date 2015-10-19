@@ -81,12 +81,13 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
 			
-			for (Solution solution : exp.getSerendipitousSolutions()) {
-				VariableTranslator currentTranslator = new VariableTranslator(solution);
-				Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
-				calculator.calculateCoverage(serendipitousParameters);
-				mcCabeCalculator.addPath(calculator.getCoveredPath());
-			}
+			if (config.getSerendipitousCoverage())
+				for (Solution solution : exp.getSerendipitousSolutions()) {
+					VariableTranslator currentTranslator = new VariableTranslator(solution);
+					Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
+					calculator.calculateCoverage(serendipitousParameters);
+					mcCabeCalculator.addPath(calculator.getCoveredPath());
+				}
 
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 
@@ -97,13 +98,8 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
 				calculator.calculateCoverage(numericParams);
-//				mcCabeCalculator.addPath(calculator.getCoveredPath());
-//				calculator.calculateCoverage(suite);
-//				double prevCoverage = calculator.getBranchCoverage();
+				mcCabeCalculator.addPath(calculator.getCoveredPath());
 				suite.add(testCase);
-//				calculator.calculateCoverage(suite);
-//				if (calculator.getBranchCoverage() == prevCoverage)
-//					suite.remove(testCase);
 				this.measureBenchmarks("McCabe target", suite, exp.getNumberOfEvaluation());
 			} else {
 				this.println("Target not covered...");

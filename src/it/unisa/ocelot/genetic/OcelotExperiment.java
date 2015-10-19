@@ -21,7 +21,7 @@ import jmetal.experiments.Settings;
  *
  */
 public abstract class OcelotExperiment extends Experiment {
-	protected Algorithm algorithm;
+	protected OcelotAlgorithm algorithm;
 	private Solution solution;
 	private Set<LabeledEdge> serendipitousPotentials;
 	private Set<Solution> serendipitousSolutions;
@@ -52,7 +52,10 @@ public abstract class OcelotExperiment extends Experiment {
 			throws ClassNotFoundException {
 		this.algorithmSettings(algorithm);
 
-		this.algorithm = algorithm[0];
+		if (algorithm[0] instanceof OcelotAlgorithm)
+			this.algorithm = (OcelotAlgorithm)algorithm[0];
+		else
+			throw new RuntimeException("Experiment error: you chose a non-Ocelot algorithm. Please, adapt it.");
 	}
 
 	public abstract void algorithmSettings(Algorithm[] pAlgorithm);
@@ -69,6 +72,23 @@ public abstract class OcelotExperiment extends Experiment {
 	}
 
 	public Solution basicRun() throws ClassNotFoundException, jmetal.util.JMException {
+		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
+		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
+			SerendipitousAlgorithm<LabeledEdge> algorithm = ((SerendipitousAlgorithm) this.algorithm);
+			
+			algorithm.setSerendipitousPotentials(this.serendipitousPotentials);
+		}
+		SolutionSet solutionSet = this.algorithm.execute();
+		this.solution = solutionSet.get(0);
+		
+		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
+			this.serendipitousSolutions = ((SerendipitousAlgorithm) this.algorithm).getSerendipitousSolutions();
+		}
+		
+		return this.solution;
+	}
+	
+	public Solution extraRun(int pIterations) throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
 		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
 			SerendipitousAlgorithm<LabeledEdge> algorithm = ((SerendipitousAlgorithm) this.algorithm);

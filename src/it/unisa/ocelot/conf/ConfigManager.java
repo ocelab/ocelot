@@ -371,6 +371,10 @@ public class ConfigManager {
 		return this.properties.getProperty("suite.generator.serendipitous", "false").equalsIgnoreCase("true");
 	}
 	
+	public String getBudgetManager() {
+		return this.properties.getProperty("suite.generator.budgetmanager", "Basic");
+	}
+	
 	public List<String> getCascadeGenerators() {
 		String cascade = this.properties.getProperty("suite.generator.cascade", "");
 		String[] array = cascade.split("\\,");

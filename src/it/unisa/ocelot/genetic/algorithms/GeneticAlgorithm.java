@@ -49,6 +49,8 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 
 	private Set<Solution> serendipitousSolutions;
 	private Set<LabeledEdge> serendipitousPotentials;
+	
+	private SolutionSet lastPopulation;
 
 	/**
 	 * Constructor
@@ -63,6 +65,8 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		
 		this.serendipitousSolutions = new HashSet<Solution>();
 		this.serendipitousPotentials = new HashSet<LabeledEdge>();
+		
+		this.lastPopulation = null;
 
 		no_evaluation = 0;
 	} // pgGA
@@ -99,8 +103,11 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 
 //		parallelEvaluator_.startEvaluator(problem_);
 
-		// Initialize the variables
-		population = new SolutionSet(populationSize);
+		// Initialize the variables. If this is an extra execution, it keeps using the last population
+		if (lastPopulation == null)
+			population = new SolutionSet(populationSize);
+		else
+			population = lastPopulation;
 		offspringPopulation = new SolutionSet(populationSize);
 
 		evaluations = 0;
@@ -179,6 +186,8 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		// Return a population with the best individual
 		SolutionSet resultPopulation = new SolutionSet(1);
 		resultPopulation.add(population.get(0));
+		
+		this.lastPopulation = population;
 
 		this.algorithmStats.setEvaluations(evaluations);
 		this.no_evaluation = evaluations;

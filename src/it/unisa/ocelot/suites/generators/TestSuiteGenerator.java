@@ -102,6 +102,9 @@ public abstract class TestSuiteGenerator {
 	}
 	
 	protected void addSerendipitousTestCases(OcelotExperiment exp, Set<TestCase> suite) {
+		if (!config.getSerendipitousCoverage())
+			return;
+		
 		Set<Solution> solutions = exp.getSerendipitousSolutions();
 		
 		for (Solution solution : solutions) {

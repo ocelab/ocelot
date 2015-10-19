@@ -25,6 +25,7 @@ import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
+import it.unisa.ocelot.genetic.VariableTranslator;
 import jmetal.core.*;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
@@ -109,15 +110,22 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		int strength = 0;
 
 		boolean targetCovered = false;
+		
+		boolean dontRestart = (solutionBundle.solution != null);
 		// Generations
 		while (evaluations < maxEvaluations && !targetCovered) {
 			//Creates a random solution
-			solutionBundle.solution = new Solution(problem_);
+			if (!dontRestart) {
+				solutionBundle.solution = new Solution(problem_);
+				
+				this.prepareSerendipitous();
+				solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
+				this.checkSerendipitous(solutionBundle.solution);
+				dontRestart = false;
+			}
+			
 			XParamArray solutionModifier = new XParamArray(solutionBundle.solution);
 			
-			this.prepareSerendipitous();
-			solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
-			this.checkSerendipitous(solutionBundle.solution);
 			
 			evaluations++;
 			
@@ -215,6 +223,9 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		
 		double updateValue = solutionModifier.getValue(currentKind, currentVariable);
 		double difference = this.derivate * this.delta * pDirection * Math.pow(1.3, pStength);
+		if (Math.abs(difference) < epsilon)
+			difference = epsilon*pDirection;
+		
 		updateValue = updateValue + difference;
 		
 		if (updateValue > solutionModifier.getUpperBound(currentKind, currentVariable))
@@ -222,14 +233,14 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		else if (updateValue < solutionModifier.getLowerBound(currentKind, currentVariable))
 			updateValue = solutionModifier.getLowerBound(currentKind, currentVariable);
 		
-		
+		double prevValue = solutionModifier.getValue(currentKind, currentVariable);
 		solutionModifier.setValue(currentKind, currentVariable, updateValue);
 		
 		this.prepareSerendipitous();
 		double branchDistance = problem.evaluateWithBranchDistance(solution);
 		this.checkSerendipitous(solution);
 		evaluations++;
-		
+				
 		this.derivate = this.derivate(
 				solution.getObjective(0), branchDistance, 
 				pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance, 
@@ -264,7 +275,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		double branchDistanceMinus = problem.evaluateWithBranchDistance(solutionMinus);
 		this.checkSerendipitous(solutionMinus);
 		evaluations += 2;
-		
+				
 		int comparation = comparator.compare(solutionPlus, solutionMinus);
 		
 		if (comparation < 0 || (comparation == 0 && branchDistancePlus < branchDistanceMinus)) { //if solPlus < solMinus
