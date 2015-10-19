@@ -2,6 +2,7 @@ package it.unisa.ocelot.genetic.algorithms;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
 import it.unisa.ocelot.util.Front;
 
@@ -37,7 +38,7 @@ import jmetal.util.comparators.ObjectiveComparator;
  * @author giograno
  *
  */
-public class MOSA extends Algorithm {
+public class MOSA extends OcelotAlgorithm {
 
 	// the final Solution Set produced by the algorithm
 	private SolutionSet archive;
@@ -111,10 +112,8 @@ public class MOSA extends Algorithm {
 		// Create the initial solutionSet
 		Solution newSolution;
 		for (int i = 0; i < populationSize; i++) {
-			// System.out.println("Evaluating population number " + i);
 			newSolution = new Solution(problem_);
 			problem_.evaluate(newSolution);
-			// System.out.println("Population number "+ i + " evaluated");
 			evaluations++;
 			population.add(newSolution);
 		}
@@ -124,7 +123,6 @@ public class MOSA extends Algorithm {
 		this.updateArchive(population, evaluations);
 
 		while (evaluations < maxEvaluations && !allTargetsCovered()) {
-			// Create the offSpring solutionSet
 			offspringPopulation = new SolutionSet(populationSize);
 			Solution[] parents = new Solution[2];
 
@@ -190,6 +188,8 @@ public class MOSA extends Algorithm {
 			evaluations++;
 
 		}// while
+		
+		this.algorithmStats.setEvaluations(evaluations);
 
 		return this.archive;
 	}
@@ -221,7 +221,7 @@ public class MOSA extends Algorithm {
 				if (objectiveScore == 0.0) {
 					// target covered
 					edge.setCovered();
-					System.out.println("Covered branch " + edge.toString() + " from "
+					this.algorithmStats.log("Covered branch " + edge.toString() + " from "
 							+ this.controlFlowGraph.getEdgeSource(edge).toString() + " to "
 							+ this.controlFlowGraph.getEdgeTarget(edge).toString());
 
@@ -230,7 +230,7 @@ public class MOSA extends Algorithm {
 						if (currentCandidate.getObjective(collateralEdge.getObjectiveID()) == 0
 								&& !collateralEdge.isCovered()) {
 							collaterallyCoveredEdgesForCurrentSolution.add(collateralEdge);
-							System.out.println("Collaterally covered "
+							this.algorithmStats.log("Collaterally covered "
 									+ collateralEdge.toString()
 									+ " from "
 									+ this.controlFlowGraph.getEdgeSource(collateralEdge)

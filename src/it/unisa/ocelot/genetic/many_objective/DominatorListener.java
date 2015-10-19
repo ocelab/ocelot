@@ -101,14 +101,8 @@ public class DominatorListener implements SimulatorListener {
 
 		return dominatorNodes.size();
 	}
-
-	/**
-	 * Calculates the branch distance normalized as proposed by Arcuri in
-	 * "It does matter how you normalize the branch distance in search based software testing"
-	 * 
-	 * @return a double value of normalized branch distance
-	 */
-	public double getNormalizedBranchDistance() {
+	
+	public double getBranchDistance() {
 		double distance = 0.D;
 
 		if (this.getApproachLevel() == 0.D) {
@@ -119,7 +113,7 @@ public class DominatorListener implements SimulatorListener {
 				distance = event.distanceFalse;
 			if (target instanceof TrueEdge)
 				distance = event.distanceTrue;
-			return distance / (distance + 1);
+			return distance;
 		}
 
 		// approach level more than 0
@@ -133,7 +127,18 @@ public class DominatorListener implements SimulatorListener {
 					distance = Math.max(event.distanceTrue, event.distanceFalse);
 			}
 		}
-		return distance / (distance + 1);
+		return distance;
+	}
+
+	/**
+	 * Calculates the branch distance normalized as proposed by Arcuri in
+	 * "It does matter how you normalize the branch distance in search based software testing"
+	 * 
+	 * @return a double value of normalized branch distance
+	 */
+	public double getNormalizedBranchDistance() {
+		double branchDistance = this.getBranchDistance();
+		return branchDistance / (branchDistance + 1);
 	}
 
 	/**

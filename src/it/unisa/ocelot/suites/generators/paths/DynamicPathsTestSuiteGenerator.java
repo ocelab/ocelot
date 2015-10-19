@@ -1,6 +1,5 @@
 package it.unisa.ocelot.suites.generators.paths;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,13 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
+/**
+ * Do not use. NP-Hard problem, not quite easy to solve.
+ * @author simone
+ *
+ */
 @Deprecated
 public class DynamicPathsTestSuiteGenerator extends TestSuiteGenerator {	
 	public DynamicPathsTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
@@ -68,7 +73,7 @@ public class DynamicPathsTestSuiteGenerator extends TestSuiteGenerator {
 					break;
 				}
 			}
-			this.println("Parameters found: " + Arrays.toString(numericParams));
+			this.println("Parameters found: " + Utils.printParameters(numericParams));
 			this.printSeparator();
 	
 			this.measureBenchmarks("Dynamic Path", suite, exp.getNumberOfEvaluation());

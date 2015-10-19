@@ -3,30 +3,29 @@ package it.unisa.ocelot.suites.generators.mccabe;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.DynamicMcCabeCalculator;
-import it.unisa.ocelot.c.cfg.McCabeCalculator;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
-import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
-import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
-import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import jmetal.core.Solution;
-import jmetal.core.Variable;
 import jmetal.util.JMException;
 
+/**
+ * Dynamic McCabe path calculator. Select the first test case randomly. In a second phase it selects as a target
+ * the alternative branch of the last condition in the stack of covered conditions.
+ * @author simone
+ *
+ */
 public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 
@@ -62,14 +61,17 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 		
 		while (currentTarget != null) {
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), currentTarget);
-
-			this.print("Current target: ");
-			this.println(currentTarget);
-						
+			
 			exp.initExperiment();
 			exp.setSerendipitousPotentials(new HashSet<>(this.getUncoveredEdges(suite)));
+			
+			CFGNode departingNode = cfg.getEdgeSource(currentTarget);
+			this.printSeparator();
+			this.println("Current target: branch " + currentTarget.toString() + " of node " + departingNode);
 			try {
+				this.print("Running... ");
 				exp.basicRun();
+				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
@@ -95,16 +97,20 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
 				calculator.calculateCoverage(numericParams);
-				mcCabeCalculator.addPath(calculator.getCoveredPath());
+//				mcCabeCalculator.addPath(calculator.getCoveredPath());
+//				calculator.calculateCoverage(suite);
+//				double prevCoverage = calculator.getBranchCoverage();
 				suite.add(testCase);
+//				calculator.calculateCoverage(suite);
+//				if (calculator.getBranchCoverage() == prevCoverage)
+//					suite.remove(testCase);
 				this.measureBenchmarks("McCabe target", suite, exp.getNumberOfEvaluation());
 			} else {
 				this.println("Target not covered...");
-				System.out.println("Useless test case. Discarded.");
+				this.println("Useless test case. Discarded.");
 			}
 			
-			this.println("Parameters found: " + Arrays.toString(numericParams));
-			this.printSeparator();
+			this.println("Parameters found: " + Utils.printParameters(numericParams));
 			
 			currentTarget = mcCabeCalculator.getNextTarget();
 			if (currentTarget != null && !getUncoveredEdges(suite).contains(currentTarget)) {
@@ -113,9 +119,7 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			}
 			
 			calculator.calculateCoverage(suite);
-			System.out.println("Partial coverage: " + calculator.getBranchCoverage());
+			this.println("Partial coverage: " + calculator.getBranchCoverage());
 		}
-		
-		this.measureBenchmarks("End", suite, 0);
 	}
 }

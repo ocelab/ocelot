@@ -359,6 +359,18 @@ public class ConfigManager {
 		return this.properties.getProperty("suite.generator.algorithm", "GeneticAlgorithm");
 	}
 	
+	public double getAvmEpsilon() {
+		return Double.parseDouble(this.properties.getProperty("avm.epsilon", "1"));
+	}
+	
+	public double getAvmDelta() {
+		return Double.parseDouble(this.properties.getProperty("avm.delta", "1"));
+	}
+	
+	public boolean getSerendipitousCoverage() {
+		return this.properties.getProperty("suite.generator.serendipitous", "false").equalsIgnoreCase("true");
+	}
+	
 	public List<String> getCascadeGenerators() {
 		String cascade = this.properties.getProperty("suite.generator.cascade", "");
 		String[] array = cascade.split("\\,");

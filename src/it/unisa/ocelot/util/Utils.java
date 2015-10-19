@@ -79,11 +79,15 @@ public class Utils {
 	
 	public static String printParameters(Object[][][] pParameters) {
 		String result = "";
-		result += "Values\n\t" + Arrays.toString(pParameters[0][0]) + "\n";
-		result += "Arrays\n";
-		for (int i = 0; i < pParameters[1].length; i++)
-			result += "\t" + Arrays.toString(pParameters[1][i]) + "\n";
-		result += "Pointers\n\t" + Arrays.toString(pParameters[2][0]) + "\n";
+		if (pParameters[0][0].length != 0)
+			result += "Values\t" + Arrays.toString(pParameters[0][0]) + "\n";
+		if (pParameters[1].length != 0) {
+			result += "Arrays\n";
+			for (int i = 0; i < pParameters[1].length; i++)
+				result += "\t" + Arrays.toString(pParameters[1][i]) + "\n";
+		}
+		if (pParameters[2][0].length != 0)
+			result += "Pointers\t" + Arrays.toString(pParameters[2][0]) + "\n";
 		
 		return result;
 	}

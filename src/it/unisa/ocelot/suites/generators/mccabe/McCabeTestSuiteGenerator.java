@@ -14,6 +14,7 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,11 @@ import java.util.Set;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
+/**
+ * Selects each linear independent path and tries to cover them in order to get full branch coverage.
+ * @author simone
+ *
+ */
 public class McCabeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 
@@ -60,13 +66,17 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator implements Casc
 
 		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
 			PathCoverageExperiment exp = new PathCoverageExperiment(cfg, config, cfg.getParameterTypes(), aMcCabePath);
+			
+			exp.initExperiment();
 
+			this.printSeparator();
 			this.print("Current target: ");
 			this.println(aMcCabePath);
 			
-			exp.initExperiment();
 			try {
+				this.print("Running... ");
 				exp.basicRun();
+				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
@@ -85,8 +95,7 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator implements Casc
 				this.measureBenchmarks("McCabe path", suite, exp.getNumberOfEvaluation());
 			} else
 				this.println("Path not covered...");
-			this.println("Parameters found: " + Arrays.toString(numericParams));
-			this.printSeparator();
+			this.println("Parameters found: " + Utils.printParameters(numericParams));
 		}
 	}
 }

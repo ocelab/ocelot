@@ -11,6 +11,7 @@ import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,12 +60,12 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 *            The solution to evaluate
 	 */
 	@Override
-	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 		
 		if (debug)
-			System.out.println(Arrays.toString(arguments));
+			System.out.println(Utils.printParameters(arguments));
 
 		CBridge bridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
@@ -72,7 +73,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
-			return;
+			return -1;
 		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
@@ -95,6 +96,9 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 
 			solution.setObjective(labeledEdge.getObjectiveID(), fitness);
 		}
+		
+		//Not important, MOSA uses his own algorithm
+		return 0;
 	}
 
 	/**

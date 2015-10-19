@@ -66,7 +66,7 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 		this.dominators = dominators.getStrictDominators(parent);
 	}
 
-	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
 		CBridge bridge = getCurrentBridge();
@@ -79,7 +79,7 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
-			return;
+			return -1;
 		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
@@ -98,6 +98,8 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 		
 		if (debug)
 			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);
+		
+		return bdalListener.getBranchDistance();
 	}
 	
 	public Set<LabeledEdge> getSerendipitousCovered() {

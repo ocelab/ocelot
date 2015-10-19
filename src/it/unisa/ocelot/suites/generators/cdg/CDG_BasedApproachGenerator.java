@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.edges.EdgeComparator;
 import it.unisa.ocelot.c.cfg.edges.FalseEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.edges.TrueEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.CDG_BasedExperiment;
@@ -18,6 +19,7 @@ import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +33,12 @@ import jmetal.util.JMException;
 
 import org.eclipse.cdt.core.settings.model.util.Comparator;
 
+/**
+ * Approach described in Harman et al. (Optimizing for the Number of Tests Generated in Search Based Test Data
+ * Generation with an Application to the Oracle Cost Problem). 
+ * @author simone
+ *
+ */
 public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private CoverageCalculatorListener coverageCalculatorListener;
 	private final List<LabeledEdge> branches;
@@ -78,14 +86,21 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 
 		int index = 0;
 		for (LabeledEdge branch : branches) {
-
 			if (!branch.isCovered()) {
-
+				this.println("Target: branch " + branch.toString() 
+						+ " of node " + this.cfg.getEdgeSource(branch).toString());
+				
 				CDG_BasedExperiment experiment = new CDG_BasedExperiment(cfg, config,
 						cfg.getParameterTypes(), branches, branch);
 				experiment.initExperiment();
+				
+				CFGNode departingNode = cfg.getEdgeSource(branch);
+				this.printSeparator();
+				this.println("Current target: branch " + branch.toString() + " of node " + departingNode);
 				try {
+					this.print("Running... ");
 					experiment.basicRun();
+					this.println("Done!");
 				} catch (JMException | ClassNotFoundException e) {
 					throw new TestSuiteGenerationException(e.getMessage());
 				}
@@ -105,12 +120,12 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 					TestCase testCase = this.createTestCase(numericParams, suite.size());
 					suite.add(testCase);
 
-					this.println("Parameters found: " + Arrays.toString(numericParams));
+					this.println("Parameters found: " + Utils.printParameters(numericParams));
 				} else {
 					this.println("Target not covered... test case discarded");
 				}
 
-				System.out.println(experiment.getNumberOfEvaluation());
+				this.println("Evaluations:" + experiment.getNumberOfEvaluation());
 				this.measureBenchmarks("CDG-based approach", suite,
 						experiment.getNumberOfEvaluation());
 			}// end if branch is covered

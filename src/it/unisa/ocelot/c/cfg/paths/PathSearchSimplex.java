@@ -103,7 +103,7 @@ public class PathSearchSimplex {
 		RealVector copyCoefficients = currentSolution.copy();
 		List<List<LabeledEdge>> result = new ArrayList<List<LabeledEdge>>();
 		while (copyCoefficients.getMaxValue() > 0 || copyCoefficients.getMinValue() < 0) {
-			System.out.println("Trying...");
+			//System.out.println("Trying...");
 			copyCoefficients = currentSolution.copy();
 			result = this.getPaths(copyCoefficients);
 		}

@@ -20,18 +20,26 @@ package it.unisa.ocelot.genetic.algorithms;
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
+import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
+import it.unisa.ocelot.genetic.SerendipitousProblem;
+import it.unisa.ocelot.genetic.StandardProblem;
 import jmetal.core.*;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.wrapper.XParamArray;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
- * A multithreaded generational genetic algorithm
+ * Alternating Variable Method.
  */
 
-public class AVM extends Algorithm {
+public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge> {
 	private static final long serialVersionUID = 720067051970162535L;
 	
 	
@@ -40,11 +48,17 @@ public class AVM extends Algorithm {
 	
 	private Comparator<Solution> comparator;
 	private int evaluations;
-	private Solution solution;
+	private SolutionBundle solutionBundle;
 	private double derivate;
 	
 	private double delta;
 	private double epsilon;
+	
+	private Set<Solution> serendipitousSolutions;
+	private Set<LabeledEdge> serendipitousPotentials;
+	
+	private StandardProblem problem;
+	
 	/**
 	 * Constructor
 	 * 
@@ -55,6 +69,14 @@ public class AVM extends Algorithm {
 	 */
 	public AVM(Problem problem) {
 		super(problem);
+		
+		if (problem instanceof StandardProblem)
+			this.problem = (StandardProblem)problem;
+		else
+			throw new RuntimeException("Non standard problem used with AVM algorithm.");
+		
+		this.solutionBundle = new SolutionBundle(null, 0);
+		this.serendipitousSolutions = new HashSet<>();
 	}
 
 	/**
@@ -90,9 +112,13 @@ public class AVM extends Algorithm {
 		// Generations
 		while (evaluations < maxEvaluations && !targetCovered) {
 			//Creates a random solution
-			solution = new Solution(problem_);
-			XParamArray solutionModifier = new XParamArray(solution);
-			problem_.evaluate(solution);
+			solutionBundle.solution = new Solution(problem_);
+			XParamArray solutionModifier = new XParamArray(solutionBundle.solution);
+			
+			this.prepareSerendipitous();
+			solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
+			this.checkSerendipitous(solutionBundle.solution);
+			
 			evaluations++;
 			
 			int lastUpdatedKind = solutionModifier.kinds() - 1;
@@ -134,10 +160,10 @@ public class AVM extends Algorithm {
 						currentVariable++; //Normally increments the variable
 					
 					//Gets the direction of update (minus or plus). Besides, it updates the solution.
-					direction = this.getDirection(solution, currentKind, currentVariable);
+					direction = this.getDirection(solutionBundle, currentKind, currentVariable);
 					
 					if (direction == 0.0) {
-						if (solution.getObjective(0) == 0.0)
+						if (solutionBundle.solution.getObjective(0) == 0.0)
 							targetCovered = true;
 						if (lastUpdatedKind == currentKind && lastUpdatedVariable == currentVariable)
 							localOptimum = true;
@@ -151,31 +177,40 @@ public class AVM extends Algorithm {
 				lastUpdatedVariable = currentVariable;
 				
 				//Creates a new solution, updated toward the specified direction.
-				Solution newSolution = this.newSolution(solution, currentKind, currentVariable, direction, strength);
+				SolutionBundle newSolution = this.newSolution(
+						solutionBundle, 
+						currentKind, currentVariable, 
+						direction, strength);
 				
-				if (comparator.compare(newSolution, solution) == -1) {
-					solution = newSolution;
+				int comparison = comparator.compare(newSolution.solution, solutionBundle.solution);
+				if (comparison == -1 || (comparison == 0 && newSolution.branchDistance < solutionBundle.branchDistance)) {
+					solutionBundle.solution = newSolution.solution;
+					solutionBundle.branchDistance = newSolution.branchDistance;
 					strength++;
 				} else {
 					direction = 0;
 				}
+				
+				if (solutionBundle.solution.getObjective(0) == 0.0)
+					targetCovered = true;
 			}
 		} // while
 
 		SolutionSet resultPopulation = new SolutionSet(1);
-		resultPopulation.add(solution);
+		resultPopulation.add(solutionBundle.solution);
 
-		System.out.println("Evaluations: " + evaluations);
+		this.algorithmStats.setEvaluations(evaluations);
 		return resultPopulation;
 	} // execute
 	
-	private Solution newSolution(
-			Solution pSolution, 
+	
+	private SolutionBundle newSolution(
+			SolutionBundle pSolutionBundle,
 			int currentKind, int currentVariable,
 			double pDirection,
 			int pStength)
 					throws JMException {
-		Solution solution = new Solution(pSolution);
+		Solution solution = new Solution(pSolutionBundle.solution);
 		XParamArray solutionModifier = new XParamArray(solution);
 		
 		double updateValue = solutionModifier.getValue(currentKind, currentVariable);
@@ -190,56 +225,133 @@ public class AVM extends Algorithm {
 		
 		solutionModifier.setValue(currentKind, currentVariable, updateValue);
 		
-		problem_.evaluate(solution);
+		this.prepareSerendipitous();
+		double branchDistance = problem.evaluateWithBranchDistance(solution);
+		this.checkSerendipitous(solution);
 		evaluations++;
 		
-		this.derivate = this.derivate(solution.getObjective(0), pSolution.getObjective(0), Math.abs(difference));
+		this.derivate = this.derivate(
+				solution.getObjective(0), branchDistance, 
+				pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance, 
+				Math.abs(difference));
 		
-		return solution;
+		return new SolutionBundle(solution, branchDistance);
 	}
 	
 	//TODO Adaptive epsilon based on the branch distance value (denormalization required)
-	private double getDirection(Solution pSolution, int pCurrentKind, int pCurrentVariable) throws JMException {
-		Solution solutionPlus = new Solution(pSolution);
-		Solution solutionMinus = new Solution(pSolution);
+	private double getDirection(SolutionBundle pSolutionBundle, int pCurrentKind, int pCurrentVariable) throws JMException {
+		Solution solutionPlus = new Solution(pSolutionBundle.solution);
+		Solution solutionMinus = new Solution(pSolutionBundle.solution);
 		
 		XParamArray modifierPlus = new XParamArray(solutionPlus);
 		XParamArray modifierMinus = new XParamArray(solutionMinus);
 		double currentValue = modifierPlus.getValue(pCurrentKind, pCurrentVariable);
-		modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue + this.epsilon);
-		modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue - this.epsilon);
+		if (currentValue+this.epsilon > modifierPlus.getUpperBound(pCurrentKind, pCurrentVariable))
+			modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue);
+		else
+			modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue + this.epsilon);
 		
-		problem_.evaluate(solutionPlus);
-		problem_.evaluate(solutionMinus);
+		if (currentValue-this.epsilon < modifierMinus.getLowerBound(pCurrentKind, pCurrentVariable))
+			modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue);
+		else
+			modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue - this.epsilon);
+		
+		this.prepareSerendipitous();
+		double branchDistancePlus = problem.evaluateWithBranchDistance(solutionPlus);
+		this.checkSerendipitous(solutionPlus);
+		
+		this.prepareSerendipitous();
+		double branchDistanceMinus = problem.evaluateWithBranchDistance(solutionMinus);
+		this.checkSerendipitous(solutionMinus);
 		evaluations += 2;
 		
-		if (comparator.compare(solutionPlus, solutionMinus) < 0) { //if solPlus < solMinus
-			if (comparator.compare(solutionPlus, pSolution) < 0) { //if solPlus < solution
-				this.solution = solutionPlus;
+		int comparation = comparator.compare(solutionPlus, solutionMinus);
+		
+		if (comparation < 0 || (comparation == 0 && branchDistancePlus < branchDistanceMinus)) { //if solPlus < solMinus
+			int comparation2 = comparator.compare(solutionPlus, pSolutionBundle.solution);
+			if (comparation2 < 0 || (comparation2 == 0 && branchDistancePlus < pSolutionBundle.branchDistance)) { //if solPlus < solution
+				this.derivate = this.derivate(
+						solutionPlus.getObjective(0), branchDistancePlus, 
+						pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance,
+						this.epsilon);
 				
-				this.derivate = this.derivate(solutionPlus.getObjective(0), pSolution.getObjective(0), this.epsilon);
+				this.solutionBundle.solution = solutionPlus;
+				this.solutionBundle.branchDistance = branchDistancePlus;
+				
+				if (this.solutionBundle.solution.getObjective(0) == 0.0)
+					return 0.0;
+				
 				return 1;
 			} else
 				return 0;
-		} else {
-			if (comparator.compare(solutionMinus, pSolution) < 0) {
-				this.solution = solutionMinus;
+		} else if (comparation > 0 || (comparation == 0 && branchDistancePlus > branchDistanceMinus)) {
+			int comparation2 = comparator.compare(solutionMinus, pSolutionBundle.solution);
+			if (comparation2 < 0 || (comparation2 == 0 && branchDistanceMinus < pSolutionBundle.branchDistance)) {
+				this.derivate = this.derivate(
+						solutionMinus.getObjective(0), branchDistanceMinus,
+						pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance,
+						this.epsilon);
 				
-				this.derivate = this.derivate(solutionMinus.getObjective(0), pSolution.getObjective(0), this.epsilon);
+				this.solutionBundle.solution = solutionMinus;
+				this.solutionBundle.branchDistance = branchDistanceMinus;
+				
+				if (this.solutionBundle.solution.getObjective(0) == 0.0)
+					return 0.0;
+				
 				return -1;
 			} else
 				return 0;
+		} else
+			return 0;
+	}
+	
+	private void prepareSerendipitous() {
+		if (problem_ instanceof SerendipitousProblem<?>) {
+			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
+			
+			problem.setSerendipitousPotentials(this.serendipitousPotentials);
 		}
 	}
 	
-	private double derivate(double a, double b, double dx) {
-		double bdA = this.denormalize(a - Math.floor(a));
-		double bdB = this.denormalize(b - Math.floor(b));
-		
-		return Math.abs(bdA - bdB)/dx;
+	private void checkSerendipitous(Solution solution) {
+		if (problem_ instanceof SerendipitousProblem<?>) {
+			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
+			
+			if (problem.getSerendipitousCovered().size() > 0) {
+				this.serendipitousPotentials.removeAll(problem.getSerendipitousCovered());
+				
+				this.serendipitousSolutions.add(solution);
+			}
+		}
 	}
 	
-	private double denormalize(double x) {
-		return x/(1 - x);
+	@Override
+	public Set<Solution> getSerendipitousSolutions() {
+		return this.serendipitousSolutions;
+	}
+
+	@Override
+	public void setSerendipitousPotentials(Set<LabeledEdge> pPotentials) {
+		this.serendipitousPotentials = pPotentials;
+	}
+	
+	private double derivate(double a, double bdA, double b, double bdB, double dx) {
+		double alA = Math.floor(a);
+		double alB = Math.floor(b);
+		
+		if (alA == alB)
+			return Math.abs(bdA - bdB)/dx;
+		else
+			return (alA - alB)/dx;
 	}
 } // pgGA
+
+class SolutionBundle {
+	public Solution solution;
+	public double branchDistance;
+	
+	public SolutionBundle(Solution pSolution, double pBranchDistance) {
+		this.solution = pSolution;
+		this.branchDistance = pBranchDistance;
+	}
+}

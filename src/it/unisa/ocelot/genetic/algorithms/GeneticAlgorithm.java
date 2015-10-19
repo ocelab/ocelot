@@ -21,6 +21,7 @@ package it.unisa.ocelot.genetic.algorithms;
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import jmetal.core.Algorithm;
@@ -41,7 +42,7 @@ import java.util.Set;
  * A multithreaded generational genetic algorithm
  */
 
-public class GeneticAlgorithm extends Algorithm implements SerendipitousAlgorithm<LabeledEdge> {
+public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge> {
 	private static final long serialVersionUID = -2679014653669190929L;
 	
 	private int no_evaluation;
@@ -179,7 +180,7 @@ public class GeneticAlgorithm extends Algorithm implements SerendipitousAlgorith
 		SolutionSet resultPopulation = new SolutionSet(1);
 		resultPopulation.add(population.get(0));
 
-//		System.out.println("Evaluations: " + evaluations);
+		this.algorithmStats.setEvaluations(evaluations);
 		this.no_evaluation = evaluations;
 		return resultPopulation;
 	} // execute

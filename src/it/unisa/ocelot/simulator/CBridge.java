@@ -79,6 +79,6 @@ public class CBridge {
 	public native void getEvents(EventsHandler pHandler, double[] values, double[][] arrays, double[] pointers);
 	
 	public void onCrash() {
-		System.out.println("A crash occurred...");
+		System.err.println("A crash occurred...");
 	}
 }

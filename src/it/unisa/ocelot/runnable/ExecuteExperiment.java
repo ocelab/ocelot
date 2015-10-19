@@ -31,8 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 public class ExecuteExperiment {
 	private static final String CONFIG_FILENAME = "config.properties";
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR
 	};
 
 	static {
@@ -84,8 +84,8 @@ public class ExecuteExperiment {
 			System.out.println("RUNNING " + generatorName);
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
 					generatorName, config, cfg);
-			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler
-					.getInstance(config);
+//			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler
+//					.getInstance(config);
 	
 			BenchmarkCalculator<Integer> timeBenchmark = new TimeBenchmarkCalculator();
 			BenchmarkCalculator<Double> coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
@@ -110,17 +110,17 @@ public class ExecuteExperiment {
 			
 			exportCSV(folderPath + preFilename, benchmarks);
 			
-			Set<TestCase> minimizedSuite = minimizer.minimize(suite);
+//			Set<TestCase> minimizedSuite = minimizer.minimize(suite);
 	
 			System.out
 					.println("-------------------------------------------------------");
 			System.out.println("Total test cases: " + suite.size());
-			System.out.println("Minimized test cases: " + minimizedSuite.size());
+//			System.out.println("Minimized test cases: " + minimizedSuite.size());
 			System.out
 					.println("-------------------------------------------------------");
 			
 			System.out.println("Minimised test suite:");
-			for (TestCase tc : minimizedSuite) {
+			for (TestCase tc : suite) {
 				System.out.println(tc.getCoveredEdges());
 				System.out.println(Utils.printParameters(tc.getParameters()));
 				System.out.println("#########");

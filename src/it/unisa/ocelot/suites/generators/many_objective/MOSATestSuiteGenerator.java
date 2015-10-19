@@ -19,6 +19,12 @@ import jmetal.core.SolutionSet;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
+/**
+ * Many-Objective test suite generator. Approach as described in Panichella et al. (Reformulating Branch Coverage as a 
+ * Many-Objective Optimization Problem).
+ * @author simone
+ *
+ */
 public class MOSATestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private ConfigManager config;
 	private boolean satisfied;

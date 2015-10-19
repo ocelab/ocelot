@@ -118,7 +118,7 @@ public class PathCoverageProblem extends StandardProblem {
 		return;
 	}
 
-	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
 		CBridge bridge = getCurrentBridge();
@@ -131,7 +131,7 @@ public class PathCoverageProblem extends StandardProblem {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
-			return;
+			return - 1;
 		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
@@ -148,5 +148,7 @@ public class PathCoverageProblem extends StandardProblem {
 		
 		if (new Double(solution.getObjective(0)).isNaN())
 			solution.setObjective(0, Double.POSITIVE_INFINITY);
+		
+		return listener.getBranchDistance();
 	}
 }

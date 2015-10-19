@@ -9,6 +9,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,9 @@ public abstract class TestSuiteGenerator {
 	}
 	
 	public Set<TestCase> generateTestSuite() throws TestSuiteGenerationException {
-		return this.generateTestSuite(new HashSet<TestCase>());
+		Set<TestCase> suite = this.generateTestSuite(new HashSet<TestCase>());
+		this.measureBenchmarks("End", suite, 0);
+		return suite;
 	}
 	
 	public abstract Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException;
@@ -64,6 +67,13 @@ public abstract class TestSuiteGenerator {
 	protected void print(Object pObject) {
 		if (this.config.getPrintResults())
 			System.out.print(pObject);
+	}
+	
+	protected void printStat(OcelotExperiment experiment, String pStat) {
+		if (experiment.getAlgorithmStats() != null)
+			this.println(experiment.getAlgorithmStats().getStat(pStat));
+		else
+			System.err.println("No stats found! Please check the generator...");
 	}
 
 	protected void println(Object pObject) {
@@ -85,7 +95,7 @@ public abstract class TestSuiteGenerator {
 	
 		TestCase tc = new TestCase();
 		tc.setId(id);
-		tc.setCoveredEdges(calculator.getCoveredEdges());
+		tc.setCoveredPath(calculator.getCoveredPath());
 		tc.setParameters(pParams);
 	
 		return tc;
@@ -99,12 +109,19 @@ public abstract class TestSuiteGenerator {
 			
 			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
-				
-			this.print("Serendipitous coverage!");
+			calculator.calculateCoverage(suite);
+			double prevCoverage = calculator.getBranchCoverage();
+			
 			suite.add(testCase);
-			this.measureBenchmarks("Serendipitous", suite, exp.getNumberOfEvaluation());
+			calculator.calculateCoverage(suite);
+			if (calculator.getBranchCoverage() == prevCoverage)
+				suite.remove(testCase);
+			else {
+				this.print("Serendipitous coverage! ");
+				this.measureBenchmarks("Serendipitous", suite, exp.getNumberOfEvaluation());
 	
-			this.println("Parameters found: " + Arrays.toString(numericParams));
+				this.println("Parameters found: " + Utils.printParameters(numericParams));
+			}
 		}
 	}
 }

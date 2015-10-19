@@ -36,7 +36,7 @@ import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
  *
  */
 public class CallGeneratorVisitor extends ASTVisitor {
-	private String callMacro;
+	private String call;
 	private String functionName;
 	private String[] neededParameters;
 	private List<IType> functionParameters;
@@ -68,7 +68,7 @@ public class CallGeneratorVisitor extends ASTVisitor {
 		this.localVariables = new ArrayList<String>();
 		this.usedVariables = new ArrayList<String>();
 		
-		this.callMacro = "";
+		this.call = "";
 		
 		try {
 			this.config = ConfigManager.getInstance();
@@ -157,9 +157,6 @@ public class CallGeneratorVisitor extends ASTVisitor {
 		
 		int result = super.leave(pDeclaration);
 		if (pDeclaration instanceof CASTFunctionDefinition) {
-			System.out.println(this.usedVariables);
-			System.out.println(this.localVariables);
-			
 			CASTFunctionDefinition function = (CASTFunctionDefinition)pDeclaration;
 			
 			IASTName functionName;
@@ -267,11 +264,11 @@ public class CallGeneratorVisitor extends ASTVisitor {
 						callString += " __arg" +outputArgument; //Name
 						callString += " = __val" + inputArgument + ";\n"; //Assign
 						
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
+						callParameters[outputArgument] = "__arg" + outputArgument;
 						inputArgument++;
 					} else {
 						String argcall = "__ptr" + pointerArgument;
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + argcall;
+						callParameters[outputArgument] = /*StringUtils.repeat('&', pointers) +*/ argcall;
 						pointerArgument++;
 					}
 				}
@@ -328,7 +325,7 @@ public class CallGeneratorVisitor extends ASTVisitor {
 						
 			callString += this.functionName + "(" + StringUtils.join(callParameters, ",") + ");\n";
 			
-			this.callMacro = callString;
+			this.call = callString;
 		}
 		return result;
 	}
@@ -354,7 +351,6 @@ public class CallGeneratorVisitor extends ASTVisitor {
 	
 	@Override
 	public int visit(IASTParameterDeclaration parameterDeclaration) {
-		// TODO Auto-generated method stub
 		return super.visit(parameterDeclaration);
 	}
 	
@@ -363,7 +359,7 @@ public class CallGeneratorVisitor extends ASTVisitor {
 		return super.leave(tu);
 	}
 	
-	public String getCallMacro() {
-		return callMacro;
+	public String getCall() {
+		return call;
 	}
 }

@@ -20,6 +20,12 @@ import java.util.Set;
 
 import jmetal.util.JMException;
 
+/**
+ * Generates statically the smallest set of path that can achieve the full branch coverage and tries to cover each of
+ * them.
+ * @author simone
+ *
+ */
 public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 
@@ -72,17 +78,15 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			} catch (NullPointerException e) {
 				lastCoverage = 0;
 			}
-			System.out.println("Starting an iteration...");
+			this.println("### Starting an iteration... ###");
 			Set<TestCase> lastIterationTestCases = new HashSet<TestCase>();
 			for (List<LabeledEdge> aMcCabePath : mcCabePaths) {
 				PathCoverageExperiment exp = new PathCoverageExperiment(cfg,
 						config, cfg.getParameterTypes(), aMcCabePath);
 	
-				//this.printSeparator();
+				this.printSeparator();
 				this.print("Current target: ");
 				this.println(aMcCabePath);
-				if (this.config.getDebug())
-					Utils.waitForEnter();
 				
 				exp.initExperiment();
 				try {
@@ -109,16 +113,12 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 				else
 					this.println("Path not covered...");
 				this.println("Parameters found: ");
-				this.println(Arrays.toString(numericParams[0][0]));
-				for (int k = 0; k < numericParams[1].length; k++)
-					this.println(Arrays.toString(numericParams[1][k]));
-				this.println(Arrays.toString(numericParams[2][0]));
-				this.printSeparator();
+				this.println(Utils.printParameters(numericParams));
 			}
 			calculator.calculateCoverage(suite);
 			improvement = calculator.getBranchCoverage() > lastCoverage;
 			lastCoverage = calculator.getBranchCoverage();
-			System.out.println("Iteration ended!");
+			this.println("### Iteration ended! ###");
 			if (improvement) {
 				searchPath.solve(this.getUncoveredEdges(suite));
 				mcCabePaths = searchPath.getChosenPaths();

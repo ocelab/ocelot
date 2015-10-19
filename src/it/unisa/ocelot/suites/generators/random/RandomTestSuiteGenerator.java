@@ -32,7 +32,12 @@ import org.apache.commons.lang3.Range;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
-
+/**
+ * Randomly generates test cases, keeping only the ones that improve coverage. The maximum number of generations
+ * is set in the config file.
+ * @author simone
+ *
+ */
 public class RandomTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private Random random;
 	private Range<Double>[] ranges;

@@ -47,7 +47,7 @@ public class CDG_BasedProblem extends StandardProblem {
 	}
 
 	@Override
-	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Object[][][] arguments = translator.translateArray(this.parameters);
 
@@ -77,6 +77,8 @@ public class CDG_BasedProblem extends StandardProblem {
 //		System.out.println(l_e);
 //		solution.setFitness(1-l_e);
 		solution.setFitness(1 - collateralCoverageEvaluator.calculateCollateralCoverage());
+		
+		return dominatorListener.getBranchDistance();
 	}
 
 	public void setDebug(boolean debug) {

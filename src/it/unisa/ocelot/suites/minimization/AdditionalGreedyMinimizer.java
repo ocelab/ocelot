@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class AdditionalGreedyMinimizer implements TestSuiteMinimizer {
+public class AdditionalGreedyMinimizer extends TestSuiteMinimizer {
 	public AdditionalGreedyMinimizer() {
 	}
 	

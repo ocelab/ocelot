@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.algorithms.AlgorithmStats;
 import it.unisa.ocelot.genetic.algorithms.CDG_GA;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 import jmetal.core.Algorithm;
@@ -59,6 +60,13 @@ public abstract class OcelotExperiment extends Experiment {
 	public void setSerendipitousPotentials(Set<LabeledEdge> pPotentials) {
 		this.serendipitousPotentials = pPotentials;
 	}
+	
+	public AlgorithmStats getAlgorithmStats() {
+		if (this.algorithm instanceof OcelotAlgorithm)
+			return ((OcelotAlgorithm) this.algorithm).getStats();
+		else
+			return null;
+	}
 
 	public Solution basicRun() throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
@@ -98,10 +106,14 @@ public abstract class OcelotExperiment extends Experiment {
 	}
 
 	public int getNumberOfEvaluation() {
+		if (this.algorithm instanceof OcelotAlgorithm)
+			return ((OcelotAlgorithm) this.algorithm).getStats().getEvaluations();
+		/*
 		if (this.algorithm instanceof GeneticAlgorithm)
 			return ((GeneticAlgorithm) this.algorithm).getNumberOfEvaluation();
 		if (this.algorithm instanceof CDG_GA)
 			return ((CDG_GA) this.algorithm).getNo_evaluations();
+		*/
 		return 0;
 	}
 }

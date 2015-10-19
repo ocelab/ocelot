@@ -2,14 +2,29 @@ package it.unisa.ocelot.writer.check;
 
 import java.util.Arrays;
 
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+
+import it.unisa.ocelot.c.instrumentor.CallGeneratorVisitor;
+import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
+import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.writer.TestCaseWriter;
+import it.unisa.ocelot.writer.TestWritingException;
 
 public class CheckTestCaseWriter extends TestCaseWriter {
+	private ConfigManager config;
+	private IASTTranslationUnit translationUnit;
+	
 	public CheckTestCaseWriter(int id) {
 		this.setName("ocelot_testcase" + id);
 	}
+	
+	public void setTranslationUnit(IASTTranslationUnit translationUnit) {
+		this.translationUnit = translationUnit;
+	}
+	
 	@Override
-	public String write() {
+	public String write(ConfigManager pConfigManager) throws TestWritingException {
+		this.config = pConfigManager;
 		String testCase = "";
 		
 		testCase += "START_TEST(" + this.getName() + ")\n";
@@ -20,8 +35,8 @@ public class CheckTestCaseWriter extends TestCaseWriter {
 		testCase += this.writeFunctionCall();
 		
 		testCase += "\n";
-		testCase += "	 /* REPLACE THE ASSERTION BELOW */";
-		testCase += "    ck_assert_str_eq(\"OK\", \"OK\");\n";
+		testCase += "/* REPLACE THE ASSERTION BELOW */\n";
+		testCase += "ck_assert_str_eq(\"OK\", \"OK\");\n";
 		testCase += "}\n";
 		testCase += "END_TEST\n\n";
 		
@@ -49,16 +64,20 @@ public class CheckTestCaseWriter extends TestCaseWriter {
 		initialization += "\n";
 		
 		for (int i = 0; i < pointers.length; i++) {
-			initialization += "double* __ptr" + i + " = &__array" + pointers[i] + ";\n";
+			initialization += "void* __ptr" + i + " = &__array" + pointers[i] + ";\n";
 		}
 		initialization += "\n";
 		
 		return initialization;
 	}
 	
-	private String writeFunctionCall() {
-		String functionCall = "";
+	private String writeFunctionCall() throws TestWritingException {
+		ExternalReferencesVisitor referenceVisitor = new ExternalReferencesVisitor(config.getTestFunction());
+		translationUnit.accept(referenceVisitor);
 		
-		return functionCall;
+		CallGeneratorVisitor callGeneratorVisitor = new CallGeneratorVisitor(config.getTestFunction(), referenceVisitor.getExternalReferences());
+		translationUnit.accept(callGeneratorVisitor);
+		
+		return callGeneratorVisitor.getCall();
 	}
 }

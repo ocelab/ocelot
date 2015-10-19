@@ -76,11 +76,7 @@ public class PolynomialMutationParams extends Mutation {
 		for (int var = 0; var < x.getNumberOfDecisionVariables(); var++) {
 			if (PseudoRandom.randDouble() <= probability) {
 				y = 0;
-				try {
-					y = x.getValue(var);
-				} catch (Exception e ){
-					System.out.println("OOOOOG");
-				}
+				y = x.getValue(var);
 				yl = x.getLowerBound(var);
 				yu = x.getUpperBound(var);
 				delta1 = (y - yl) / (yu - yl);

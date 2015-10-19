@@ -14,6 +14,7 @@ import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,13 @@ import java.util.Set;
 import jmetal.core.Variable;
 import jmetal.util.JMException;
 
-
+/**
+ * Classic memory based approach. For each test case generated, all the covered edges are removed from
+ * the set of targets. This approach can be run so that also serendipitous solution are added to the 
+ * test suite.
+ * @author simone
+ *
+ */
 public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 	
@@ -66,23 +73,28 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 				&& calculator.getBranchCoverage() < config.getRequiredCoverage()) {
 			LabeledEdge targetEdge = uncoveredEdges.get(0);
 			uncoveredEdges.remove(0); // avoids infinite loop
-			CFGNode targetNode = cfg.getEdgeTarget(targetEdge);
 
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config,
 					cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
-			exp.setSerendipitousPotentials(new HashSet<LabeledEdge>(this.getUncoveredEdges(suite)));
+			
+			if (config.getSerendipitousCoverage())
+				exp.setSerendipitousPotentials(new HashSet<LabeledEdge>(this.getUncoveredEdges(suite)));
+			
+			CFGNode departingNode = cfg.getEdgeSource(targetEdge);
+			this.printSeparator();
+			this.println("Current target: branch " + targetEdge.toString() + " of node " + departingNode);
+			
 			try {
+				this.print("Running... ");
 				exp.basicRun();
+				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
 			
-			this.addSerendipitousTestCases(exp, suite);
-
-			this.printSeparator();
-			this.print("Current target: ");
-			this.println(targetNode);
+			if (config.getSerendipitousCoverage())
+				this.addSerendipitousTestCases(exp, suite);
 
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
@@ -98,7 +110,7 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 			} else
 				this.println("Target not covered...");
 
-			this.println("Parameters found: " + Arrays.toString(numericParams));
+			this.println("Parameters found: " + Utils.printParameters(numericParams));
 
 			calculator.calculateCoverage(suite);
 			uncoveredEdges.removeAll(calculator.getCoveredEdges());

@@ -20,6 +20,13 @@ import java.util.Set;
 
 import jmetal.util.JMException;
 
+/**
+ * Generates statically the smallest set of path that can achieve the full branch coverage and tries to cover each of
+ * them. Configures the problem of covering a specific path as a multi-node coverage problem instead of a path coverage 
+ * problem.
+ * @author simone
+ *
+ */
 public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 
@@ -72,7 +79,7 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 			} catch (NullPointerException e) {
 				lastCoverage = 0;
 			}
-			System.out.println("Starting an iteration...");
+			this.println("### Starting an iteration... ###");
 			Set<TestCase> lastIterationTestCases = new HashSet<TestCase>();
 			for (List<LabeledEdge> aMcCabePath : mcCabePaths) {
 				List<LabeledEdge> uncovered = this.getUncoveredEdges(suite);
@@ -86,13 +93,12 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 				ManyEdgesCoverageExperiment exp = new ManyEdgesCoverageExperiment(
 						cfg, config, cfg.getParameterTypes(), aMcCabePath);
 	
-				//this.printSeparator();
+				exp.initExperiment();
+				
+				this.printSeparator();
 				this.print("Current target: ");
 				this.println(aMcCabePath);
-				if (this.config.getDebug())
-					Utils.waitForEnter();
 				
-				exp.initExperiment();
 				try {
 					exp.basicRun();
 				} catch (JMException | ClassNotFoundException e) {
@@ -107,8 +113,7 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 				TestCase testCase = this.createTestCase(numericParams, suite.size());
 				suite.add(testCase);
 				
-				//TODO: Fix with number of evaluations!
-				this.measureBenchmarks("McCabe", suite, 0);
+				this.measureBenchmarks("McCabe", suite, exp.getNumberOfEvaluation());
 				lastIterationTestCases.add(testCase);
 				
 				this.println("Fitness function: " + fitnessValue + ". ");
@@ -117,16 +122,12 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 				else
 					this.println("Path not covered...");
 				this.println("Parameters found: ");
-				this.println(Arrays.toString(numericParams[0][0]));
-				for (int k = 0; k < numericParams[1].length; k++)
-					this.println(Arrays.toString(numericParams[1][k]));
-				this.println(Arrays.toString(numericParams[2][0]));
-				this.printSeparator();
+				this.println(Utils.printParameters(numericParams));
 			}
 			calculator.calculateCoverage(suite);
 			improvement = calculator.getBranchCoverage() > lastCoverage;
 			lastCoverage = calculator.getBranchCoverage();
-			System.out.println("Iteration ended!");
+			this.println("### Iteration ended! ###");
 			if (improvement) {
 				searchPath.solve(this.getUncoveredEdges(suite));
 				mcCabePaths = searchPath.getChosenPaths();

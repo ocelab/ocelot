@@ -58,7 +58,7 @@ public class NodeCoverageProblem extends StandardProblem {
 		this.dominators = dominators.getStrictDominators(pNode);
 	}
 
-	public void evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		Object[][][] arguments = this.getParameters(solution);
 
 		CBridge bridge = getCurrentBridge();
@@ -70,7 +70,7 @@ public class NodeCoverageProblem extends StandardProblem {
 			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
-			return;
+			return -1;
 		}
 
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
@@ -86,5 +86,7 @@ public class NodeCoverageProblem extends StandardProblem {
 		
 		if (debug)
 			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);
+		
+		return bdalListener.getBranchDistance();
 	}
 }

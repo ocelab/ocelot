@@ -4,9 +4,11 @@ import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGWindow;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.types.CTypeHandler;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.simulator.CBridge;
+import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
@@ -106,9 +108,20 @@ public class ExecuteWholeCoverage {
 		
 		System.out.println("Minimised test suite:");
 		for (TestCase tc : minimizedSuite) {
-			System.out.println(tc.getCoveredEdges());
+			System.out.println(tc.getCoveredPath());
 			System.out.println(Utils.printParameters(tc.getParameters()));
 			System.out.println("#########");
+		}
+		
+		System.out.println("-----------------------------------------------------");
+		System.out.println("Still uncovered:");
+		
+		CoverageCalculator calculator = new CoverageCalculator(cfg);
+		calculator.calculateCoverage(minimizedSuite);
+		
+		for (LabeledEdge uncoveredEdge : calculator.getUncoveredBranches()) {
+			System.out.println("Branch " + uncoveredEdge.toString() 
+					+ " from node " + cfg.getEdgeSource(uncoveredEdge).toString());
 		}
 	}
 

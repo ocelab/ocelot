@@ -1,5 +1,7 @@
 package it.unisa.ocelot.genetic.algorithms;
 
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +16,7 @@ import jmetal.util.comparators.FitnessComparator;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.parallel.IParallelEvaluator;
 
-public class CDG_GA extends Algorithm {
+public class CDG_GA extends OcelotAlgorithm {
 
 	private static final long serialVersionUID = 7006139362097837208L;
 
@@ -119,7 +121,7 @@ public class CDG_GA extends Algorithm {
 				double currentFitness = current.getFitness();
 
 				if (current.getObjective(0) == 0 && currentFitness < minFitness) {
-					System.out.println("Update fitness : " + currentFitness);
+					this.algorithmStats.setStat("UpdateFitness", currentFitness);
 					bestFitnessSolution = new Solution(current);
 					minFitness = currentFitness;
 					this.no_evaluations = evaluations;
@@ -135,11 +137,13 @@ public class CDG_GA extends Algorithm {
 			}
 			offspringPopulation.clear();
 		} // while
+		
+		this.algorithmStats.setEvaluations(evaluations);
 
 		SolutionSet bestFitnessResult = new SolutionSet(1);
 
 		if (bestFitnessSolution == null) {
-			System.out.println("Null solution");
+			this.algorithmStats.setStat("NullSolution", true);
 			population.sort(comparator);
 			bestFitnessResult.add(population.get(0));
 			no_evaluations = evaluations;

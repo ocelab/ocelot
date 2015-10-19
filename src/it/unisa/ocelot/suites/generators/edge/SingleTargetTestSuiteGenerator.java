@@ -3,12 +3,14 @@ package it.unisa.ocelot.suites.generators.edge;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +21,11 @@ import java.util.Set;
 
 import jmetal.util.JMException;
 
-
+/**
+ * Test suite generators which selects, in turn, each single branch and tries to cover it.
+ * @author simone
+ *
+ */
 public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 	
@@ -53,25 +59,25 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 	}
 	
 	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {		
-		List<LabeledEdge> uncoveredEdges = new ArrayList<LabeledEdge>(cfg.edgeSet());
-		Collections.shuffle(uncoveredEdges);
-		while (!uncoveredEdges.isEmpty()) {
-			LabeledEdge targetEdge = uncoveredEdges.remove(0); //avoids infinite loop
+		List<LabeledEdge> edgesToCover = new ArrayList<LabeledEdge>(cfg.edgeSet());
+		Collections.shuffle(edgesToCover);
+		while (!edgesToCover.isEmpty()) {
+			LabeledEdge targetEdge = edgesToCover.remove(0); //avoids infinite loop
 			
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
 			exp.initExperiment();
-			exp.setSerendipitousPotentials(new HashSet<>(uncoveredEdges));
+			
+			CFGNode departingNode = cfg.getEdgeSource(targetEdge);
+			this.printSeparator();
+			this.println("Current target: branch " + targetEdge.toString() + " of node " + departingNode);
+			
 			try {
+				this.print("Running... ");
 				exp.basicRun();
+				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
-			
-			this.addSerendipitousTestCases(exp, suite);
-			
-			this.printSeparator();
-			this.print("Current target: ");
-			this.println(targetEdge);
 			
 			double fitnessValue = exp.getFitnessValue();
 			VariableTranslator translator = new VariableTranslator(exp.getSolution());
@@ -86,11 +92,9 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 			TestCase testCase = this.createTestCase(numericParams, suite.size());
 			suite.add(testCase);
 			
-			uncoveredEdges = this.getUncoveredEdges(suite);
-			
 			this.measureBenchmarks("Target", suite, 0);
 			
-			this.println("Parameters found: " + Arrays.toString(numericParams));
+			this.println("Parameters found: " + Utils.printParameters(numericParams));
 		}
 	}
 }

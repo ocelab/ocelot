@@ -157,9 +157,6 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		
 		int result = super.leave(pDeclaration);
 		if (pDeclaration instanceof CASTFunctionDefinition) {
-			System.out.println(this.usedVariables);
-			System.out.println(this.localVariables);
-			
 			CASTFunctionDefinition function = (CASTFunctionDefinition)pDeclaration;
 			
 			IASTName functionName;

@@ -4,7 +4,9 @@ import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.cfg.CFGWindow;
+import it.unisa.ocelot.c.types.CTypeHandler;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
@@ -48,6 +50,13 @@ public class GenAndWrite {
 		CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 
 		
+		CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
+		CBridge.initialize(
+				typeHandler.getValues().size(), 
+				typeHandler.getPointers().size(),
+				typeHandler.getPointers().size());
+
+		
 		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
 		System.out.println("Cyclomatic complexity: " + mcCabePaths);
 
@@ -76,7 +85,7 @@ public class GenAndWrite {
 		
 		TestFramework framework = new TestFramework(new CheckFactory());
 		
-		String content = framework.writeTestSuite(minimizedSuite);
+		String content = framework.writeTestSuite(minimizedSuite, cfg, config);
 		Utils.writeFile(filename, content);
 		
 		System.out.println("Operation completed!");

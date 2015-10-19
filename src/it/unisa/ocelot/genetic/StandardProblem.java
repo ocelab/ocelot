@@ -104,13 +104,10 @@ public abstract class StandardProblem extends Problem {
 		//Sets up the ranges for the variables references (if any)
 		for (int i = 0; i < numberOfReferences; i++) {
 			lowerLimits[1 + numberOfReferences][i] = 0;
-			upperLimits[1 + numberOfReferences][i] = numberOfReferences;
+			upperLimits[1 + numberOfReferences][i] = numberOfReferences-1;
 		}
 		
 		this.parameters = pParameters;
-		
-		System.out.println(pParameters.length-numberOfReferences);
-		System.out.println(numberOfReferences);
 	}
 	
 	protected Object[][][] getParameters(Solution solution) {
@@ -138,7 +135,6 @@ public abstract class StandardProblem extends Problem {
 	}
 	
 	public double getUpperLimit(int pArray, int i) {
-		// TODO Auto-generated method stub
 		return upperLimits[pArray][i];
 	}
 	
@@ -158,7 +154,7 @@ public abstract class StandardProblem extends Problem {
 		return result;
 	}
 	
-	public abstract void evaluateSolution(Solution solution) throws JMException, SimulationException;
+	public abstract double evaluateSolution(Solution solution) throws JMException, SimulationException;
 	
 	@Override
 	public final void evaluate(Solution solution) throws JMException {
@@ -179,6 +175,31 @@ public abstract class StandardProblem extends Problem {
 			try {
 				this.evaluateSolution(solution);
 				return;
+			} catch (SimulationException e) {
+				tries--;
+			}
+		}
+		
+		throw new JMException("Unable to evaluate the solution " + solution.getDecisionVariables().toString());
+	}
+	
+	public final double evaluateWithBranchDistance(Solution solution) throws JMException {
+		int tries = MAX_TRIES;
+		
+		Object[][][] arguments = this.getParameters(solution);
+		
+		for (Object obj : arguments[2][0]) {
+			Integer pointerRef = (Integer)obj;
+			if (pointerRef < 0 || pointerRef >= numberOfArrays) {
+				System.err.println("Warning: invalid pointer for " + Arrays.toString(arguments[2][0]));
+				solution.setObjective(0, Double.MAX_VALUE);
+				return -1;
+			}
+		}
+		
+		while (tries > 0) {
+			try {
+				return this.evaluateSolution(solution);
 			} catch (SimulationException e) {
 				tries--;
 			}

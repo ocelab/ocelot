@@ -10,6 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Test suite generator which combines multiple generators in cascade. The generators must
+ * implement CascadeableGenerator. 
+ * @author simone
+ *
+ */
 public class CascadeTestSuiteGenerator extends TestSuiteGenerator {
 	private List<TestSuiteGenerator> generators;
 	

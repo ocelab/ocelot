@@ -6,6 +6,7 @@ import it.unisa.ocelot.c.cfg.edges.FlowEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
+import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ public class CoverageCalculator {
 			simulator.simulate();
 			
 			if (!simulator.isSimulationCorrect())
-				throw new RuntimeException("Simulation error for parameters " + Arrays.toString(params));
+				throw new RuntimeException("Simulation error for parameters " + Utils.printParameters(params));
 		}
 		
 		this.coveredEdges = this.coverageListener.getCoveredEdges();

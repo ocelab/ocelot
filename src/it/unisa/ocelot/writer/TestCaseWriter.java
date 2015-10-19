@@ -1,10 +1,21 @@
 package it.unisa.ocelot.writer;
 
 import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.conf.ConfigManager;
 
 public abstract class TestCaseWriter {
 	protected TestCase testCase;
 	protected String name;
+	protected CFG cfg;
+	
+	public void setCfg(CFG cfg) {
+		this.cfg = cfg;
+	}
+	
+	public CFG getCfg() {
+		return cfg;
+	}
 	
 	public void setTestCase(TestCase testCase) {
 		this.testCase = testCase;
@@ -22,5 +33,5 @@ public abstract class TestCaseWriter {
 		this.name = name;
 	}
 	
-	public abstract String write();
+	public abstract String write(ConfigManager pConfigManager) throws TestWritingException;
 }

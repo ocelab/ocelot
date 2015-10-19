@@ -1,0 +1,66 @@
+%implements "chartSource" "C"
+%function ChartConfig(block, system) void
+  %createrecord chartConfiguration { ...
+          executeAtInitialization  0 ...
+  }
+  %return chartConfiguration
+%endfunction
+%function ChartDataMap(block, system) void
+  %createrecord ChartDataElements {\
+    NumChartData   8 \
+    ChartDataDefaults {\
+      RecordType   "ChartData"\
+      Dimensions   []\
+      IsTestPoint  0\
+    }\
+    ChartData {\
+      Name         "sfEvent"\
+      Description  "ActiveChartEvent"\
+      SFName       ""\
+      Path         ""\
+    }\
+    ChartData {\
+      Name         "is_active_c1_Guidance"\
+      Description  "StateIsActive"\
+      SFName       ""\
+      Path         ""\
+    }\
+    ChartData {\
+      Name         "is_Guidance"\
+      Description  "StateActiveChild"\
+      SFName       ""\
+      Path         "Guidance"\
+    }\
+    ChartData {\
+      Name         "is_active_Guidance"\
+      Description  "StateIsActive"\
+      SFName       ""\
+      Path         "Guidance"\
+    }\
+    ChartData {\
+      Name         "is_Fuze"\
+      Description  "StateActiveChild"\
+      SFName       ""\
+      Path         "Fuze"\
+    }\
+    ChartData {\
+      Name         "is_active_Fuze"\
+      Description  "StateIsActive"\
+      SFName       ""\
+      Path         "Fuze"\
+    }\
+    ChartData {\
+      Name         "Acquire_time"\
+      Description  "ChartLocal"\
+      SFName       ""\
+      Path         "Acquire_time"\
+    }\
+    ChartData {\
+      Name         "incr"\
+      Description  "ChartLocal"\
+      SFName       ""\
+      Path         "incr"\
+    }\
+  }
+  %return ChartDataElements
+%endfunction
