@@ -3,9 +3,7 @@ package it.unisa.ocelot.suites.minimization;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class AdditionalGreedyMinimizer extends TestSuiteMinimizer {
@@ -35,8 +33,10 @@ public class AdditionalGreedyMinimizer extends TestSuiteMinimizer {
 				}
 			}
 			
-			selected.add(maxTC);
-			covered.addAll(maxCoverage);
+			if (maxTC != null) {
+				selected.add(maxTC);
+				covered.addAll(maxCoverage);
+			}
 		} while (!covered.equals(totalCovered));
 		
 		return selected;

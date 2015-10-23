@@ -32,7 +32,8 @@ public class ExecuteExperiment {
 	private static final String CONFIG_FILENAME = "config.properties";
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
 		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR
+		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.CASCADE_APPROACH
 	};
 
 	static {

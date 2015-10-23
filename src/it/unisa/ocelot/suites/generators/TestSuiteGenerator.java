@@ -9,6 +9,8 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
+import it.unisa.ocelot.suites.budget.BudgetManager;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
@@ -24,11 +26,14 @@ public abstract class TestSuiteGenerator {
 	protected ConfigManager config;
 	public CoverageCalculator calculator;
 	public CFG cfg;
+	protected BudgetManager budgetManager;
+	private int fixedBudget;
 	
 	public TestSuiteGenerator(CFG pCFG) {
 		this.benchmarkCalculators = new ArrayList<BenchmarkCalculator>();
 		this.cfg = pCFG;
 		this.calculator = new CoverageCalculator(pCFG);
+		this.fixedBudget = -1;
 	}
 	
 	public void addBenchmark(BenchmarkCalculator pCalculator) {
@@ -126,5 +131,21 @@ public abstract class TestSuiteGenerator {
 				this.println("Parameters found: " + Utils.printParameters(numericParams));
 			}
 		}
+	}
+	
+	public boolean needsBudget() {
+		return true;
+	}
+	
+	protected void setFixedBudget(int pFixedBudget) {
+		this.fixedBudget = pFixedBudget;
+	}
+	
+	public void setupBudgetManager(int pNumberOfExperiments) {
+		if (this.budgetManager == null)
+			if (this.fixedBudget == -1)
+				this.budgetManager = BudgetManagerHandler.getInstance(config, pNumberOfExperiments);
+			else
+				this.budgetManager = BudgetManagerHandler.getInstance(config.getBudgetManager(), this.fixedBudget, pNumberOfExperiments);
 	}
 }

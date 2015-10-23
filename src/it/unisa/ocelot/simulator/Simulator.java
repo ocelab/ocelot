@@ -73,9 +73,9 @@ public class Simulator {
 			lastNode = currentNode;
 			lastExecutionEvent = this.currentEventIndex;
 
-			emergencyLog += currentNode.toString() + "\n";
-			if (currentEvent != null)
-				emergencyLog += currentEvent.toString() + "\n\n";
+//			emergencyLog += currentNode.toString() + "\n";
+//			if (currentEvent != null)
+//				emergencyLog += currentEvent.toString() + "\n\n";
 			
 			//If we have a switch, we get all the execution events related to this switch
 			//(one for each edge) and we set currentEvent as the event related to the chosen branch.
@@ -90,7 +90,7 @@ public class Simulator {
 				this.rewind(1);
 				for (LabeledEdge edge : edges) {
 					currentCaseEvent = this.getNextEvent();
-					emergencyLog += currentCaseEvent.toString() + "\n";
+//					emergencyLog += currentCaseEvent.toString() + "\n";
 					
 					caseEvents.add(currentCaseEvent);
 					currentCaseEvent.setEdge(edge);

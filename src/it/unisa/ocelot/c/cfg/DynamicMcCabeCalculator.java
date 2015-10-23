@@ -70,4 +70,35 @@ public class DynamicMcCabeCalculator {
 		
 		return true;
 	}
+
+	public int extimateMissingTargets() {
+		int extimate = 0;
+		for (CFGNode node : this.cfg.vertexSet()) {
+			int totalEdges = 0;
+			int coveredEdges = 0;
+			for (LabeledEdge edge : this.cfg.outgoingEdgesOf(node)) {
+				totalEdges++;
+				if (covered.get(edge))
+					coveredEdges++;
+			}
+			
+			if (totalEdges > 1)
+				extimate += (totalEdges - coveredEdges);
+		}
+		
+		return extimate+1;
+	}
+	
+	public int currenltyMissingTargets() {
+		int missing = 0;
+		
+		for (CFGNode node : this.partiallyCoveredNodes) {
+			for (LabeledEdge edge : this.cfg.outgoingEdgesOf(node)) {
+				if (!covered.get(edge))
+					missing++;
+			}
+		}
+		
+		return missing;
+	}
 }

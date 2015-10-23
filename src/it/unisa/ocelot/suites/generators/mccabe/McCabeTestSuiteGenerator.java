@@ -12,6 +12,7 @@ import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -63,11 +64,13 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator implements Casc
 		McCabeCalculator mcCabeCalculator = new McCabeCalculator(cfg);
 		mcCabeCalculator.calculateMcCabePaths();
 		ArrayList<ArrayList<LabeledEdge>> mcCabePaths = mcCabeCalculator.getMcCabeEdgePaths();
+		
+		this.setupBudgetManager(mcCabePaths.size());
 
 		for (ArrayList<LabeledEdge> aMcCabePath : mcCabePaths) {
 			PathCoverageExperiment exp = new PathCoverageExperiment(cfg, config, cfg.getParameterTypes(), aMcCabePath);
 			
-			exp.initExperiment();
+			exp.initExperiment(this.budgetManager);
 
 			this.printSeparator();
 			this.print("Current target: ");

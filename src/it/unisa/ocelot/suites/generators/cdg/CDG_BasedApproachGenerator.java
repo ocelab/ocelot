@@ -17,6 +17,7 @@ import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -83,16 +84,27 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 	private void coverEdges(Set<TestCase> suite) throws TestSuiteGenerationException {
 		EdgeComparator comparator = new EdgeComparator(cfg);
 		Collections.sort(branches, comparator);
+		
+		this.setupBudgetManager(branches.size());
 
 		int index = 0;
-		for (LabeledEdge branch : branches) {
+		for (int i = 0; i < branches.size(); i++) {
+			LabeledEdge branch = branches.get(i);
 			if (!branch.isCovered()) {
+				int stillToCover = 0;
+				for (int j = i; j < branches.size(); j++)
+					if (!branches.get(j).isCovered())
+						stillToCover++;
+				
+				this.budgetManager.updateTargets(stillToCover);
+				
 				this.println("Target: branch " + branch.toString() 
 						+ " of node " + this.cfg.getEdgeSource(branch).toString());
 				
 				CDG_BasedExperiment experiment = new CDG_BasedExperiment(cfg, config,
 						cfg.getParameterTypes(), branches, branch);
-				experiment.initExperiment();
+				
+				experiment.initExperiment(this.budgetManager);
 				
 				CFGNode departingNode = cfg.getEdgeSource(branch);
 				this.printSeparator();

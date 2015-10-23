@@ -154,6 +154,13 @@ public abstract class StandardProblem extends Problem {
 		return result;
 	}
 	
+	/**
+	 * Evaluates a potential solution to the problem
+	 * @param solution Solution to be evaluated
+	 * @return The branch distance (if any)
+	 * @throws JMException
+	 * @throws SimulationException
+	 */
 	public abstract double evaluateSolution(Solution solution) throws JMException, SimulationException;
 	
 	@Override

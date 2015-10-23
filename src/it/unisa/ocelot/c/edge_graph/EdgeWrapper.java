@@ -10,4 +10,20 @@ public class EdgeWrapper<E> {
 	public E getWrappedEdge() {
 		return wrappedEdge;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		
+		if (!(obj instanceof EdgeWrapper))
+			return false;
+		
+		EdgeWrapper wrapper = (EdgeWrapper)obj;
+		
+		if (wrapper.getWrappedEdge() == null)
+			return (this.getWrappedEdge() == null);
+		
+		return wrapper.getWrappedEdge().equals(this.getWrappedEdge());
+	}
 }

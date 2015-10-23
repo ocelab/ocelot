@@ -28,4 +28,9 @@ public abstract class TestSuiteMinimizer extends TestSuiteGenerator implements C
 	public boolean isSatisfied() {
 		return false;
 	}
+	
+	@Override
+	public boolean needsBudget() {
+		return false;
+	}
 }

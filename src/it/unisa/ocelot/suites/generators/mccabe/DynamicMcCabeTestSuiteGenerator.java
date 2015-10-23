@@ -9,6 +9,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -59,10 +60,13 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 		
 		LabeledEdge currentTarget = cfg.getStart().navigate(cfg).goFlow().edge();
 		
-		while (currentTarget != null) {
+		this.setupBudgetManager(mcCabeCalculator.extimateMissingTargets());
+		
+		while (currentTarget != null && calculator.getBranchCoverage() < config.getRequiredCoverage()) {
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), currentTarget);
 			
-			exp.initExperiment();
+			exp.initExperiment(this.budgetManager);
+			
 			exp.setSerendipitousPotentials(new HashSet<>(this.getUncoveredEdges(suite)));
 			
 			CFGNode departingNode = cfg.getEdgeSource(currentTarget);
@@ -116,6 +120,7 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			
 			calculator.calculateCoverage(suite);
 			this.println("Partial coverage: " + calculator.getBranchCoverage());
+			this.budgetManager.updateTargets(mcCabeCalculator.extimateMissingTargets());
 		}
 	}
 }

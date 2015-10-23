@@ -79,10 +79,15 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 
 	public SolutionSet multiObjectiveRun() throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
+		
+		//this.algorithm.setInputParameter("maxEvaluations", this.budgetManager.getExperimentBudget(this));
+		
 		SolutionSet solutionSet = this.algorithm.execute();
 		// restore all branch as uncovered for next experiments
 		for (LabeledEdge edge : this.branches)
 			edge.setUncovered();
+		
+		this.budgetManager.reportConsumedBudget(this, this.algorithm.getStats().getEvaluations());
 		return solutionSet;
 	}
 

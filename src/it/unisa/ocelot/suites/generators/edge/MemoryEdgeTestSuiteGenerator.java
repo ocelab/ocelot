@@ -12,6 +12,7 @@ import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
 import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -68,6 +69,8 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {
 		List<LabeledEdge> uncoveredEdges = this.getUncoveredEdges(suite);
 
+		this.setupBudgetManager(uncoveredEdges.size());
+		
 		Collections.shuffle(uncoveredEdges);
 		while (!uncoveredEdges.isEmpty()
 				&& calculator.getBranchCoverage() < config.getRequiredCoverage()) {
@@ -76,7 +79,8 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config,
 					cfg.getParameterTypes(), targetEdge);
-			exp.initExperiment();
+			
+			exp.initExperiment(this.budgetManager);
 			
 			if (config.getSerendipitousCoverage())
 				exp.setSerendipitousPotentials(new HashSet<LabeledEdge>(this.getUncoveredEdges(suite)));
@@ -114,6 +118,7 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 
 			calculator.calculateCoverage(suite);
 			uncoveredEdges.removeAll(calculator.getCoveredEdges());
+			this.budgetManager.updateTargets(uncoveredEdges.size());
 		}
 	}
 }

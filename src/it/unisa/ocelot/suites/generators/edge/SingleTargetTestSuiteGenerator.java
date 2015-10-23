@@ -8,6 +8,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -60,12 +61,16 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 	
 	private void coverSingleTargets(Set<TestCase> suite) throws TestSuiteGenerationException {		
 		List<LabeledEdge> edgesToCover = new ArrayList<LabeledEdge>(cfg.edgeSet());
+		
+		this.setupBudgetManager(edgesToCover.size());
+		
 		Collections.shuffle(edgesToCover);
 		while (!edgesToCover.isEmpty()) {
 			LabeledEdge targetEdge = edgesToCover.remove(0); //avoids infinite loop
 			
 			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), targetEdge);
-			exp.initExperiment();
+			
+			exp.initExperiment(this.budgetManager);
 			
 			CFGNode departingNode = cfg.getEdgeSource(targetEdge);
 			this.printSeparator();

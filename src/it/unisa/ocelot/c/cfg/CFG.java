@@ -146,6 +146,25 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 		for (LabeledEdge edge : this.edgeSet()) {
 			if (!(edge instanceof FlowEdge)) {
 				// objectID correspond to the ID in multiple objective function 
+				targets.add(edge);
+				branchID++;
+			}
+		} // edges terminated
+		return targets;
+	}
+	
+	/**
+	 * Returns all branches of this control flow graph 
+	 * (we intend for branch all edges except FlowEdges)
+	 * @return a list of LabeledEdges
+	 */
+	public List<LabeledEdge> getIdBranchesFromCFG() {
+		List<LabeledEdge> targets = new ArrayList<>();
+
+		int branchID = 0;
+		for (LabeledEdge edge : this.edgeSet()) {
+			if (!(edge instanceof FlowEdge)) {
+				// objectID correspond to the ID in multiple objective function 
 				edge.setObjectiveID(branchID);
 				targets.add(edge);
 				branchID++;

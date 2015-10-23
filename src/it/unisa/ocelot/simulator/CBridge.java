@@ -1,5 +1,7 @@
 package it.unisa.ocelot.simulator;
 
+import java.util.Date;
+
 public class CBridge {
 	private int coreId;
 	private static int n;
@@ -71,7 +73,12 @@ public class CBridge {
 //		if (n % 100 == 0)
 //			System.out.println(n);
 		
+//		Date start = new Date();
 		this.getEvents(pHandler, values, arrays, pointers);
+//		Date end = new Date();
+		
+//		long difference = end.getTime() - start.getTime();
+//		System.out.println("Execution took " + difference + " milliseconds");
 	}
 	
 	public native void memoryDump();

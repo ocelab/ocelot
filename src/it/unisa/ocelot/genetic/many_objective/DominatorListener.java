@@ -16,11 +16,13 @@ import it.unisa.ocelot.simulator.SimulatorListener;
 
 /**
  * Listener needed to calculate normalized branches distance and approach level
- * of a target edge
+ * of a target edge. This listener is deprecated. The unified EdgeDistanceListener
+ * is used instead.
  * 
  * @author giograno
  *
  */
+@Deprecated
 public class DominatorListener implements SimulatorListener {
 
 	private CFG cfg;

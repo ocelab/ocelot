@@ -34,6 +34,8 @@ public class EdgeDistanceListener implements SimulatorListener {
 	private boolean forceCovered;
 	private Set<LabeledEdge> serendipitousPotentials;
 	private Set<LabeledEdge> serendipitousCovered;
+	
+	private Set<List<ExecutionEvent>> pairEventSets;
 
 	/**
 	 * Constructor of EdgeDistanceListener class
@@ -55,6 +57,8 @@ public class EdgeDistanceListener implements SimulatorListener {
 		
 		this.serendipitousCovered = new HashSet<>();
 		this.serendipitousPotentials = new HashSet<>();
+				
+		this.pairEventSets = new HashSet<>();
 	}
 
 	@Override
@@ -68,14 +72,21 @@ public class EdgeDistanceListener implements SimulatorListener {
 
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge, ExecutionEvent pEvent) {
+		if (pEdge.equals(targetEdge))
+			forceCovered = true;
+		
 		if (this.serendipitousPotentials.contains(pEdge))
 			this.serendipitousCovered.add(pEdge);
+		
+		if (forceCovered)
+			return;
 		
 		CFGNode node = this.cfg.getEdgeSource(pEdge);
 
 		if (node.equals(this.nearestNode)) {
 			nearestEvents.clear();
 			nearestEvents.add(pEvent);
+			this.pairEventSets.add(new ArrayList<>(nearestEvents));
 		}
 
 	}
@@ -83,14 +94,22 @@ public class EdgeDistanceListener implements SimulatorListener {
 	@Override
 	public void onEdgeVisit(LabeledEdge pEdge, ExecutionEvent pEvent,
 			List<ExecutionEvent> pCases) {
+		if (pEdge.equals(targetEdge)) {
+			forceCovered = true;
+		}
+		
 		if (this.serendipitousPotentials.contains(pEdge))
 			this.serendipitousCovered.add(pEdge);
+		
+		if (forceCovered)
+			return;
 
 		CFGNode node = this.cfg.getEdgeSource(pEdge);
 
 		if (node.equals(this.nearestNode)) {
 			nearestEvents.clear();
 			nearestEvents.addAll(pCases);
+			this.pairEventSets.add(new ArrayList<>(nearestEvents));
 		}
 	}
 
@@ -111,6 +130,7 @@ public class EdgeDistanceListener implements SimulatorListener {
 		if (this.dominators.contains(node)) {
 			dominators.remove(node);
 			this.nearestNode = node;
+			this.pairEventSets.clear();
 		}
 	}
 	
@@ -118,43 +138,63 @@ public class EdgeDistanceListener implements SimulatorListener {
 		if (forceCovered)
 			return 0;
 		
+		double minDistance = Double.MAX_VALUE;
 		if (this.getApproachLevel() == 0) {
-			// execution has reached the parent node of edge target
-			if (this.nearestEvents.size() == 1) {
-				ExecutionEvent event = nearestEvents.get(0);
-				
-				if (event.getEdge().equals(this.targetEdge))
-					return 0;
-				else
-					return Math.max(event.distanceTrue, event.distanceFalse);
-			} else {
-				for (ExecutionEvent event : this.nearestEvents) {
+			for (List<ExecutionEvent> nearestEvents : this.pairEventSets) {
+				// execution has reached the parent node of edge target
+				if (nearestEvents.size() == 1) {
+					ExecutionEvent event = nearestEvents.get(0);
+					
 					if (event.getEdge().equals(this.targetEdge))
-						return event.distanceTrue;
+						return 0;
+					else {
+						double distance = Math.max(event.distanceTrue, event.distanceFalse); 
+						if (distance < minDistance)
+							minDistance = distance;
+					}
+				} else {
+					for (ExecutionEvent event : nearestEvents) {
+						if (event.getEdge().equals(this.targetEdge)) {
+							double distance = event.distanceTrue; 
+							if (distance < minDistance)
+								minDistance = distance;
+						}
+					}
 				}
+				
+//				System.err.println("Something went wrong in EdgeDistanceListener...");
+//				assert false: "Something went wrong in EdgeDistanceListener...";
+//				return 10000.0;
 			}
-			
-			assert false: "Something went wrong in EdgeDistanceListener...";
-			return 10000.0;
 		}
 
-		// approach level more than 0
-		if (nearestEvents.size() == 1) {
-			// single condition
-			ExecutionEvent event = nearestEvents.get(0);
-			return Math.max(event.distanceTrue, event.distanceFalse);
-		} else {
-			List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, this.nearestNode, this.targetFather);
-			LabeledEdge nearestEdge = path.get(0);
-			
-			for (ExecutionEvent event : this.nearestEvents) {
-				if (event.getEdge().equals(nearestEdge))
-					return Math.max(event.distanceTrue, event.distanceFalse);
+		for (List<ExecutionEvent> nearestEvents : this.pairEventSets) {
+			// approach level more than 0
+			if (nearestEvents.size() == 1) {
+				// single condition
+				ExecutionEvent event = nearestEvents.get(0);
+				double distance = Math.max(event.distanceTrue, event.distanceFalse); 
+				if (distance < minDistance)
+					minDistance = distance;
+			} else {
+				List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, nearestNode, this.targetFather);
+				LabeledEdge nearestEdge = path.get(0);
+				
+				for (ExecutionEvent event : nearestEvents) {
+					if (event.getEdge().equals(nearestEdge)) {
+						double distance = Math.max(event.distanceTrue, event.distanceFalse);
+						if (distance < minDistance)
+							minDistance = distance;
+					}
+				}
+				
+//				System.err.println("Something went wrong in EdgeDistanceListener...");
+//				assert false: "Something went wrong in EdgeDistanceListener...";
+//				return 10000.0;
 			}
-			
-			assert false: "Something went wrong in EdgeDistanceListener...";
-			return 10000.0;
 		}
+		
+		return minDistance;
 	}
 
 	/**

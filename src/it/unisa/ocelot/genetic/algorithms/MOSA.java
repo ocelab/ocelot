@@ -1,7 +1,12 @@
 package it.unisa.ocelot.genetic.algorithms;
 
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
+import it.unisa.ocelot.c.cfg.edges.FlowEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.edge_graph.EdgeGraph;
+import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
 import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
 import it.unisa.ocelot.util.Front;
@@ -12,6 +17,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.jgrapht.graph.DefaultEdge;
 
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
@@ -44,7 +51,12 @@ public class MOSA extends OcelotAlgorithm {
 	private SolutionSet archive;
 	// we store here the complete set of target for given problem
 	private List<LabeledEdge> allTargets;
+	private List<LabeledEdge> allBranches;
 	private CFG controlFlowGraph;
+	private Set<LabeledEdge> coveredBranches;
+	private EdgeGraph<CFGNode, LabeledEdge> edgeGraph;
+	
+	private Dominators<EdgeWrapper<LabeledEdge>, DefaultEdge> dominators;
 
 	private List<Integer> evaluations;
 
@@ -64,6 +76,14 @@ public class MOSA extends OcelotAlgorithm {
 		this.controlFlowGraph = problem.getControlFlowGraph();
 		allTargets = new ArrayList<>(targets);
 		evaluations = new ArrayList<>();
+		this.allBranches = this.controlFlowGraph.getBranchesFromCFG();
+		this.coveredBranches = new HashSet<>();
+		
+		
+		edgeGraph = new EdgeGraph<CFGNode, LabeledEdge>(
+				this.controlFlowGraph, this.controlFlowGraph.getStart(), this.controlFlowGraph.getEnd());
+		
+		this.dominators = new Dominators<EdgeWrapper<LabeledEdge>, DefaultEdge>(edgeGraph, edgeGraph.getStart());
 	}
 
 	/**
@@ -86,10 +106,15 @@ public class MOSA extends OcelotAlgorithm {
 		int populationSize;
 		int maxEvaluations;
 		int evaluations;
+		double maxCoverage;
 
 		// Read the parameters
 		populationSize = ((Integer) getInputParameter("populationSize")).intValue();
 		maxEvaluations = ((Integer) getInputParameter("maxEvaluations")).intValue();
+		if (getInputParameter("maxCoverage") != null)
+			maxCoverage = ((Double) getInputParameter("maxCoverage")).doubleValue();
+		else
+			maxCoverage = 1.0;
 
 		SolutionSet population;
 		SolutionSet offspringPopulation;
@@ -122,7 +147,7 @@ public class MOSA extends OcelotAlgorithm {
 		// archive
 		this.updateArchive(population, evaluations);
 
-		while (evaluations < maxEvaluations && !allTargetsCovered()) {
+		while (evaluations < maxEvaluations && calculateCoverage() < maxCoverage) {
 			offspringPopulation = new SolutionSet(populationSize);
 			Solution[] parents = new Solution[2];
 
@@ -208,41 +233,31 @@ public class MOSA extends OcelotAlgorithm {
 			if (edge.isCovered())
 				continue;
 
-			List<LabeledEdge> collaterallyCoveredEdgesForCurrentSolution = null;
-
 			Iterator<Solution> iteratorCandidates = candidates.iterator();
 			while (iteratorCandidates.hasNext()) {
 
 				Solution currentCandidate = iteratorCandidates.next();
 				double objectiveScore = currentCandidate.getObjective(edge.getObjectiveID());
 
-				collaterallyCoveredEdgesForCurrentSolution = new ArrayList<>();
-
 				if (objectiveScore == 0.0) {
 					// target covered
-					edge.setCovered();
+					this.setBranchCovered(edge);
 					this.algorithmStats.log("Covered branch " + edge.toString() + " from "
-							+ this.controlFlowGraph.getEdgeSource(edge).toString() + " to "
-							+ this.controlFlowGraph.getEdgeTarget(edge).toString());
+							+ this.controlFlowGraph.getEdgeSource(edge).toString());
 
 					// look for all target collateraly covered
 					for (LabeledEdge collateralEdge : allTargets) {
-						if (currentCandidate.getObjective(collateralEdge.getObjectiveID()) == 0
+						if (currentCandidate.getObjective(collateralEdge.getObjectiveID()) == 0.0
 								&& !collateralEdge.isCovered()) {
-							collaterallyCoveredEdgesForCurrentSolution.add(collateralEdge);
+							this.setBranchCovered(collateralEdge);
 							this.algorithmStats.log("Collaterally covered "
 									+ collateralEdge.toString()
 									+ " from "
 									+ this.controlFlowGraph.getEdgeSource(collateralEdge)
-											.toString()
-									+ " to "
-									+ this.controlFlowGraph.getEdgeTarget(collateralEdge)
 											.toString());
 						}
 					}
-
-					for (LabeledEdge collateral : collaterallyCoveredEdgesForCurrentSolution)
-						collateral.setCovered();
+						
 
 					archive.add(currentCandidate);
 					evaluations.add(evaluation);
@@ -250,6 +265,22 @@ public class MOSA extends OcelotAlgorithm {
 				}
 			} // while candidates
 		} // while targets
+	}
+	
+	private void setBranchCovered(LabeledEdge pEdge) {
+		pEdge.setCovered();
+		Set<EdgeWrapper<LabeledEdge>> edgeDominators = null;
+		for (LabeledEdge branch : this.allBranches) {
+			if (!allTargets.contains(branch)) {
+				if (edgeDominators == null)
+					edgeDominators = dominators.getStrictDominators(edgeGraph.getWrapper(pEdge));
+				
+				if (edgeDominators.contains(edgeGraph.getWrapper(branch))) {
+					
+					branch.setCovered();
+				}
+			}
+		}
 	}
 
 	private Front preferenceSorting(SolutionSet candidates) {
@@ -375,6 +406,23 @@ public class MOSA extends OcelotAlgorithm {
 				return false;
 
 		return true;
+	}
+	
+	private double calculateCoverage() {
+		double covered = 0;
+		int total = 0;
+		for (LabeledEdge edge : allBranches) {
+			if (edge.isCovered())
+				covered++;
+			else {
+//				System.out.println("Branch " + edge + " from " + this.controlFlowGraph.getEdgeSource(edge));
+			}
+			total++;
+		}
+		
+		double coverage = covered / total;
+//		System.out.println(coverage);
+		return coverage;
 	}
 
 	public List<Integer> getEvaluations() {

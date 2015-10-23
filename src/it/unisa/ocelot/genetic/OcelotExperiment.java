@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.algorithms.AlgorithmStats;
 import it.unisa.ocelot.genetic.algorithms.CDG_GA;
 import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
+import it.unisa.ocelot.suites.budget.BudgetManager;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
@@ -25,6 +26,13 @@ public abstract class OcelotExperiment extends Experiment {
 	private Solution solution;
 	private Set<LabeledEdge> serendipitousPotentials;
 	private Set<Solution> serendipitousSolutions;
+	
+	protected BudgetManager budgetManager;
+	
+	public void initExperiment(BudgetManager pBudgetManager) {
+		this.budgetManager = pBudgetManager;
+		this.initExperiment();
+	}
 
 	public OcelotExperiment(String pResultsFolder, int pRuns) {
 		this.experimentName_ = "TargetCoverage";
@@ -73,33 +81,35 @@ public abstract class OcelotExperiment extends Experiment {
 
 	public Solution basicRun() throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
-		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
-			SerendipitousAlgorithm<LabeledEdge> algorithm = ((SerendipitousAlgorithm) this.algorithm);
-			
-			algorithm.setSerendipitousPotentials(this.serendipitousPotentials);
-		}
+		
+		SerendipitousAlgorithm serendipitousAlgorithm = null;
+		if (this.algorithm instanceof SerendipitousAlgorithm<?>)
+			serendipitousAlgorithm = ((SerendipitousAlgorithm) this.algorithm);
+				
+		
+		int iterations = this.budgetManager.getExperimentBudget(this);
+		algorithm.setInputParameter("maxEvaluations", iterations);
+		
+		if (serendipitousAlgorithm != null)
+			serendipitousAlgorithm.setSerendipitousPotentials(this.serendipitousPotentials);
+		
 		SolutionSet solutionSet = this.algorithm.execute();
 		this.solution = solutionSet.get(0);
 		
-		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
-			this.serendipitousSolutions = ((SerendipitousAlgorithm) this.algorithm).getSerendipitousSolutions();
-		}
+		if (serendipitousAlgorithm != null)
+			this.serendipitousSolutions = serendipitousAlgorithm.getSerendipitousSolutions();
 		
-		return this.solution;
-	}
-	
-	public Solution extraRun(int pIterations) throws ClassNotFoundException, jmetal.util.JMException {
-		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
-		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
-			SerendipitousAlgorithm<LabeledEdge> algorithm = ((SerendipitousAlgorithm) this.algorithm);
+		this.budgetManager.reportConsumedBudget(this, this.algorithm.getStats().getEvaluations());
+		
+		if (this.solution.getObjective(0) != 0.0) {
+			int moreBudget = this.budgetManager.askForMoreBudget(this, this.solution);
 			
-			algorithm.setSerendipitousPotentials(this.serendipitousPotentials);
-		}
-		SolutionSet solutionSet = this.algorithm.execute();
-		this.solution = solutionSet.get(0);
-		
-		if (this.algorithm instanceof SerendipitousAlgorithm<?>) {
-			this.serendipitousSolutions = ((SerendipitousAlgorithm) this.algorithm).getSerendipitousSolutions();
+			if (moreBudget > 0) {
+				algorithm.extraExecute(moreBudget);
+				
+				if (serendipitousAlgorithm != null)
+					this.serendipitousSolutions.addAll(serendipitousAlgorithm.getSerendipitousSolutions());
+			}
 		}
 		
 		return this.solution;

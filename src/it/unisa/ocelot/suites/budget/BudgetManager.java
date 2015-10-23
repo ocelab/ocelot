@@ -3,13 +3,21 @@ package it.unisa.ocelot.suites.budget;
 import it.unisa.ocelot.genetic.OcelotExperiment;
 import jmetal.core.Solution;
 
-public abstract class BudgetManager<T> {
+public abstract class BudgetManager {
 	protected int budget;
+	private int totalBudget;
 	protected int numberOfExperiments;
 	
 	public BudgetManager(int pTotalBudget, int pNumberOfTargets) {
-		this.budget = pTotalBudget;
+		this.setupBudget(pTotalBudget);
 		this.numberOfExperiments = pNumberOfTargets;
+	}
+	
+	/**
+	 * This method is called automatically when performing a changeTo operation. Do not call manually!
+	 */
+	@Deprecated
+	protected BudgetManager() {
 	}
 	
 	/**
@@ -17,7 +25,7 @@ public abstract class BudgetManager<T> {
 	 * @param pExperiment
 	 * @return
 	 */
-	public abstract int getExperimentBudget(OcelotExperiment pExperiment, T pInformationBundle);
+	public abstract int getExperimentBudget(OcelotExperiment pExperiment);
 	
 	/**
 	 * Asks for an extra budget. If the handler allows it, this method returns the amount of extra
@@ -34,4 +42,26 @@ public abstract class BudgetManager<T> {
 	 * @param pConsumed Budget consumed
 	 */
 	public abstract void reportConsumedBudget(OcelotExperiment pExperiment, int pConsumed);
+	
+	public abstract void updateTargets(int pNumberOfExperiments);
+	
+	public BudgetManager changeTo(Class<? extends BudgetManager> pClass) throws InstantiationException {
+		try {
+			BudgetManager instance = pClass.newInstance();
+			instance.setupBudget(this.budget);
+			instance.numberOfExperiments = this.numberOfExperiments;
+			return instance;
+		} catch (IllegalAccessException e) {
+			throw new InstantiationException(e.getMessage());
+		}
+	}
+	
+	public int getConsumedBudget() {
+		return totalBudget-budget;
+	}
+	
+	protected void setupBudget(int pBudget) {
+		this.budget = pBudget;
+		this.totalBudget = pBudget;
+	}
 }

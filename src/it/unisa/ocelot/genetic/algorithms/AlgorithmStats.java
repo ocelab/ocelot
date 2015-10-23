@@ -30,8 +30,8 @@ public class AlgorithmStats {
 	}
 	
 	public void log(String pString) {
-		this.log += "---------------------------------------------------";
-		this.log += "Log entry " + new Date().toString();
+		this.log += "---------------------------------------------------\n";
+		this.log += "Log entry " + new Date().toString()+"\n";
 		this.log += pString + "\n";
 	}
 	

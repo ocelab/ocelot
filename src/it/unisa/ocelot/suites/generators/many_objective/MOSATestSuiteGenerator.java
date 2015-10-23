@@ -2,11 +2,14 @@ package it.unisa.ocelot.suites.generators.many_objective;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageExperiment;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BasicBudgetManager;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
@@ -26,7 +29,6 @@ import jmetal.util.JMException;
  *
  */
 public class MOSATestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
-	private ConfigManager config;
 	private boolean satisfied;
 
 	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
@@ -41,7 +43,7 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
 		this.startBenchmarks();
 
-		coverMultiObjectiveBranches(suite);
+		coverMultiObjectiveBranches(suite, cfg.getIdBranchesFromCFG());
 //		this.measureBenchmarks("MOSA algorithm", suite);
 
 		calculator.calculateCoverage(suite);
@@ -59,17 +61,25 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 		return satisfied;
 	}
 
-	private void coverMultiObjectiveBranches(Set<TestCase> suite)
+	protected void coverMultiObjectiveBranches(Set<TestCase> suite, List<LabeledEdge> pTargets)
 			throws TestSuiteGenerationException {
 
 		SolutionSet archiveSolutions = new SolutionSet();
 		
 		MOSABranchCoverageExperiment mosaExperiment = new MOSABranchCoverageExperiment(
-				cfg, cfg.getBranchesFromCFG(), config, cfg.getParameterTypes());
+				cfg, pTargets, config, cfg.getParameterTypes());
+		
+		this.setupBudgetManager(1);
+		try {
+			this.budgetManager = this.budgetManager.changeTo(BasicBudgetManager.class);
+		} catch (InstantiationException e) {
+			throw new TestSuiteGenerationException(e.getMessage());
+		}
  
-		mosaExperiment.initExperiment();
+		mosaExperiment.initExperiment(this.budgetManager);
 		try {
 			archiveSolutions = mosaExperiment.multiObjectiveRun();
+			System.out.println(mosaExperiment.getAlgorithmStats().getLog());
 		} catch (JMException | ClassNotFoundException e) {
 			e.printStackTrace();
 			throw new TestSuiteGenerationException(e.getMessage());

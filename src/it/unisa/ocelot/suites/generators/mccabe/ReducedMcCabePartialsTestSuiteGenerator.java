@@ -9,6 +9,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_edges.ManyEdgesCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
@@ -70,6 +71,8 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 		searchPath.solve(this.getUncoveredEdges(suite));
 		mcCabePaths = searchPath.getChosenPaths();
 		
+		this.setupBudgetManager(mcCabePaths.size() * 3);
+		
 		boolean improvement = true;
 		
 		double lastCoverage = 0;
@@ -93,7 +96,7 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 				ManyEdgesCoverageExperiment exp = new ManyEdgesCoverageExperiment(
 						cfg, config, cfg.getParameterTypes(), aMcCabePath);
 	
-				exp.initExperiment();
+				exp.initExperiment(this.budgetManager);
 				
 				this.printSeparator();
 				this.print("Current target: ");
