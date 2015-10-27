@@ -68,6 +68,8 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 			}
 
 			StandardSettings settings = new MOSASettings(problem, config, branches);
+			if (config.isMetaMutatorEnabled())
+				settings.useMetaMutator();
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			problem.setDebug(config.getDebug());
 			algorithm[0] = settings.configure();

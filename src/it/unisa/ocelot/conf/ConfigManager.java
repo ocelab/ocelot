@@ -385,4 +385,12 @@ public class ConfigManager {
 		
 		return list;
 	}
+	
+	public boolean isMetaMutatorEnabled() {
+		return this.properties.getProperty("operators.mutator.metamutator", "false").equalsIgnoreCase("true");
+	}
+	
+	public void setProperty(String pProperty, String pValue) {
+		this.properties.setProperty(pProperty, pValue);
+	}
 }

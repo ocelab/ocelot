@@ -47,8 +47,8 @@ int _f_ocelot_trace_case(int,double,int);
 /*
  * Functions that register in _v_ocelot_fcalls the result of each function call in the original expression.
  */
-double _f_ocelot_reg_fcall_numeric(double fcall);
-double _f_ocelot_reg_fcall_pointer(void* fcall);
+double _f_ocelot_reg_fcall_numeric(double fcall, int howMany);
+double _f_ocelot_reg_fcall_pointer(void* fcall, int howMany);
 
 /*
  * Returns one of the

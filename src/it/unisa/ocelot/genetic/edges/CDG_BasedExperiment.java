@@ -43,7 +43,8 @@ public class CDG_BasedExperiment extends OcelotExperiment {
 				problem = new CDG_BasedProblem(cfg, parametersTypes, config.getTestArraysSize(), ranges, branches, target);
 
 			StandardSettings settings = new GASettings(problem, config);
-			settings.useMetaMutator();
+			if (config.isMetaMutatorEnabled())
+				settings.useMetaMutator();
 			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			problem.setDebug(config.getDebug());

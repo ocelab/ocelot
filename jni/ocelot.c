@@ -37,15 +37,21 @@ int _f_ocelot_trace_case(int branch, double distanceTrue, int isChosen) {
 	return 0;
 }
 
-double _f_ocelot_reg_fcall_numeric(double fcall) {
-	printf("Function call numeric");
-	OCLIST_APPEND(_v_ocelot_fcalls, fcall);
-	return fcall;
+double _f_ocelot_reg_fcall_numeric(double fcall, int howMany) {
+	//printf("Function call numeric");
+	int i;
+	for (i = 0; i < howMany; i++)
+		OCLIST_APPEND(_v_ocelot_fcalls, fcall);
+
+	//fprintf(stderr, "\n\nAllocated. Size = %d",OCLIST_SIZE(_v_ocelot_fcalls));
+	return 1;
 }
 
-double _f_ocelot_reg_fcall_pointer(void* fcall) {
-	printf("Function call pointer");
-	OCLIST_APPEND(_v_ocelot_fcalls, *(double*)fcall);
+double _f_ocelot_reg_fcall_pointer(void* fcall, int howMany) {
+	//printf("Function call pointer");
+	int i;
+	for (i = 0; i < howMany; i++)
+		OCLIST_APPEND(_v_ocelot_fcalls, *(double*)fcall);
 
 	return (double)*(double*)fcall;
 }
@@ -56,6 +62,7 @@ double _f_ocelot_get_fcall() {
 		OCLIST_SHIFT(_v_ocelot_fcalls);
 		return element;
 	} else {
+		fprintf(stderr, "Empty function queue!\n");
 		return 0;
 	}
 }

@@ -1,4 +1,4 @@
-package it.unisa.ocelot.runnable;
+package it.unisa.ocelot.runnable.runners;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
@@ -28,60 +28,70 @@ import java.util.Set;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
 
-public class ExecuteExperiment {
-	private static final String CONFIG_FILENAME = "config.properties";
+public class ExecuteExperiment implements Runnable {
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
 		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
 		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.CASCADE_APPROACH
+		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR
 	};
+	
+	private CFG cfg;
+	private ConfigManager config;
+	
+	private String[] experimentGenerators;
+	
+	public ExecuteExperiment() throws Exception {
+		this(EXPERIMENT_GENERATORS);
+	}
 
-	static {
-		System.loadLibrary("Test");
+	public ExecuteExperiment(String[] generators) throws Exception {
+		this.experimentGenerators = generators;
 	}
 	
-	private static CFG cfg;
-	private static ConfigManager config;
-
-	public static void main(String[] args) throws Exception {
-		ConfigManager.setFilename(CONFIG_FILENAME);
-		config = ConfigManager.getInstance();
-
-		// Sets up the output file
-		File outputDirectory = new File(config.getOutputFolder());
-		outputDirectory.mkdirs();
-		FileOutputStream fos = new FileOutputStream(config.getOutputFolder()
-				+ "exp_res.txt");
-		TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
-		PrintStream ps = new PrintStream(myOut);
-		System.setOut(ps);
-
-		// Builds the CFG and sets the target
-		cfg = CFGBuilder.build(config.getTestFilename(),
-				config.getTestFunction());
-		
-		int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
-		System.out.println("Cyclomatic complexity: " + mcCabePaths);
-		System.out.println("Number of branches: " + cfg.edgeSet().size());
-		System.out.println("Number of nodes: " + cfg.vertexSet().size());
-		
-		CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
-		CBridge.initialize(
-				typeHandler.getValues().size(), 
-				typeHandler.getPointers().size(),
-				typeHandler.getPointers().size());
-
-		for (int i = 0; i < config.getExperimentRuns(); i++) {
-			runOnce(i);
+	@Override
+	public void run() {
+		try {
+			config = ConfigManager.getInstance();
+	
+			// Sets up the output file
+			File outputDirectory = new File(config.getOutputFolder());
+			outputDirectory.mkdirs();
+			FileOutputStream fos = new FileOutputStream(config.getOutputFolder()
+					+ "exp_res.txt");
+			TeeOutputStream myOut = new TeeOutputStream(System.out, fos);
+			PrintStream ps = new PrintStream(myOut);
+			System.setOut(ps);
+	
+			// Builds the CFG and sets the target
+			cfg = CFGBuilder.build(config.getTestFilename(),
+					config.getTestFunction());
+			
+			int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
+			System.out.println("Cyclomatic complexity: " + mcCabePaths);
+			System.out.println("Number of branches: " + cfg.edgeSet().size());
+			System.out.println("Number of nodes: " + cfg.vertexSet().size());
+			
+			CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
+			CBridge.initialize(
+					typeHandler.getValues().size(), 
+					typeHandler.getPointers().size(),
+					typeHandler.getPointers().size());
+	
+			for (int i = 0; i < config.getExperimentRuns(); i++) {
+				runOnce(i);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
-	private static void runOnce(int pTime) throws Exception {
+	private void runOnce(int pTime) throws Exception {
 		String folderPath = "RESULTS/"+config.getTestFunction()+"/";
 		File folder = new File(folderPath);
 		folder.mkdirs();
 		
-		for (String generatorName : EXPERIMENT_GENERATORS) {
+		for (String generatorName : this.experimentGenerators) {
 			System.out.println("RUNNING " + generatorName);
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
 					generatorName, config, cfg);

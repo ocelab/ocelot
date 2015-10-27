@@ -1,4 +1,4 @@
-package it.unisa.ocelot.runnable;
+package it.unisa.ocelot.runnable.runners;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;

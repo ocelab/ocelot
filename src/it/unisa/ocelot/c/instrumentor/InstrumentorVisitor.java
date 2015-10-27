@@ -60,6 +60,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 	private Stack<List<IASTStatement>> switchExpressions;
 	private String functionName;
 	private List<IASTNode> typedefs;
+	private List<IASTExpression> functionCallsInExpressions;
 	
 	public InstrumentorVisitor(String pInstrumentFunction) {
 		this.shouldVisitExpressions = true;
@@ -74,6 +75,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 		
 		this.switchExpressions = new Stack<List<IASTStatement>>();
 		this.typedefs = new ArrayList<IASTNode>();
+		this.functionCallsInExpressions = new ArrayList<>();
 	}
 	
 	public List<IASTNode> getTypedefs() {
@@ -343,18 +345,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 			
 			return realExpression;
 		} else if (expression instanceof IASTFunctionCallExpression) {
-			IASTExpression[] arguments = new IASTExpression[1];
-			arguments[0] = expression; 
-			
-			IType type = getType(expression);
-			if (type instanceof IBasicType)
-				return makeFunctionCall("_f_ocelot_reg_fcall_numeric", arguments);
-			else if (type instanceof ICPointerType)
-				return makeFunctionCall("_f_ocelot_reg_fcall_pointer", arguments);
-			else {
-				System.err.println("I can't handle this type situation: " + type.toString());
-				return makeFunctionCall("_f_ocelot_reg_fcall_numeric", arguments);
-			}
+			return this.registerFcallExpression(expression, 3);
 		}
 		return expression;
 	}
@@ -372,8 +363,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
-		ASTWriter wr = new ASTWriter();
-		statement.setConditionExpression(instrFunction);
+		IASTExpression resultExpression = buildFcallExpression(instrFunction);
+		
+		statement.setConditionExpression(resultExpression);
 	}
 	
 	public void visit(IASTSwitchStatement statement) {
@@ -389,6 +381,27 @@ public class InstrumentorVisitor extends ASTVisitor {
 				cTrue.copy()
 		);
 		
+		IASTExpression switchExpression = statement.getControllerExpression();
+		
+		if (switchExpression instanceof IASTFunctionCallExpression) {
+			int countTotalRegisters = 0;
+			
+			for (IASTStatement aCase : caseStatements) {
+				if (aCase instanceof IASTCaseStatement)
+					countTotalRegisters += 4;
+			}
+			
+			switchExpression = this.registerFcallExpression(
+					statement.getControllerExpression(), 
+					countTotalRegisters);
+			
+			
+			for (IASTExpression callExpression : this.functionCallsInExpressions) {
+				IASTStatement registerFcall = new CASTExpressionStatement(callExpression);
+				substitute.addStatement(registerFcall);
+			}
+		}
+		
 		CASTBinaryExpression currentDefaultExpression = defaultExpression;
 		
 		boolean defaultWritten = false;
@@ -403,7 +416,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 				
 				distanceCalculation = new CASTBinaryExpression(
 						CASTBinaryExpression.op_equals,
-						this.cloneExpression(statement.getControllerExpression()), 
+						this.cloneExpression(switchExpression), 
 						this.cloneExpression(realCase.getExpression())
 				);
 				
@@ -413,7 +426,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 								CASTBinaryExpression.op_logicalAnd, 
 								new CASTBinaryExpression(
 										CASTBinaryExpression.op_notequals, 
-										this.cloneExpression(statement.getControllerExpression()), 
+										this.cloneExpression(switchExpression), 
 										this.cloneExpression(realCase.getExpression())
 								), 
 								cTrue.copy()
@@ -490,7 +503,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
-		statement.setCondition(instrFunction);
+		IASTExpression resultExpression = this.buildFcallExpression(instrFunction);
+		statement.setCondition(resultExpression);
 	}
 	
 	public void visit(IASTDoStatement statement) {
@@ -500,7 +514,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getCondition()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
-		statement.setCondition(instrFunction);
+		IASTExpression resultExpression = this.buildFcallExpression(instrFunction);
+		statement.setCondition(resultExpression);
 	}
 	
 	public void visit(IASTForStatement statement) {
@@ -510,7 +525,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), true, false);
 		
 		IASTFunctionCallExpression instrFunction = makeFunctionCall("_f_ocelot_trace", instrArgs);
-		statement.setConditionExpression(instrFunction);
+		IASTExpression resultExpression = this.buildFcallExpression(instrFunction);
+		statement.setConditionExpression(resultExpression);
 	}
 	
 	public void visit(IASTCaseStatement statement) {
@@ -522,6 +538,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	public int visit(IASTStatement statement) {
+		this.functionCallsInExpressions.clear();
+		
 		if (statement instanceof IASTIfStatement)
 			this.visit((IASTIfStatement)statement);
 		else if (statement instanceof IASTSwitchStatement) {
@@ -600,6 +618,54 @@ public class InstrumentorVisitor extends ASTVisitor {
 		}
 		
 		return operationFunction;
+	}
+	
+	private IASTExpression registerFcallExpression(IASTExpression expression, int pHowMany) {
+		String howMany = String.valueOf(pHowMany);
+		IASTExpression[] arguments = new IASTExpression[2];
+		arguments[0] = expression; 
+		arguments[1] = new CASTLiteralExpression(CASTLiteralExpression.lk_integer_constant, howMany.toCharArray());
+		
+		IType type = getType(expression);
+		if (type instanceof IBasicType) {
+			this.functionCallsInExpressions.add(makeFunctionCall("_f_ocelot_reg_fcall_numeric", arguments));
+			return makeFunctionCall("_f_ocelot_get_fcall", new IASTExpression[0]);
+		} else if (type instanceof ICPointerType) {
+			this.functionCallsInExpressions.add(makeFunctionCall("_f_ocelot_reg_fcall_pointer", arguments));
+			return makeFunctionCall("_f_ocelot_get_fcall", new IASTExpression[0]);
+		} else {
+			ASTWriter writer = new ASTWriter();
+			System.err.println("I can't handle this type situation: " + type.toString() + ". Assuming numeric. Please, manually check.");
+			System.err.println("Error node: " + writer.write(expression.getParent()));
+			
+			this.functionCallsInExpressions.add(makeFunctionCall("_f_ocelot_reg_fcall_numeric", arguments));
+			return makeFunctionCall("_f_ocelot_get_fcall", new IASTExpression[0]);
+		}
+	}
+	
+	private IASTExpression buildFcallExpression(IASTExpression instrFunction) {
+		IASTExpression resultExpression;
+		
+		if (this.functionCallsInExpressions.size() > 0) {
+			resultExpression = new CASTBinaryExpression(
+					IASTBinaryExpression.op_logicalAnd, 
+					this.functionCallsInExpressions.get(this.functionCallsInExpressions.size()-1), 
+					instrFunction);
+			if (this.functionCallsInExpressions.size() > 1) {
+				for (int i = this.functionCallsInExpressions.size()-2; i >= 0; i--) {
+					IASTExpression superFcall = new CASTBinaryExpression(
+							IASTBinaryExpression.op_logicalAnd,
+							this.functionCallsInExpressions.get(i),
+							resultExpression);
+					
+					resultExpression = superFcall;
+				}
+			}			
+		} else {
+			resultExpression = instrFunction;
+		}
+		
+		return resultExpression;
 	}
 	
 	private IASTExpression cloneExpression(IASTExpression pExpression) {

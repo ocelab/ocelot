@@ -43,7 +43,8 @@ public class ManyNodesCoverageExperiment extends OcelotExperiment {
 			problem.setTarget(this.targetNodes);
 
 			StandardSettings settings = SettingsFactory.getSettings(config.getAlgorithm(), problem, config);
-			settings.useMetaMutator();
+			if (config.isMetaMutatorEnabled())
+				settings.useMetaMutator();
 			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();

@@ -44,7 +44,8 @@ public class ManyEdgesCoverageExperiment extends OcelotExperiment {
 			problem.setTarget(this.targetEdges);
 
 			StandardSettings settings = SettingsFactory.getSettings(config.getAlgorithm(), problem, config);
-			settings.useMetaMutator();
+			if (config.isMetaMutatorEnabled())
+				settings.useMetaMutator();
 			
 			settings.setNumericConstants(this.cfg.getConstantNumbers());
 			algorithm[0] = settings.configure();

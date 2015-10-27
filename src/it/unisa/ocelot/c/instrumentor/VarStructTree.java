@@ -18,6 +18,10 @@ public class VarStructTree {
 		this.root.parent = null;
 	}
 	
+	public StructNode getRoot() {
+		return root;
+	}
+	
 	public List<StructNode> getBasicVariables() {
 		Queue<StructNode> queue = new LinkedList<>();
 		List<StructNode> leaves = new ArrayList<StructNode>();
@@ -43,11 +47,13 @@ class StructNode {
 	public String name;
 	public List<StructNode> children;
 	public StructNode parent;
+	public boolean pointer;
 	
 	public StructNode(String pName, IType pType) {
 		this.type = this.resolveType(pType);
 		this.name = pName;
 		this.build();
+		this.pointer = false;
 	}
 	
 	private void build() {
@@ -81,7 +87,7 @@ class StructNode {
 	}
 	
 	public boolean isPointer() {
-		return this.type instanceof CPointerType;
+		return this.type instanceof CPointerType || this.pointer;
 	}
 	
 	public String getCompleteNameWithPointers() {
@@ -89,7 +95,7 @@ class StructNode {
 			return this.name;
 		
 		String name = this.parent.getCompleteName();
-		if (this.type instanceof CPointerType) {
+		if (this.parent.isPointer()) {
 			name += "->" + this.name;
 		} else {
 			name += "." + this.name;

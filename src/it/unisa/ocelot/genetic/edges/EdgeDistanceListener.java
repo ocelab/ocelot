@@ -178,7 +178,12 @@ public class EdgeDistanceListener implements SimulatorListener {
 					minDistance = distance;
 			} else {
 				List<LabeledEdge> path = DijkstraShortestPath.findPathBetween(this.cfg, nearestNode, this.targetFather);
-				LabeledEdge nearestEdge = path.get(0);
+				LabeledEdge nearestEdge; 
+				
+				if (path.size() > 0)
+					nearestEdge = path.get(0);
+				else
+					nearestEdge = this.targetEdge;
 				
 				for (ExecutionEvent event : nearestEvents) {
 					if (event.getEdge().equals(nearestEdge)) {
