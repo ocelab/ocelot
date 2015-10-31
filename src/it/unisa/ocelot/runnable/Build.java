@@ -31,6 +31,7 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
  * @author simone
  *
  */
+@Deprecated
 public class Build {	
 	public static void main(String[] args) throws Exception {
 		ConfigManager config = ConfigManager.getInstance();

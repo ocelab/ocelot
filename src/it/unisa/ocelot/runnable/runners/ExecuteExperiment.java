@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ExecuteExperiment implements Runnable {
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
-		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
+//		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
+//		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
 		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR
 	};
 	
