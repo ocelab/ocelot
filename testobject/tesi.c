@@ -603,14 +603,6 @@ int check_ISBN(char* current_value) {
 	return RESULT;
 }
 
-void ptrtest(int* w, int* x, int* y, int* z) {
-	if (w == x)
-		if (y == z)
-			if (w == z)
-				return 0;
-}
-
-
 gdouble
 gradient_calc_square_factor (gdouble dist,
                              gdouble offset,
