@@ -198,7 +198,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		return this.no_evaluation;
 	}
 	
-	private void prepareSerendipitous() {
+	protected void prepareSerendipitous() {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
 			
@@ -206,7 +206,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		}
 	}
 	
-	private void checkSerendipitous(Solution solution) {
+	protected void checkSerendipitous(Solution solution) {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
 			
