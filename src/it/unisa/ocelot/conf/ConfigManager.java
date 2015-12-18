@@ -393,4 +393,12 @@ public class ConfigManager {
 	public void setProperty(String pProperty, String pValue) {
 		this.properties.setProperty(pProperty, pValue);
 	}
+	
+	public String[] getTestLink() {
+		String link = this.properties.getProperty("test.link", "");
+		if (link.equals(""))
+			return new String[0];
+		else
+			return link.split("\\,");
+	}
 }

@@ -77,6 +77,7 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 				exp.basicRun();
 				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
+				e.printStackTrace();
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
 			

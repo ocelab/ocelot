@@ -22,4 +22,9 @@ public class CDouble extends CType {
 	public double getMinValue() {
 		return Double.MIN_VALUE;
 	}
+	
+	@Override
+	public boolean isDiscrete() {
+		return false;
+	}
 }

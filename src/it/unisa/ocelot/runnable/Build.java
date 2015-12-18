@@ -54,6 +54,9 @@ public class Build {
 			throw new BuildingException("Your operative system \"" + os + "\" is not supported");
 		}
 		
+		for (String linkLibrary : config.getTestLink())
+			generator.addLinkLibrary(linkLibrary);
+		
 		builder.setMakefileGenerator(generator);
 		builder.setOutput(System.out);
 		

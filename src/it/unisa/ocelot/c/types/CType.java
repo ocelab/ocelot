@@ -14,6 +14,6 @@ public abstract class CType {
 	public abstract Object getInstance(Object pOriginalValue);
 	public abstract double getMaxValue();
 	public abstract double getMinValue();
-	
+	public abstract boolean isDiscrete();
 	
 }

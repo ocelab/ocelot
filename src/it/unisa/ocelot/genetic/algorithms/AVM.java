@@ -21,6 +21,7 @@ package it.unisa.ocelot.genetic.algorithms;
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
@@ -32,8 +33,12 @@ import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.wrapper.XParamArray;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Comparison;
 
 
 /**
@@ -42,7 +47,6 @@ import java.util.Set;
 
 public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge> {
 	private static final long serialVersionUID = 720067051970162535L;
-	
 	
 	private static final double EPSILON = 0.001;
 	private static final double DELTA = 1;
@@ -59,6 +63,8 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	private Set<LabeledEdge> serendipitousPotentials;
 	
 	private StandardProblem problem;
+	
+	private Map<Integer, Map<Integer, Boolean>> discreteValues;
 	
 	/**
 	 * Constructor
@@ -88,6 +94,12 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	 * @throws jmetal.util.JMException
 	 */
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
+		try {
+			CType[] types = (CType[])getInputParameter("parametersTypes");
+			this.initializeDiscreteness(types);
+		} catch (ClassNotFoundException e) {
+		}
+		
 		int maxEvaluations;
 		
 		comparator = new ObjectiveComparator(0); // Single objective comparator
@@ -249,23 +261,30 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		return new SolutionBundle(solution, branchDistance);
 	}
 	
-	//TODO Adaptive epsilon based on the branch distance value (denormalization required)
 	private double getDirection(SolutionBundle pSolutionBundle, int pCurrentKind, int pCurrentVariable) throws JMException {
+		double epsilon;
+		
+		if (this.isDiscrete(pCurrentKind, pCurrentVariable)) {
+			epsilon = 1;
+		} else {
+			epsilon = this.epsilon;
+		}
+		
 		Solution solutionPlus = new Solution(pSolutionBundle.solution);
 		Solution solutionMinus = new Solution(pSolutionBundle.solution);
 		
 		XParamArray modifierPlus = new XParamArray(solutionPlus);
 		XParamArray modifierMinus = new XParamArray(solutionMinus);
 		double currentValue = modifierPlus.getValue(pCurrentKind, pCurrentVariable);
-		if (currentValue+this.epsilon > modifierPlus.getUpperBound(pCurrentKind, pCurrentVariable))
+		if (currentValue+epsilon > modifierPlus.getUpperBound(pCurrentKind, pCurrentVariable)) {
 			modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue);
-		else
-			modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue + this.epsilon);
+		} else
+			modifierPlus.setValue(pCurrentKind, pCurrentVariable, currentValue + epsilon);
 		
-		if (currentValue-this.epsilon < modifierMinus.getLowerBound(pCurrentKind, pCurrentVariable))
+		if (currentValue-epsilon < modifierMinus.getLowerBound(pCurrentKind, pCurrentVariable)) {
 			modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue);
-		else
-			modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue - this.epsilon);
+		} else
+			modifierMinus.setValue(pCurrentKind, pCurrentVariable, currentValue - epsilon);
 		
 		this.prepareSerendipitous();
 		double branchDistancePlus = problem.evaluateWithBranchDistance(solutionPlus);
@@ -284,7 +303,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 				this.derivate = this.derivate(
 						solutionPlus.getObjective(0), branchDistancePlus, 
 						pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance,
-						this.epsilon);
+						epsilon);
 				
 				this.solutionBundle.solution = solutionPlus;
 				this.solutionBundle.branchDistance = branchDistancePlus;
@@ -301,7 +320,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 				this.derivate = this.derivate(
 						solutionMinus.getObjective(0), branchDistanceMinus,
 						pSolutionBundle.solution.getObjective(0), pSolutionBundle.branchDistance,
-						this.epsilon);
+						epsilon);
 				
 				this.solutionBundle.solution = solutionMinus;
 				this.solutionBundle.branchDistance = branchDistanceMinus;
@@ -344,6 +363,45 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	@Override
 	public void setSerendipitousPotentials(Set<LabeledEdge> pPotentials) {
 		this.serendipitousPotentials = pPotentials;
+	}
+	
+	private void initializeDiscreteness(CType[] types) throws ClassNotFoundException {
+		Solution test = new Solution(problem_);
+		
+		XParamArray modifier = new XParamArray(test);
+		
+		this.discreteValues = new HashMap<>();
+		int typeIndex = 0;
+		for (int i = 0; i < modifier.kinds(); i++) {
+			Map<Integer, Boolean> kindMap = new HashMap<Integer, Boolean>();
+			
+			for (int j = 0; j < modifier.size(i); j++) {
+				if (i == modifier.kinds() - 1 && i > 0) {
+					//Pointers are always discrete
+					kindMap.put(j, true);
+				} else {
+					if (types[typeIndex].isDiscrete()) {
+						System.out.println("Discrete");
+						kindMap.put(j, true);
+					} else
+						kindMap.put(j, false);
+					
+					if (i == 0) {
+						typeIndex++;
+					}
+				}
+			}
+			
+			if (i != 0) {
+				typeIndex++;
+			}
+			
+			this.discreteValues.put(i, kindMap);
+		}
+	}
+	
+	private boolean isDiscrete(int pKind, int pVariable) {
+		return this.discreteValues.get(pKind).get(pVariable);
 	}
 	
 	private double derivate(double a, double bdA, double b, double bdB, double dx) {

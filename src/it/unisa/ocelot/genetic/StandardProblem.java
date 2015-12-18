@@ -143,6 +143,10 @@ public abstract class StandardProblem extends Problem {
 		System.err.println("An error occurred: " + e.getMessage());
 	}
 	
+	public CType[] getParametersTypes() {
+		return this.parameters;
+	}
+	
 	protected CBridge getCurrentBridge() {
 		CBridge result = this.bridges.get(Thread.currentThread());
 		
