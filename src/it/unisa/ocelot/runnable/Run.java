@@ -33,6 +33,7 @@ public class Run {
 	private int runnerType;
 	private String[] experimentGenerators;
 	private boolean forceBuild;
+	private String configFilename;
 
 	private boolean forceNoBuild;
 	
@@ -46,10 +47,11 @@ public class Run {
 	}
 	
 	public Run(String[] args) {
-		this.runnerType = RUNNER_ILLEGAL;
+		this.runnerType = RUNNER_WRITE;
 		this.experimentGenerators = null;
 		this.forceBuild = false;
 		this.forceNoBuild = false;
+		this.configFilename = CONFIG_FILENAME;
 		
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		for (String arg : args) {
@@ -71,10 +73,8 @@ public class Run {
 		}
 		
 		try {
-			FileInputStream fis = new FileInputStream(new File(CONFIG_FILENAME));
-			String hash = makeHash(fis);
-			fis.close();
-			
+			String hash = makeHash();
+
 			String previousHash = Utils.readFile(HASH_FILENAME);
 			return (!previousHash.equals(hash));
 		} catch (IOException e) {
@@ -86,9 +86,7 @@ public class Run {
 	public void saveHash() {
 		String hash;
 		try {
-			FileInputStream fis = new FileInputStream(new File(CONFIG_FILENAME));
-			hash = makeHash(fis);
-			fis.close();
+			hash = makeHash();
 		} catch (IOException e) {
 			System.err.println("Unable to create an hashfile. Configuration file unreadable");
 			return;
@@ -101,12 +99,28 @@ public class Run {
 		}
 	}
 	
-	private String makeHash(FileInputStream stream) throws IOException {
-		String md5config = DigestUtils.md5Hex(stream);
-		String md5magic = DigestUtils.md5Hex("OCELOT" + VERSION);
-		String md5final = DigestUtils.md5Hex(md5config + md5magic);
+	private String makeHash() throws IOException {
+		FileInputStream streamConfig = new FileInputStream(new File(CONFIG_FILENAME));
+		FileInputStream streamTranslationUnit = new FileInputStream(ConfigManager.getInstance().getTestFilename());
+		File libFile;
+		libFile = new File("libTest.so");
+		if (!libFile.exists())
+			libFile = new File("Test.dll");
+		if (!libFile.exists())
+			libFile = new File("libTest.jnilib");
+		FileInputStream streamLib = new FileInputStream(libFile);
 		
-		return md5config + md5magic + md5final;
+		String md5version = DigestUtils.md5Hex("OCELOT" + VERSION);
+		String md5config = DigestUtils.md5Hex(streamConfig);
+		String md5file = DigestUtils.md5Hex(streamTranslationUnit);
+		String md5lib = DigestUtils.md5Hex(streamLib);
+		String md5final = DigestUtils.md5Hex(md5version + md5config + md5file + md5lib);
+		
+		streamConfig.close();
+		streamTranslationUnit.close();
+		streamLib.close();
+		
+		return md5version + md5config + md5file + md5lib + md5final;
 	}
 	
 	public void build() throws Exception {
@@ -129,6 +143,9 @@ public class Run {
 		else {
 			throw new BuildingException("Your operative system \"" + os + "\" is not supported");
 		}
+		
+		for (String linkLibrary : config.getTestLink())
+			generator.addLinkLibrary(linkLibrary);
 		
 		builder.setMakefileGenerator(generator);
 		builder.setOutput(System.out);
@@ -197,8 +214,9 @@ public class Run {
 			if (changedProperty)
 				throw new IllegalArgumentException("Illegal config position: set the configuration file before editing specific properties.");
 			
+			this.configFilename = value;
 			ConfigManager.setFilename(value);
-		} else if (property.equalsIgnoreCase("experiment.generators")) {
+		} else if (property.equalsIgnoreCase("expgen")) {
 			String[] generators = value.split("\\,");
 			this.experimentGenerators = generators;
 		} else {
