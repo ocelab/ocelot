@@ -47,9 +47,11 @@ public abstract class StandardSettings extends Settings {
 			crossoverProbability = pConfig.getCrossoverProbability();
 		} catch (NumberFormatException e) {}
 		
-		try {
-			mutationProbability = pConfig.getMutationProbability();
-		} catch (NumberFormatException e) {}
+		if (!pConfig.isDynamicMutation()) {
+			try {
+				mutationProbability = pConfig.getMutationProbability();
+			} catch (NumberFormatException e) {}
+		}
 		
 		try {
 			threads = pConfig.getThreads();

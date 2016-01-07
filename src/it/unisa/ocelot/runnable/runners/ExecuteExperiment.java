@@ -10,6 +10,7 @@ import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TimeBenchmarkCalculator;
+import it.unisa.ocelot.suites.generators.CascadeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGeneratorHandler;
 import it.unisa.ocelot.suites.minimization.TestSuiteMinimizer;
@@ -30,10 +31,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ExecuteExperiment implements Runnable {
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-//		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
-//		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
 		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR
 	};
+	
+	private static final boolean minimizeAtTheEnd = true;
 	
 	private CFG cfg;
 	private ConfigManager config;
@@ -95,6 +98,15 @@ public class ExecuteExperiment implements Runnable {
 			System.out.println("RUNNING " + generatorName);
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
 					generatorName, config, cfg);
+			
+			if (minimizeAtTheEnd) {
+				CascadeTestSuiteGenerator realGenerator = new CascadeTestSuiteGenerator(config, cfg);
+				TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
+				realGenerator.addTestSuiteGenerator(generator);
+				realGenerator.addTestSuiteGenerator(minimizer);
+				
+				generator = realGenerator;
+			}
 //			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler
 //					.getInstance(config);
 	
