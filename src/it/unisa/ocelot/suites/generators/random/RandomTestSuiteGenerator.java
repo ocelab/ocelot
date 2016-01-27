@@ -142,4 +142,10 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator implements Casc
 		
 		return parameters; 
 	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

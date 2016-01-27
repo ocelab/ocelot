@@ -60,7 +60,7 @@ public class CascadeTestSuiteGenerator extends TestSuiteGenerator {
 			if (generator.needsBudget())
 				this.budgetManager.reportConsumedBudget(null, generator.budgetManager.getConsumedBudget());
 			
-			this.measureBenchmarks(generator.getClass().getSimpleName(), suite, 0);
+			this.measureBenchmarks(generator.getClass().getSimpleName(), suite, generator.getNumberOfEvaluations());
 			
 			CascadeableGenerator cascadeable = (CascadeableGenerator)generator;
 			if (cascadeable.isSatisfied())
@@ -68,5 +68,14 @@ public class CascadeTestSuiteGenerator extends TestSuiteGenerator {
 		}
 		
 		return suite;
+	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		int total = 0;
+		for (TestSuiteGenerator generator : this.generators) {
+			total += generator.getNumberOfEvaluations();
+		}
+		return total;
 	}
 }

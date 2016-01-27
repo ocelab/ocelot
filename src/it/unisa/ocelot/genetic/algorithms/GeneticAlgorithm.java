@@ -42,7 +42,7 @@ import java.util.Set;
  * A multithreaded generational genetic algorithm
  */
 
-public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge> {
+public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge>, SeedableAlgorithm {
 	private static final long serialVersionUID = -2679014653669190929L;
 	
 	private int no_evaluation;
@@ -50,6 +50,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 	private Set<Solution> serendipitousSolutions;
 	private Set<LabeledEdge> serendipitousPotentials;
 	
+	private SolutionSet startingPopulation;
 	private SolutionSet lastPopulation;
 
 	/**
@@ -70,6 +71,16 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 
 		no_evaluation = 0;
 	} // pgGA
+	
+	public void seedStartingPopulation(SolutionSet set, int keepNumber) {
+		this.startingPopulation = set;
+		
+		if (this.startingPopulation != null) {
+			for (int i = this.startingPopulation.size()-1; i >= keepNumber ; i--) {
+				this.startingPopulation.remove(i);
+			}
+		}
+	}
 
 	/**
 	 * Runs the pgGA algorithm.
@@ -102,12 +113,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 				.intValue();
 
 //		parallelEvaluator_.startEvaluator(problem_);
-
-		// Initialize the variables. If this is an extra execution, it keeps using the last population
-		if (lastPopulation == null)
-			population = new SolutionSet(populationSize);
-		else
-			population = lastPopulation;
+			
 		offspringPopulation = new SolutionSet(populationSize);
 
 		evaluations = 0;
@@ -118,11 +124,30 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		selectionOperator = operators_.get("selection");
 
 		// Create the initial solutionSet
+		// Initialize the variables. If this is an extra execution, it keeps using the last population
+		if (lastPopulation == null) {
+			if (startingPopulation == null) {
+				population = new SolutionSet(populationSize);
+			} else { 
+				population = startingPopulation;
+			}
+		} else {
+			population = lastPopulation;
+		}
+		
 		Solution newSolution;
 		List<Solution> solutionList = new ArrayList<>();
-		for (int i = 0; i < populationSize; i++) {
+		for (int i = 0; i < population.getCapacity() - population.size() ; i++) {
 			newSolution = new Solution(problem_);
 			solutionList.add(newSolution);
+		}
+		
+		for (int i = 0; i < population.size(); i++) {
+			Solution solution = population.get(i);
+			prepareSerendipitous();
+			problem_.evaluate(solution);
+			checkSerendipitous(solution);
+			evaluations++;
 		}
 
 		for (Solution solution : solutionList) {
@@ -228,4 +253,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		this.serendipitousPotentials = pPotentials;
 	}
 	
+	public SolutionSet getLastPopulation() {
+		return lastPopulation;
+	}
 } // pgGA

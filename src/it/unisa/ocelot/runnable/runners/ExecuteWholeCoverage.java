@@ -11,6 +11,7 @@ import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
+import it.unisa.ocelot.suites.benchmarks.EvaluationBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TimeBenchmarkCalculator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
@@ -60,10 +61,12 @@ public class ExecuteWholeCoverage implements Runnable {
 			BenchmarkCalculator timeBenchmark = new TimeBenchmarkCalculator();
 			BenchmarkCalculator coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
 			BenchmarkCalculator sizeBenchmark = new TestSuiteSizeBenchmarkCalculator(cfg);
+			BenchmarkCalculator evaluationsBenchmark = new EvaluationBenchmarkCalculator();
 	
 			generator.addBenchmark(timeBenchmark);
 			generator.addBenchmark(coverageBenchmark);
 			generator.addBenchmark(sizeBenchmark);
+			generator.addBenchmark(evaluationsBenchmark);
 			
 			CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
 			CBridge.initialize(
@@ -80,18 +83,22 @@ public class ExecuteWholeCoverage implements Runnable {
 				cumulativeResult += timeBenchmark.getPrintableCumulativeResults() + "\n";
 				cumulativeResult += coverageBenchmark.getPrintableCumulativeResults() + "\n";
 				cumulativeResult += sizeBenchmark.getPrintableCumulativeResults() + "\n";
+				cumulativeResult += evaluationsBenchmark.getPrintableCumulativeResults() + "\n";
+				
 				Utils.writeFile(OUTPUT_FOLDER + "/" + preFilename + "_cumulative.txt", cumulativeResult);
 	
 				String result = "";
 				result += timeBenchmark.getPrintableResults() + "\n";
 				result += coverageBenchmark.getPrintableResults() + "\n";
 				result += sizeBenchmark.getPrintableResults() + "\n";
+				result += evaluationsBenchmark.getPrintableResults() + "\n";
 				Utils.writeFile(OUTPUT_FOLDER + "/" + preFilename + "_normal.txt", result);
 			}
 	
-			System.out.println(timeBenchmark);
-			System.out.println(coverageBenchmark);
-			System.out.println(sizeBenchmark);
+			System.out.println(timeBenchmark.getPrintableCumulativeResults());
+			System.out.println(coverageBenchmark.getPrintableCumulativeResults());
+			System.out.println(sizeBenchmark.getPrintableCumulativeResults());
+			System.out.println(evaluationsBenchmark.getPrintableCumulativeResults());
 	
 			Set<TestCase> minimizedSuite = minimizer.minimize(suite);
 	

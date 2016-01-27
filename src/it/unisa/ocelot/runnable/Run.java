@@ -186,6 +186,18 @@ public class Run {
 			this.forceNoBuild = true;
 			return;
 		}
+		if (arg.equals("--profile")) {
+			try {
+				System.out.println("Profiling countdown:");
+				for (int i = 10; i >= 1; i--) { 
+					System.out.println(i);
+					Thread.sleep(1000);
+				}
+			} catch (InterruptedException e) {
+			}
+			
+			return;
+		}
 		
 		if (arg.equals("-v") || arg.equals("--version")) {
 			System.out.println("Ocelot version " + VERSION);

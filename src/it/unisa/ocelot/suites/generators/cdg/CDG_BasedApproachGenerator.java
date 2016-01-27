@@ -44,6 +44,8 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 	private CoverageCalculatorListener coverageCalculatorListener;
 	private final List<LabeledEdge> branches;
 	private boolean satisfied;
+	
+	private int evaluations;
 
 	public CDG_BasedApproachGenerator(ConfigManager config, CFG cfg) {
 		super(cfg);
@@ -112,6 +114,7 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 				try {
 					this.print("Running... ");
 					experiment.basicRun();
+					this.evaluations += experiment.getNumberOfEvaluation();
 					this.println("Done!");
 				} catch (JMException | ClassNotFoundException e) {
 					throw new TestSuiteGenerationException(e.getMessage());
@@ -158,5 +161,10 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 		for (LabeledEdge branch : branchCoveredByExecution) {
 			branch.setCovered();
 		}
+	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		return evaluations;
 	}
 }

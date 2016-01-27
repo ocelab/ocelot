@@ -410,4 +410,12 @@ public class ConfigManager {
 		else
 			return link.split("\\,");
 	}
+	
+	public boolean isDMCSeed() {
+		return this.properties.getProperty("suite.generator.dmc.seed", "false").equalsIgnoreCase("true");
+	}
+
+	public int getDMCSeedSize() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.dmc.seed.size", "50"));
+	}
 }

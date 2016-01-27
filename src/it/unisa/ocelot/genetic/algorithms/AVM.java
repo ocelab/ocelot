@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.xml.internal.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Comparison;
 
 
@@ -45,7 +46,7 @@ import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Comparison;
  * Alternating Variable Method.
  */
 
-public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge> {
+public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<LabeledEdge>, SeedableAlgorithm {
 	private static final long serialVersionUID = 720067051970162535L;
 	
 	private static final double EPSILON = 0.001;
@@ -63,6 +64,9 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	private Set<LabeledEdge> serendipitousPotentials;
 	
 	private StandardProblem problem;
+	
+	private Solution seededSolution;
+	private SolutionSet lastPopulation;
 	
 	private Map<Integer, Map<Integer, Boolean>> discreteValues;
 	
@@ -84,6 +88,17 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		
 		this.solutionBundle = new SolutionBundle(null, 0);
 		this.serendipitousSolutions = new HashSet<>();
+	}
+	
+	@Override
+	public void seedStartingPopulation(SolutionSet set, int keepNumber) {
+		if (keepNumber != 0)
+			this.seededSolution = set.get(0);
+	}
+	
+	@Override
+	public SolutionSet getLastPopulation() {
+		return this.lastPopulation;
 	}
 
 	/**
@@ -120,6 +135,11 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		evaluations = 0;
 		
 		int strength = 0;
+		
+		if (this.seededSolution != null) {
+			solutionBundle.solution = new Solution(this.seededSolution);
+			solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
+		}
 
 		boolean targetCovered = false;
 		
@@ -217,7 +237,9 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		} // while
 
 		SolutionSet resultPopulation = new SolutionSet(1);
+		this.lastPopulation = new SolutionSet(1);
 		resultPopulation.add(solutionBundle.solution);
+		this.lastPopulation.add(solutionBundle.solution);
 
 		this.algorithmStats.setEvaluations(evaluations);
 		return resultPopulation;
