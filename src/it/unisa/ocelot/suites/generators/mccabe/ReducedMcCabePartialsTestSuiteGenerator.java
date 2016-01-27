@@ -140,4 +140,10 @@ public class ReducedMcCabePartialsTestSuiteGenerator extends TestSuiteGenerator 
 			}
 		}
 	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

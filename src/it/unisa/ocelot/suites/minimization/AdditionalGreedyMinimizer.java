@@ -42,4 +42,8 @@ public class AdditionalGreedyMinimizer extends TestSuiteMinimizer {
 		return selected;
 	}
 	
+	@Override
+	public int getNumberOfEvaluations() {
+		return 0;
+	}
 }

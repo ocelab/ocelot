@@ -14,7 +14,7 @@ public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String getJavaHome() {
-		return "/usr/lib/jvm/java-7-openjdk-amd64";
+		return "/usr/lib/jvm/java-8-openjdk";
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String[] getGlib2Paths() {
-		return new String[] {"/usr/lib/x86_64-linux-gnu/glib-2.0/include", "$(SYSTEM_INCLUDE)/glib-2.0"};
+		return new String[] {"/usr/lib/x86_64-linux-gnu/glib-2.0/include", "$(SYSTEM_INCLUDE)/glib-2.0", "/usr/lib/glib-2.0/include/"};
 	}
 
 	@Override

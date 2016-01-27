@@ -8,8 +8,10 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.BranchCoverageBenchmarkCalculator;
+import it.unisa.ocelot.suites.benchmarks.EvaluationBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TestSuiteSizeBenchmarkCalculator;
 import it.unisa.ocelot.suites.benchmarks.TimeBenchmarkCalculator;
+import it.unisa.ocelot.suites.generators.CascadeTestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGeneratorHandler;
 import it.unisa.ocelot.suites.minimization.TestSuiteMinimizer;
@@ -30,10 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ExecuteExperiment implements Runnable {
 	private static final String[] EXPERIMENT_GENERATORS = new String[] {
-//		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
-//		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.MOSA_TEST_SUITE_GENERATOR,
+		TestSuiteGeneratorHandler.CDG_BASED_APPROACH_SUITE_GENERATOR,
 		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR
 	};
+	
+	private static final boolean minimizeAtTheEnd = false;
 	
 	private CFG cfg;
 	private ConfigManager config;
@@ -87,7 +91,7 @@ public class ExecuteExperiment implements Runnable {
 	}
 	
 	private void runOnce(int pTime) throws Exception {
-		String folderPath = "RESULTS/"+config.getTestFunction()+"/";
+		String folderPath = this.config.getResultsFolder() + "/" + config.getTestFunction() + "/";
 		File folder = new File(folderPath);
 		folder.mkdirs();
 		
@@ -95,16 +99,27 @@ public class ExecuteExperiment implements Runnable {
 			System.out.println("RUNNING " + generatorName);
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
 					generatorName, config, cfg);
+			
+			if (minimizeAtTheEnd) {
+				CascadeTestSuiteGenerator realGenerator = new CascadeTestSuiteGenerator(config, cfg);
+				TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
+				realGenerator.addTestSuiteGenerator(generator);
+				realGenerator.addTestSuiteGenerator(minimizer);
+				
+				generator = realGenerator;
+			}
 //			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler
 //					.getInstance(config);
 	
 			BenchmarkCalculator<Integer> timeBenchmark = new TimeBenchmarkCalculator();
+			BenchmarkCalculator<Integer> evaluationsBenchmark = new EvaluationBenchmarkCalculator();
 			BenchmarkCalculator<Double> coverageBenchmark = new BranchCoverageBenchmarkCalculator(cfg);
 			BenchmarkCalculator<Integer> sizeBenchmark = new TestSuiteSizeBenchmarkCalculator(cfg);
 	
 			generator.addBenchmark(timeBenchmark);
 			generator.addBenchmark(coverageBenchmark);
 			generator.addBenchmark(sizeBenchmark);
+			generator.addBenchmark(evaluationsBenchmark);
 	
 			Set<TestCase> suite = generator.generateTestSuite();
 			
@@ -112,6 +127,7 @@ public class ExecuteExperiment implements Runnable {
 			benchmarks.add(timeBenchmark);
 			benchmarks.add(sizeBenchmark);
 			benchmarks.add(coverageBenchmark);
+			benchmarks.add(evaluationsBenchmark);
 			
 			String[] parts = config.getTestFilename().split("[./]");
 			String preFilename = parts[parts.length-2]

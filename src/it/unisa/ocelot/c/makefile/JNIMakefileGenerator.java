@@ -1,14 +1,19 @@
 package it.unisa.ocelot.c.makefile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import it.unisa.ocelot.util.Utils;
 
 public abstract class JNIMakefileGenerator {
 	private String filename;
+	private List<String> linkLibs;
 	
 	public JNIMakefileGenerator(String pFilename) {
 		this.filename = pFilename;
+		this.linkLibs = new ArrayList<>();
+		this.linkLibs.add("glib-2.0");
 	}
 	
 	public abstract String getCCompiler();
@@ -20,8 +25,9 @@ public abstract class JNIMakefileGenerator {
 	public abstract String getMoreOptions();
 	
 	public abstract String getCFlags();
-	public String[] getLibs() {
-		return new String[]{"glib-2.0"};
+	
+	public void addLinkLibrary(String pLibrary) {
+		this.linkLibs.add(pLibrary);
 	}
 	
 	public abstract String getLibName();
@@ -36,7 +42,7 @@ public abstract class JNIMakefileGenerator {
 			javapaths += "-I"+temp+" ";
 		
 		String libspath = "";
-		for (String temp : this.getLibs())
+		for (String temp : this.linkLibs)
 			libspath += "-l"+temp+" ";
 		
 		String moreOptions = this.getMoreOptions();

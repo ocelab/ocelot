@@ -45,6 +45,7 @@ public class CheckTestSuiteWriter extends TestSuiteWriter<CheckTestCaseWriter> {
 		String headers = "";
 		
 		headers += "#include <stdlib.h>\n";
+		headers += "#include <check.h>\n";
 		
 		
 		return headers;

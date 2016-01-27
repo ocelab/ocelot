@@ -148,4 +148,6 @@ public abstract class TestSuiteGenerator {
 			else
 				this.budgetManager = BudgetManagerHandler.getInstance(config.getBudgetManager(), this.fixedBudget, pNumberOfExperiments);
 	}
+	
+	public abstract int getNumberOfEvaluations();
 }

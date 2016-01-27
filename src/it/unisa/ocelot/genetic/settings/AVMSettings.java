@@ -4,6 +4,7 @@ import jmetal.core.Algorithm;
 import jmetal.core.Problem;
 import jmetal.util.JMException;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.StandardSettings;
 import it.unisa.ocelot.genetic.algorithms.AVM;
 
@@ -30,6 +31,10 @@ public class AVMSettings extends StandardSettings {
         algorithm.setInputParameter("maxEvaluations", this.maxEvaluations);
         algorithm.setInputParameter("epsilon", this.epsilon);
         algorithm.setInputParameter("delta", this.delta);
+        
+        if (problem_ instanceof StandardProblem) {
+        	algorithm.setInputParameter("parametersTypes", ((StandardProblem) problem_).getParametersTypes());
+        }
 
         return algorithm;
     }

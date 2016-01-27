@@ -1,7 +1,5 @@
 package it.unisa.ocelot.simulator;
 
-import java.util.Date;
-
 public class CBridge {
 	private int coreId;
 	private static int n;

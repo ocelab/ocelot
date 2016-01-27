@@ -101,4 +101,10 @@ public class McCabeTestSuiteGenerator extends TestSuiteGenerator implements Casc
 			this.println("Parameters found: " + Utils.printParameters(numericParams));
 		}
 	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

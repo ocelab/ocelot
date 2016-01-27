@@ -7,6 +7,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
+import it.unisa.ocelot.genetic.edges.DMCExperiment;
 import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jmetal.core.Solution;
+import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 
 /**
@@ -29,6 +31,8 @@ import jmetal.util.JMException;
  */
 public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
+	
+	private int evaluations;
 
 	public DynamicMcCabeTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
@@ -62,8 +66,11 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 		
 		this.setupBudgetManager(mcCabeCalculator.extimateMissingTargets());
 		
+		SolutionSet seedPopulation = null;
+		
 		while (currentTarget != null && calculator.getBranchCoverage() < config.getRequiredCoverage()) {
-			EdgeCoverageExperiment exp = new EdgeCoverageExperiment(cfg, config, cfg.getParameterTypes(), currentTarget);
+			DMCExperiment exp = new DMCExperiment(cfg, config, cfg.getParameterTypes(), currentTarget, 
+					seedPopulation, this.config.getDMCSeedSize());
 			
 			exp.initExperiment(this.budgetManager);
 			
@@ -75,8 +82,13 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			try {
 				this.print("Running... ");
 				exp.basicRun();
+				this.evaluations += exp.getNumberOfEvaluation();
+				
+				if (this.config.isDMCSeed())
+					seedPopulation = exp.getLastPopulation();
 				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
+				e.printStackTrace();
 				throw new TestSuiteGenerationException(e.getMessage());
 			}
 			
@@ -122,5 +134,10 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			this.println("Partial coverage: " + calculator.getBranchCoverage());
 			this.budgetManager.updateTargets(mcCabeCalculator.extimateMissingTargets());
 		}
+	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		return this.evaluations;
 	}
 }

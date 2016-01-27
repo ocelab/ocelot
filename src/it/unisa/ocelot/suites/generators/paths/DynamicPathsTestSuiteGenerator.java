@@ -82,4 +82,9 @@ public class DynamicPathsTestSuiteGenerator extends TestSuiteGenerator {
 		return suite;
 	}
 
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

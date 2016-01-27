@@ -30,6 +30,8 @@ import jmetal.util.JMException;
  */
 public class MOSATestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
+	
+	private int evaluations;
 
 	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
 		super(cfg);
@@ -80,6 +82,7 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 		try {
 			archiveSolutions = mosaExperiment.multiObjectiveRun();
 			System.out.println(mosaExperiment.getAlgorithmStats().getLog());
+			this.evaluations = mosaExperiment.getNumberOfEvaluation();
 		} catch (JMException | ClassNotFoundException e) {
 			e.printStackTrace();
 			throw new TestSuiteGenerationException(e.getMessage());
@@ -99,5 +102,10 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 			
 			this.measureBenchmarks("MOSA Target", suite, numberOfEvaluations.get(i));
 		}
+	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		return this.evaluations;
 	}
 }

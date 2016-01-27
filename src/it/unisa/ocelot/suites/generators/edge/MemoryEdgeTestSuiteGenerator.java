@@ -37,6 +37,8 @@ import jmetal.util.JMException;
 public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements CascadeableGenerator {
 	private boolean satisfied;
 	
+	private int evaluations;
+	
 	public MemoryEdgeTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
 		super(pCFG);
 		
@@ -92,6 +94,7 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 			try {
 				this.print("Running... ");
 				exp.basicRun();
+				this.evaluations += exp.getNumberOfEvaluation();
 				this.println("Done!");
 			} catch (JMException | ClassNotFoundException e) {
 				throw new TestSuiteGenerationException(e.getMessage());
@@ -120,5 +123,10 @@ public class MemoryEdgeTestSuiteGenerator extends TestSuiteGenerator implements 
 			uncoveredEdges.removeAll(calculator.getCoveredEdges());
 			this.budgetManager.updateTargets(uncoveredEdges.size());
 		}
+	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		return this.evaluations;
 	}
 }

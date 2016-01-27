@@ -22,4 +22,9 @@ public class CInteger extends CType {
 	public double getMinValue() {
 		return Integer.MIN_VALUE;
 	}
+	
+	@Override
+	public boolean isDiscrete() {
+		return true;
+	}
 }

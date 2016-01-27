@@ -131,4 +131,10 @@ public class ReducedMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			}
 		}
 	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

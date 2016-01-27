@@ -114,6 +114,15 @@ public class ConfigManager {
 	}
 	
 	/**
+	 * Returns true if the mutation probability has to be dynamic. False by default.
+	 * @return
+	 * @throws NumberFormatException if the parameter is not specified
+	 */
+	public boolean isDynamicMutation() {
+		return this.properties.getProperty("mutation.dynamic", "false").equalsIgnoreCase("true");
+	}
+	
+	/**
 	 * Returns the number of threads for the genetic algorithm (1 if not specified)
 	 * @return
 	 */
@@ -392,5 +401,21 @@ public class ConfigManager {
 	
 	public void setProperty(String pProperty, String pValue) {
 		this.properties.setProperty(pProperty, pValue);
+	}
+	
+	public String[] getTestLink() {
+		String link = this.properties.getProperty("test.link", "");
+		if (link.equals(""))
+			return new String[0];
+		else
+			return link.split("\\,");
+	}
+	
+	public boolean isDMCSeed() {
+		return this.properties.getProperty("suite.generator.dmc.seed", "false").equalsIgnoreCase("true");
+	}
+
+	public int getDMCSeedSize() {
+		return Integer.parseInt(this.properties.getProperty("suite.generator.dmc.seed.size", "50"));
 	}
 }

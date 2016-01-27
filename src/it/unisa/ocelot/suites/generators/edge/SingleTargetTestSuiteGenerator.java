@@ -102,4 +102,10 @@ public class SingleTargetTestSuiteGenerator extends TestSuiteGenerator implement
 			this.println("Parameters found: " + Utils.printParameters(numericParams));
 		}
 	}
+	
+	@Override
+	public int getNumberOfEvaluations() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

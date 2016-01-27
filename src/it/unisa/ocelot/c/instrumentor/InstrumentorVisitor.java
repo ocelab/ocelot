@@ -710,6 +710,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	private IType getType(IASTExpression pExpression) {
+		System.out.println(pExpression.getRawSignature());
 		return getType(pExpression.getExpressionType());
 	}
 	
