@@ -92,7 +92,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	
 	@Override
 	public void seedStartingPopulation(SolutionSet set, int keepNumber) {
-		if (keepNumber != 0)
+		if (keepNumber != 0 && set != null)
 			this.seededSolution = set.get(0);
 	}
 	
@@ -138,7 +138,10 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		
 		if (this.seededSolution != null) {
 			solutionBundle.solution = new Solution(this.seededSolution);
+			this.prepareSerendipitous();
 			solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
+			this.checkSerendipitous(solutionBundle.solution);
+			evaluations++;
 		}
 
 		boolean targetCovered = false;
@@ -153,8 +156,8 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 				this.prepareSerendipitous();
 				solutionBundle.branchDistance = problem.evaluateWithBranchDistance(solutionBundle.solution);
 				this.checkSerendipitous(solutionBundle.solution);
-				dontRestart = false;
 			}
+			dontRestart = false;
 			
 			XParamArray solutionModifier = new XParamArray(solutionBundle.solution);
 			
@@ -173,6 +176,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 			int currentKind = 0;
 			int currentVariable = -1; //It will become 0 in the first iteration
 			double direction = 0;
+			boolean firstSelectionChange = false;
 			
 			while (!localOptimum && evaluations < maxEvaluations && !targetCovered) {
 				
@@ -209,7 +213,8 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 							localOptimum = true;
 						
 						continue;
-					}
+					} else
+						firstSelectionChange = true;
 				}
 				
 				//Updates the last updated kind/variable to the current ones
@@ -227,8 +232,15 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 					solutionBundle.solution = newSolution.solution;
 					solutionBundle.branchDistance = newSolution.branchDistance;
 					strength++;
+					firstSelectionChange = false;
 				} else {
-					direction = 0;
+					if (firstSelectionChange) {
+						if (strength >= 0)
+							strength -= 1;
+						else
+							strength *= 2;
+					} else
+						direction = 0;
 				}
 				
 				if (solutionBundle.solution.getObjective(0) == 0.0)
@@ -266,6 +278,10 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 			updateValue = solutionModifier.getUpperBound(currentKind, currentVariable);
 		else if (updateValue < solutionModifier.getLowerBound(currentKind, currentVariable))
 			updateValue = solutionModifier.getLowerBound(currentKind, currentVariable);
+		
+		double roundEpsilon = Math.pow(10, Math.floor(Math.log10(epsilon)));
+		
+		updateValue = Math.floor(updateValue / roundEpsilon) * roundEpsilon; //Rounds to the epsilonth decimal
 		
 		double prevValue = solutionModifier.getValue(currentKind, currentVariable);
 		solutionModifier.setValue(currentKind, currentVariable, updateValue);
