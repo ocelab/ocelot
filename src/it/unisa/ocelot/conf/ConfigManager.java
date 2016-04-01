@@ -418,4 +418,14 @@ public class ConfigManager {
 	public int getDMCSeedSize() {
 		return Integer.parseInt(this.properties.getProperty("suite.generator.dmc.seed.size", "50"));
 	}
+	
+	public String[] getExperimentGenerators() {
+		String generators = this.properties.getProperty("experiment.generators", "");
+		String[] array = generators.split("\\,");
+		return array;
+	}
+	
+	public boolean isExperimentMinimization() {
+		return this.properties.getProperty("experiment.minimization", "false").equalsIgnoreCase("true");
+	}
 }

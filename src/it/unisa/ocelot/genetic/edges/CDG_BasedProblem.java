@@ -2,12 +2,15 @@ package it.unisa.ocelot.genetic.edges;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CollateralCoverageEvaluator;
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
@@ -29,6 +32,8 @@ public class CDG_BasedProblem extends StandardProblem {
 	private List<LabeledEdge> branches;
 
 	private LabeledEdge target;
+	
+	private Set<CFGNode> dominators;
 
 	private boolean debug;
 
@@ -44,6 +49,12 @@ public class CDG_BasedProblem extends StandardProblem {
 		this.controlFlowGraph = controlFlowGraph;
 		this.branches = branches;
 		this.target = target;
+		
+		CFGNode parent = this.controlFlowGraph.getEdgeSource(this.target);
+		
+		Dominators<CFGNode, LabeledEdge> dominators = new Dominators<CFGNode, LabeledEdge>(this.controlFlowGraph, this.controlFlowGraph.getStart());
+		
+		this.dominators = dominators.getStrictDominators(parent);
 	}
 
 	@Override
@@ -59,7 +70,8 @@ public class CDG_BasedProblem extends StandardProblem {
 		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
 
 		// listener
-		DominatorListener dominatorListener = new DominatorListener(controlFlowGraph, target);
+		EdgeDistanceListener dominatorListener = new EdgeDistanceListener(this.controlFlowGraph, target, this.dominators);
+		//DominatorListener dominatorListener = new DominatorListener(controlFlowGraph, target);
 		CoverageCalculatorListener coverageCalculatorListener = new CoverageCalculatorListener(
 				controlFlowGraph);
 

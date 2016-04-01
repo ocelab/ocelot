@@ -46,14 +46,15 @@ public class Run {
 		runner.run();
 	}
 	
-	public Run(String[] args) {
+	public Run(String[] args) throws IOException {
 		this.runnerType = RUNNER_WRITE;
-		this.experimentGenerators = null;
 		this.forceBuild = false;
 		this.forceNoBuild = false;
 		this.configFilename = CONFIG_FILENAME;
 		
 		ConfigManager.setFilename(CONFIG_FILENAME);
+		
+		this.experimentGenerators = ConfigManager.getInstance().getExperimentGenerators();
 		for (String arg : args) {
 			interpret(arg);
 		}

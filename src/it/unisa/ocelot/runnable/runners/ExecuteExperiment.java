@@ -37,8 +37,6 @@ public class ExecuteExperiment implements Runnable {
 		TestSuiteGeneratorHandler.DYNAMIC_MCCABE_SUITE_GENERATOR
 	};
 	
-	private static final boolean minimizeAtTheEnd = false;
-	
 	private CFG cfg;
 	private ConfigManager config;
 	
@@ -100,7 +98,7 @@ public class ExecuteExperiment implements Runnable {
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(
 					generatorName, config, cfg);
 			
-			if (minimizeAtTheEnd) {
+			if (this.config.isExperimentMinimization()) {
 				CascadeTestSuiteGenerator realGenerator = new CascadeTestSuiteGenerator(config, cfg);
 				TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
 				realGenerator.addTestSuiteGenerator(generator);
