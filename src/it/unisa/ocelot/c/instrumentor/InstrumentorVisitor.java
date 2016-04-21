@@ -26,6 +26,7 @@ import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
+import org.eclipse.cdt.core.dom.ast.IASTInitializerClause;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
@@ -173,6 +174,14 @@ public class InstrumentorVisitor extends ASTVisitor {
 		return this.transformDistanceExpression(operand, !pNegation, pTransPerformed);
 	}
 	
+	public IASTExpression trasformArithmetic(IASTBinaryExpression expression, boolean negation, int operation) {
+		if (!negation) {
+			return this.transformArithmeticExpression(expression, false, operation);
+		} else {
+			return this.transformArithmeticExpression(expression, true, operation);
+		}
+	}
+	
 	public IASTExpression transformDistanceExpression(IASTExpression expression, boolean pNegation, boolean pTransPerformed) {
 		if (expression instanceof IASTBinaryExpression) {
 			IASTBinaryExpression realExpression = (IASTBinaryExpression)expression;
@@ -192,6 +201,20 @@ public class InstrumentorVisitor extends ASTVisitor {
 				return this.transformAnd(realExpression, pNegation, pTransPerformed);
 			else if (realExpression.getOperator() == IASTBinaryExpression.op_logicalOr)
 				return this.transformOr(realExpression, pNegation, pTransPerformed);
+			/* changing for operators */
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_minus)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_minus);
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_plus)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_plus);
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_multiply)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_multiply);
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_multiply)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_multiply);
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_binaryOr)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_binaryOr);
+			else if (realExpression.getOperator() == IASTBinaryExpression.op_binaryAnd)
+				return this.trasformArithmetic(realExpression, pNegation, IASTBinaryExpression.op_binaryAnd);
+			/**/
 			else if (realExpression.getOperator() == IASTBinaryExpression.op_assign || 
 					realExpression.getOperator() == IASTBinaryExpression.op_plusAssign ||
 					realExpression.getOperator() == IASTBinaryExpression.op_minusAssign ||
@@ -316,7 +339,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 				else
 					result = makeFunctionCall("_f_ocelot_isfalse", arguments);
 				return result;
-			}
+			} 
 		} else if (expression instanceof IASTFunctionCallExpression) { 
 			return makeFunctionCall("_f_ocelot_get_fcall", new IASTExpression[0]);
 		} else {
@@ -356,6 +379,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 		return PROCESS_SKIP;
 	}
 	
+	//TODO start from here
 	public void visit(IASTIfStatement statement) {
 		IASTExpression[] instrArgs = new IASTExpression[3];
 		instrArgs[0] = this.transformOriginalExpression(statement.getConditionExpression().copy());
@@ -588,6 +612,38 @@ public class InstrumentorVisitor extends ASTVisitor {
 		IASTFunctionCallExpression operationFunction = makeFunctionCall("_f_ocelot_" + pOperator, operationArgs);
 		
 		return operationFunction;
+	}
+	
+	/**
+	 * Returns the correspondent <code>IASTFunctionCallExpression</code> needed
+	 * for the instrumentation, for a given <code>IASTBinaryExpression</code>
+	 * passed as parameter
+	 * 
+	 * @param pExpression the expression 
+	 * @param negation flag for the negation of the expression
+	 * @param pRealOperator the operator 
+	 * @return a <code>IASTFunctionCallExpression</code>
+	 */
+	private IASTExpression transformArithmeticExpression(IASTBinaryExpression pExpression, boolean negation, int pRealOperator) {
+		pExpression.setOperator(pRealOperator);
+		IASTExpression operand1 = pExpression.getOperand1();
+		IASTExpression operand2 = pExpression.getOperand2();
+		
+		IASTExpression instrumentedOp1 = this.transformDistanceExpression(operand1, false, true);
+		IASTExpression instrumentedOp2 = this.transformDistanceExpression(operand2, true, true);
+				
+		IASTExpression[] operationArgs = new IASTExpression[1];
+		IASTBinaryExpression auxExpression = pExpression.copy();
+		auxExpression.setOperand1(instrumentedOp1);
+		auxExpression.setOperand2(instrumentedOp2);
+		operationArgs[0] = auxExpression;
+				
+		IASTExpression result;
+		if (negation)
+			result = makeFunctionCall("_f_ocelot_istrue", operationArgs);
+		else
+			result = makeFunctionCall("_f_ocelot_isfalse", operationArgs);
+		return result;
 	}
 	
 	private IASTExpression transformComparisonExpression(IASTBinaryExpression pExpression, String pOperator, int pRealOperator) {
