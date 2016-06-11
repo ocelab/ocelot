@@ -1,5 +1,11 @@
 package it.unisa.ocelot.genetic.algorithms;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 //  pgGA.java
 //
 //  Author:
@@ -26,20 +32,12 @@ import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import jmetal.core.*;
+import jmetal.core.Problem;
+import jmetal.core.Solution;
+import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.wrapper.XParamArray;
-
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import com.sun.xml.internal.ws.api.server.DocumentAddressResolver;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Comparison;
 
 
 /**
