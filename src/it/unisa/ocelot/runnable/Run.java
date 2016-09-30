@@ -6,9 +6,12 @@ import java.io.IOException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.sun.corba.se.impl.presentation.rmi.DynamicAccessPermission;
+
 import it.unisa.ocelot.c.Builder;
 import it.unisa.ocelot.c.BuildingException;
 import it.unisa.ocelot.c.StandardBuilder;
+import it.unisa.ocelot.c.makefile.DynamicMakefileGenerator;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
 import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
@@ -132,18 +135,18 @@ public class Run {
 				config.getTestFunction(), 
 				config.getTestIncludePaths());
 		
-		JNIMakefileGenerator generator = null; 
-		String os = System.getProperty("os.name");
-		if (os.contains("Win"))
-			generator = new WindowsMakefileGenerator();
-		else if (os.contains("Mac"))
-			generator = new MacOSXMakefileGenerator();
-		else if (os.contains("nix") || os.contains("nux") || os.contains("aix"))
-			generator = new LinuxMakefileGenerator();
-		//else if (os.contains("sunos"))
-		else {
-			throw new BuildingException("Your operative system \"" + os + "\" is not supported");
-		}
+		JNIMakefileGenerator generator = new DynamicMakefileGenerator(config);
+//		String os = System.getProperty("os.name");
+//		if (os.contains("Win"))
+//			generator = new WindowsMakefileGenerator();
+//		else if (os.contains("Mac"))
+//			generator = new MacOSXMakefileGenerator();
+//		else if (os.contains("nix") || os.contains("nux") || os.contains("aix"))
+//			generator = new LinuxMakefileGenerator();
+//		//else if (os.contains("sunos"))
+//		else {
+//			throw new BuildingException("Your operative system \"" + os + "\" is not supported");
+//		}
 		
 		for (String linkLibrary : config.getTestLink())
 			generator.addLinkLibrary(linkLibrary);

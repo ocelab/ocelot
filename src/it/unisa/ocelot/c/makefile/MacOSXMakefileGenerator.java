@@ -2,6 +2,7 @@ package it.unisa.ocelot.c.makefile;
 
 import java.io.IOException;
 
+@Deprecated
 public class MacOSXMakefileGenerator extends JNIMakefileGenerator {
 	public MacOSXMakefileGenerator() {
 		super("jni/makefile");
