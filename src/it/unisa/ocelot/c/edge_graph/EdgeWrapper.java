@@ -19,6 +19,7 @@ public class EdgeWrapper<E> {
 		if (!(obj instanceof EdgeWrapper))
 			return false;
 		
+		@SuppressWarnings("rawtypes")
 		EdgeWrapper wrapper = (EdgeWrapper)obj;
 		
 		if (wrapper.getWrappedEdge() == null)

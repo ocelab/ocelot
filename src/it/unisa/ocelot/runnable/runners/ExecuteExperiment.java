@@ -88,6 +88,7 @@ public class ExecuteExperiment implements Runnable {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private void runOnce(int pTime) throws Exception {
 		String folderPath = this.config.getResultsFolder() + "/" + config.getTestFunction() + "/";
 		File folder = new File(folderPath);
@@ -153,6 +154,7 @@ public class ExecuteExperiment implements Runnable {
 		}
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static void exportCSV(String csvFilename, List<BenchmarkCalculator> benchmarks) throws IOException {
 		if (benchmarks.size() == 0)
 			return;

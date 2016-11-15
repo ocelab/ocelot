@@ -5,7 +5,6 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

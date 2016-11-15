@@ -1,5 +1,12 @@
 package it.unisa.ocelot.suites.generators.many_objective;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.jgrapht.graph.DefaultEdge;
+
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
@@ -8,25 +15,8 @@ import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.edge_graph.EdgeGraph;
 import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageExperiment;
-import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
-import it.unisa.ocelot.suites.budget.BasicBudgetManager;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
-import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jgrapht.graph.DefaultEdge;
-
-import jmetal.core.Solution;
-import jmetal.core.SolutionSet;
-import jmetal.core.Variable;
-import jmetal.util.JMException;
 
 /**
  * Many-Objective test suite generator. Approach inspired by Panichella et al. (Reformulating Branch Coverage as a 

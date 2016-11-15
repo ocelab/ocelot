@@ -1,11 +1,9 @@
 package it.unisa.ocelot.suites.generators.paths;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import jmetal.util.JMException;
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.TooManyInfeasiblePathsException;
@@ -18,6 +16,7 @@ import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.util.Utils;
+import jmetal.util.JMException;
 
 /**
  * Do not use. NP-Hard problem, not quite easy to solve.

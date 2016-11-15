@@ -3,24 +3,11 @@ package it.unisa.ocelot.runnable;
 import it.unisa.ocelot.c.Builder;
 import it.unisa.ocelot.c.BuildingException;
 import it.unisa.ocelot.c.StandardBuilder;
-import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
-import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
 import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
 import it.unisa.ocelot.c.makefile.WindowsMakefileGenerator;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.util.Utils;
-
-import java.io.IOException;
-
-import org.apache.commons.io.IOUtils;
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
-import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 /**
  * This runnable class builds the library that will contain the function to test. It performs several tasks:

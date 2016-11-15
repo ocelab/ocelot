@@ -1,12 +1,9 @@
 package it.unisa.ocelot.genetic.algorithms;
 
-import it.unisa.ocelot.genetic.OcelotAlgorithm;
-
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 
-import jmetal.core.Algorithm;
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
@@ -29,6 +26,7 @@ public class CDG_GA extends OcelotAlgorithm {
 		no_evaluations = 0;
 	}
 
+	@SuppressWarnings({ "unused", "rawtypes" })
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		int populationSize;
 		int maxEvaluations;

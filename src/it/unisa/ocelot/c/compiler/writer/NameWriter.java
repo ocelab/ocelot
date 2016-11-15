@@ -32,6 +32,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class NameWriter extends NodeWriter {
 
 	private static final String OPERATOR = "operator "; //$NON-NLS-1$

@@ -41,7 +41,6 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTryBlockStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTWhileStatement;
 import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousStatement;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
-import org.eclipse.core.resources.IFile;
 
 /**
  * 
@@ -53,6 +52,7 @@ import org.eclipse.core.resources.IFile;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class StatementWriter extends NodeWriter{
 
 	private static final String DEFAULT = "default:"; //$NON-NLS-1$

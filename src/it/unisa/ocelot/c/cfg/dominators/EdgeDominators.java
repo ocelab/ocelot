@@ -1,8 +1,5 @@
 package it.unisa.ocelot.c.cfg.dominators;
 
-import it.unisa.ocelot.c.edge_graph.EdgeGraph;
-import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +7,9 @@ import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
+
+import it.unisa.ocelot.c.edge_graph.EdgeGraph;
+import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
 
 /**
  * Compute dominator of a graph according to:
@@ -24,12 +23,10 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  *            Edges of graph
  */
 public class EdgeDominators<V, E> implements IDominators<E> {
-	private DirectedGraph<V, E> graph;
 	private EdgeGraph<V, E> edgeGraph;
 	private Dominators<EdgeWrapper<E>, DefaultEdge> dominators;
 
 	public EdgeDominators(DirectedGraph<V, E> pGraph, V pStart, V pEnd) {
-		this.graph = pGraph;
 		this.edgeGraph = new EdgeGraph<V, E>(pGraph, pStart, pEnd);
 		this.dominators = new Dominators<EdgeWrapper<E>, DefaultEdge>(this.edgeGraph, this.edgeGraph.getStart());
 		this.dominators.computeDominators();

@@ -11,7 +11,6 @@ import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
 import it.unisa.ocelot.genetic.settings.SettingsFactory;
 import jmetal.core.Algorithm;
-import jmetal.experiments.Experiment;
 
 public class NodeCoverageExperiment extends OcelotExperiment {
 	private CType[] parametersTypes;

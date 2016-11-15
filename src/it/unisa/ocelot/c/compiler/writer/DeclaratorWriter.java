@@ -45,6 +45,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class DeclaratorWriter extends NodeWriter {
 
 	private static final String AMPERSAND_SPACE = "& "; //$NON-NLS-1$

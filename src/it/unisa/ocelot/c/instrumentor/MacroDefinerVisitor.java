@@ -45,9 +45,6 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	
 	private Map<String, IType> externalReferences;
 	
-	private List<String> localVariables;
-	private List<String> usedVariables;
-	
 	private ConfigManager config;
 	
 	public MacroDefinerVisitor(String pFunctionName, Map<String, IType> externalReferences) {
@@ -66,8 +63,8 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		
 		this.parameters = new HashMap<String, IParameter>();
 		
-		this.localVariables = new ArrayList<String>();
-		this.usedVariables = new ArrayList<String>();
+		new ArrayList<String>();
+		new ArrayList<String>();
 		
 		this.callMacro = "";
 		
@@ -208,21 +205,17 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			if (!functionName.getRawSignature().equals(this.functionName))
 				return PROCESS_CONTINUE;
 
-			int numberOfPointers = 0;
 			for (String stringName : parametersStringNames) {
-				if (stringName.contains("*"))
-					numberOfPointers++;
+				if (stringName.contains("*")) {
+				}
 			}
 			
 			for (Entry<String, IType> type : this.externalReferences.entrySet()) {
 				IType realType = getType(type.getValue());
 				
-				if (realType instanceof CPointerType)
-					numberOfPointers++;
+				if (realType instanceof CPointerType) {
+				}
 			}
-			
-			int totalVariables = parametersStringTypes.length;
-			int numberOfNonPointers = totalVariables - numberOfPointers;
 			
 			String[] callParameters = new String[parametersStringTypes.length];
 			String macro = "";
@@ -232,11 +225,8 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			macro += "#include \"CBridge.h\"\n";
 			macro += "#define OCELOT_TYPES {";
 			List<String> elements = new ArrayList<>();
-			int arrayTypesId = 0;
 			for (int i = 0; i < parametersStringTypes.length; i++) {
 				String parameterStringName = parametersStringNames[i].replaceAll("\\*\\s*", "");
-				String parameterStringType = parametersStringTypes[i];
-				
 				IParameter parameterRealType = this.parameters.get(parameterStringName);
 				IType type = getType(parameterRealType.getType());
 				
@@ -246,7 +236,6 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					List<StructNode> basics = tree.getBasicVariables();
 					for (StructNode var : basics) {
 //						this.functionParameters.add(var.type);
-						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
 //						
 						if (var.isPointer()) {
 							System.err.println("We can't handle structures with pointers yet.");
@@ -274,7 +263,6 @@ public class MacroDefinerVisitor extends ASTVisitor {
 							typeString = typeString.toUpperCase();
 							
 							elements.add("TYPE_"+ typeString);
-							arrayTypesId++;
 						}
 					}
 				}
@@ -289,7 +277,6 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					typeString = typeString.toUpperCase();
 					
 					elements.add("TYPE_"+ typeString);
-					arrayTypesId++;
 				}
 			}
 			

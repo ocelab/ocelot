@@ -1,13 +1,11 @@
 package it.unisa.ocelot.suites.minimization;
 
+import java.util.Set;
+
 import it.unisa.ocelot.TestCase;
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
-
-import java.util.Set;
 
 public abstract class TestSuiteMinimizer extends TestSuiteGenerator implements CascadeableGenerator {
 	public abstract Set<TestCase> minimize(Set<TestCase> pTestCases);

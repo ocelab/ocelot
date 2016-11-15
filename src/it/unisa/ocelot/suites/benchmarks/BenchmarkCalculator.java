@@ -1,12 +1,11 @@
 package it.unisa.ocelot.suites.benchmarks;
 
-import it.unisa.ocelot.TestCase;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+
+import it.unisa.ocelot.TestCase;
 
 public abstract class BenchmarkCalculator<T> {
 	private String name;

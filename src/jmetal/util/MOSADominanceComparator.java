@@ -1,14 +1,10 @@
 package jmetal.util;
 
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
-
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import jmetal.core.Solution;
 
 /**

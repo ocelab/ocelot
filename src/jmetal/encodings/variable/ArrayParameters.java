@@ -32,6 +32,7 @@ import jmetal.util.PseudoRandom;
  * Class implementing a decision encodings.variable representing an array of
  * real values. The real values of the array have their own bounds.
  */
+@SuppressWarnings("serial")
 public class ArrayParameters extends ArrayReal {
 	/**
 	 * Problem using the type

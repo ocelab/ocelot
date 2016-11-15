@@ -29,8 +29,11 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  */
 public class ASTWriter {
 	
+	@SuppressWarnings("unused")
 	private ChangeGeneratorWriterVisitor transformationVisitor;
+	@SuppressWarnings("unused")
 	private ASTModificationStore modificationStore = new ASTModificationStore();
+	@SuppressWarnings("unused")
 	private String givenIndentation = ""; //$NON-NLS-1$
 	
 

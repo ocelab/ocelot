@@ -51,6 +51,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class DeclarationWriter extends NodeWriter{
 	
 	private static final String ASM_END = ")"; //$NON-NLS-1$

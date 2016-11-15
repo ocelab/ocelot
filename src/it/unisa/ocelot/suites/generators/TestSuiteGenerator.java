@@ -14,7 +14,6 @@ import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import it.unisa.ocelot.util.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +21,7 @@ import java.util.Set;
 import jmetal.core.Solution;
 
 public abstract class TestSuiteGenerator {
+	@SuppressWarnings("rawtypes")
 	protected List<BenchmarkCalculator> benchmarkCalculators;
 	protected ConfigManager config;
 	public CoverageCalculator calculator;
@@ -29,6 +29,7 @@ public abstract class TestSuiteGenerator {
 	protected BudgetManager budgetManager;
 	private int fixedBudget;
 	
+	@SuppressWarnings("rawtypes")
 	public TestSuiteGenerator(CFG pCFG) {
 		this.benchmarkCalculators = new ArrayList<BenchmarkCalculator>();
 		this.cfg = pCFG;
@@ -36,20 +37,24 @@ public abstract class TestSuiteGenerator {
 		this.fixedBudget = -1;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void addBenchmark(BenchmarkCalculator pCalculator) {
 		this.benchmarkCalculators.add(pCalculator);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected void startBenchmarks() {
 		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
 			benchmarkCalculator.start();
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void measureBenchmarks(String pLabel, Set<TestCase> pSuite, Integer evaluations) {
 		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
 			benchmarkCalculator.measure(pLabel, pSuite, evaluations);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected void removeLastBenchmark() {
 		for (BenchmarkCalculator benchmarkCalculator : this.benchmarkCalculators)
 			benchmarkCalculator.removeLast();

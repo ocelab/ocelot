@@ -1,9 +1,6 @@
 package it.unisa.ocelot.genetic.many_nodes;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.management.JMException;
 
 import org.apache.commons.lang3.Range;
 
@@ -15,9 +12,6 @@ import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
 import it.unisa.ocelot.genetic.settings.SettingsFactory;
 import jmetal.core.Algorithm;
-import jmetal.core.Solution;
-import jmetal.core.SolutionSet;
-import jmetal.experiments.Experiment;
 
 public class PathCoverageExperiment extends OcelotExperiment {
 	private CType[] parametersTypes;

@@ -1,19 +1,18 @@
 package it.unisa.ocelot.genetic.many_nodes;
 
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.simulator.ExecutionEvent;
-import it.unisa.ocelot.simulator.SimulatorListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.alg.DijkstraShortestPath;
+
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.simulator.ExecutionEvent;
+import it.unisa.ocelot.simulator.SimulatorListener;
 
 public class ManyNodesDistanceListener implements SimulatorListener {
 	private CFG cfg;

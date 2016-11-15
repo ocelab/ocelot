@@ -1,18 +1,6 @@
 package it.unisa.ocelot.genetic.algorithms;
 
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.dominators.Dominators;
-import it.unisa.ocelot.c.cfg.edges.FlowEdge;
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.edge_graph.EdgeGraph;
-import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
-import it.unisa.ocelot.genetic.OcelotAlgorithm;
-import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
-import it.unisa.ocelot.util.Front;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -20,17 +8,20 @@ import java.util.Set;
 
 import org.jgrapht.graph.DefaultEdge;
 
-import jmetal.core.Algorithm;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.dominators.Dominators;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.edge_graph.EdgeGraph;
+import it.unisa.ocelot.c.edge_graph.EdgeWrapper;
+import it.unisa.ocelot.genetic.OcelotAlgorithm;
+import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageProblem;
+import it.unisa.ocelot.util.Front;
 import jmetal.core.Operator;
-import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
-import jmetal.core.Variable;
-import jmetal.qualityIndicator.QualityIndicator;
-import jmetal.util.Distance;
 import jmetal.util.JMException;
 import jmetal.util.MOSARanking;
-import jmetal.util.Ranking;
 import jmetal.util.comparators.CrowdingComparator;
 import jmetal.util.comparators.ObjectiveComparator;
 
@@ -53,6 +44,7 @@ public class MOSA extends OcelotAlgorithm {
 	private List<LabeledEdge> allTargets;
 	private List<LabeledEdge> allBranches;
 	private CFG controlFlowGraph;
+	@SuppressWarnings("unused")
 	private Set<LabeledEdge> coveredBranches;
 	private EdgeGraph<CFGNode, LabeledEdge> edgeGraph;
 	
@@ -400,6 +392,7 @@ public class MOSA extends OcelotAlgorithm {
 		} // for
 	}
 
+	@SuppressWarnings("unused")
 	private boolean allTargetsCovered() {
 		for (LabeledEdge edge : allTargets)
 			if (!(edge.isCovered()))

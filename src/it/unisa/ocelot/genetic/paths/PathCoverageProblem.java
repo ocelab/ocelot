@@ -1,28 +1,20 @@
 package it.unisa.ocelot.genetic.paths;
 
-import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.util.Utils;
-
-import org.apache.commons.lang3.Range;
-
-import jmetal.core.Problem;
 import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
-import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.JMException;
 
 public class PathCoverageProblem extends StandardProblem {

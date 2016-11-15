@@ -1,12 +1,9 @@
 package it.unisa.ocelot.genetic;
 
-import java.util.List;
-
 import it.unisa.ocelot.c.types.CType;
 import jmetal.core.Solution;
 import jmetal.core.Variable;
 import jmetal.encodings.variable.ArrayParameters;
-import jmetal.encodings.variable.ArrayReal;
 
 public class VariableTranslator {
 	private Solution solution;

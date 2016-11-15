@@ -2,14 +2,11 @@ package jmetal.operators.mutation;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import jmetal.core.Solution;
-import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
 import jmetal.util.wrapper.XParam;
-import jmetal.util.wrapper.XReal;
 
 /**
  * This mutation operator provides a classic (specified) mutation with a certain probability, and, instead, provides
@@ -17,12 +14,14 @@ import jmetal.util.wrapper.XReal;
  * @author simone
  *
  */
+@SuppressWarnings("serial")
 public class ConstantMetaMutation extends Mutation {
 	private double mutationProbability_;
 	private double metaMutationProbability_;
 	private List<Double> mutationElements_;
 	private Mutation realOperator_;
 	
+	@SuppressWarnings("unchecked")
 	public ConstantMetaMutation(HashMap<String, Object> pParameters) {
 		super(pParameters);
 		
@@ -40,6 +39,7 @@ public class ConstantMetaMutation extends Mutation {
 		XParam x = new XParam(solution);		
 		for (int var=0; var < x.getNumberOfDecisionVariables(); var++) {
 			if (PseudoRandom.randDouble() <= metaMutationProbability_) {
+				@SuppressWarnings("unused")
 				double y = x.getValue(var);
 				if (this.mutationElements_.size() > 0) {
 					int randIndex = PseudoRandom.randInt(0, this.mutationElements_.size()-1);

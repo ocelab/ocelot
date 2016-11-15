@@ -223,6 +223,7 @@ public class ConfigManager {
 			return null;
 		
 		String[] ranges = StringUtils.split(rangesString, " ");
+		@SuppressWarnings("unchecked")
 		Range<Double>[] result = new Range[ranges.length];
 		
 		for (int i = 0; i < ranges.length; i++) {
@@ -269,6 +270,7 @@ public class ConfigManager {
 		String argsString = this.properties.getProperty("test.simple");
 		String[] args = StringUtils.split(argsString, " ");
 		
+		@SuppressWarnings("rawtypes")
 		Class[] types = this.getTestParameters();
 		Object[] arguments = new Object[types.length];
 		

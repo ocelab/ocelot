@@ -1,15 +1,13 @@
 package it.unisa.ocelot.suites.benchmarks;
 
-import it.unisa.ocelot.TestCase;
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.simulator.CoverageCalculator;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
 
 public class TestSuiteSizeBenchmarkCalculator extends BenchmarkCalculator<Integer> {
 	private List<Integer> sizes;

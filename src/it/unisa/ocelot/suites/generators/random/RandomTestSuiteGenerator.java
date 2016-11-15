@@ -1,36 +1,20 @@
 package it.unisa.ocelot.suites.generators.random;
 
-import it.unisa.ocelot.TestCase;
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.McCabeCalculator;
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.types.CDouble;
-import it.unisa.ocelot.c.types.CInteger;
-import it.unisa.ocelot.c.types.CType;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.edges.EdgeCoverageExperiment;
-import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
-import it.unisa.ocelot.genetic.paths.PathCoverageExperiment;
-import it.unisa.ocelot.simulator.CoverageCalculator;
-import it.unisa.ocelot.suites.TestSuiteGenerationException;
-import it.unisa.ocelot.suites.generators.CascadeableGenerator;
-import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.Range;
 
-import jmetal.core.Variable;
-import jmetal.util.JMException;
+import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.types.CDouble;
+import it.unisa.ocelot.c.types.CInteger;
+import it.unisa.ocelot.c.types.CType;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 
 /**
  * Randomly generates test cases, keeping only the ones that improve coverage. The maximum number of generations
@@ -109,7 +93,6 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator implements Casc
 		this.measureBenchmarks("End", suite, null);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void coverRandom(Set<TestCase> suite) throws TestSuiteGenerationException {
 		for (int i = 0; i < this.config.getRandomGranularity(); i++) {
 			Object[][][] numericParams = random(cfg.getParameterTypes());

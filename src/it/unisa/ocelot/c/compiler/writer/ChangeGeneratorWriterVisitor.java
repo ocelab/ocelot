@@ -51,6 +51,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class ChangeGeneratorWriterVisitor extends ASTWriterVisitor {
 
 	private static final String DEFAULT_INDENTATION = ""; //$NON-NLS-1$

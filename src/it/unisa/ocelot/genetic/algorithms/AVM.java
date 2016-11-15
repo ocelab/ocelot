@@ -106,6 +106,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	 *         solutions as a result of the algorithm execution
 	 * @throws jmetal.util.JMException
 	 */
+	@SuppressWarnings("unchecked")
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		try {
 			CType[] types = (CType[])getInputParameter("parametersTypes");
@@ -281,7 +282,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		
 		updateValue = Math.floor(updateValue / roundEpsilon) * roundEpsilon; //Rounds to the epsilonth decimal
 		
-		double prevValue = solutionModifier.getValue(currentKind, currentVariable);
+		solutionModifier.getValue(currentKind, currentVariable);
 		solutionModifier.setValue(currentKind, currentVariable, updateValue);
 		
 		this.prepareSerendipitous();
@@ -371,6 +372,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 			return 0;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void prepareSerendipitous() {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
@@ -379,6 +381,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void checkSerendipitous(Solution solution) {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;

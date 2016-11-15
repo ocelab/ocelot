@@ -3,12 +3,7 @@ package jmetal.util.wrapper;
 import jmetal.core.Solution;
 import jmetal.core.SolutionType;
 import jmetal.encodings.solutionType.ArrayParametersSolutionType;
-import jmetal.encodings.solutionType.ArrayRealAndBinarySolutionType;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
-import jmetal.encodings.solutionType.BinaryRealSolutionType;
-import jmetal.encodings.solutionType.RealSolutionType;
 import jmetal.encodings.variable.ArrayParameters;
-import jmetal.encodings.variable.ArrayReal;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 

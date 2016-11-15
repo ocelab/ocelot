@@ -30,6 +30,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 public class ExecuteWholeCoverage implements Runnable {
 	private static final String OUTPUT_FOLDER = "RESULTS";
 
+	@SuppressWarnings("rawtypes")
 	public void run() {
 		try {
 			ConfigManager config = ConfigManager.getInstance();

@@ -1,5 +1,11 @@
 package it.unisa.ocelot.genetic.algorithms;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 //  pgGA.java
 //
 //  Author:
@@ -24,19 +30,12 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
-import jmetal.core.Algorithm;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A multithreaded generational genetic algorithm
@@ -89,14 +88,17 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 	 *         solutions as a result of the algorithm execution
 	 * @throws jmetal.util.JMException
 	 */
+	@SuppressWarnings("rawtypes")
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		int populationSize;
 		int maxEvaluations;
 		int evaluations;
+		@SuppressWarnings("unused")
 		int numberOfThreads;
 
 		SolutionSet population;
 		SolutionSet offspringPopulation;
+		@SuppressWarnings("unused")
 		SolutionSet union;
 
 		Operator mutationOperator;
@@ -223,6 +225,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		return this.no_evaluation;
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void prepareSerendipitous() {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
@@ -231,6 +234,7 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void checkSerendipitous(Solution solution) {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;

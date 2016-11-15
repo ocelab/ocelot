@@ -1,7 +1,5 @@
 package it.unisa.ocelot.writer;
 
-import it.unisa.ocelot.TestCase;
-
 public interface TestFrameworkFactory {
 	/**
 	 * Returns the concrete writer of the test case
@@ -14,5 +12,6 @@ public interface TestFrameworkFactory {
 	 * the parametrized return type.
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public TestSuiteWriter getTestSuiteWriterInstance();
 }

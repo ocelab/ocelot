@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Range;
+import org.jgrapht.graph.PolymorphGraphPath;
+
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
@@ -19,11 +22,6 @@ import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.util.Utils;
-
-import org.apache.commons.lang3.Range;
-import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.graph.PolymorphGraphPath;
-
 import jmetal.core.Solution;
 import jmetal.util.JMException;
 
