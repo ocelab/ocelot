@@ -1,35 +1,28 @@
 package it.unisa.ocelot.genetic.many_objective;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.Range;
+
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeDistanceListener;
-import it.unisa.ocelot.genetic.nodes.NodeDistanceListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.util.Utils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import jmetal.core.Problem;
 import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.util.JMException;
-
-import org.apache.commons.lang3.Range;
 
 /**
  * Class representing a many-objective optimization branch coverage problem
@@ -52,7 +45,6 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("rawtypes")
 	public MOSABranchCoverageProblem(CFG cfg, CType[] parameters, int pArraySize,
 			Range<Double>[] ranges, List<LabeledEdge> branches) throws Exception {
 		super(parameters, ranges, pArraySize);

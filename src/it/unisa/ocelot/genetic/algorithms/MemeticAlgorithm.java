@@ -16,13 +16,22 @@ import jmetal.util.comparators.ObjectiveComparator;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 
+/**
+ * Memetic algorithm with include an AVM local search operator 
+ * for the best candidate solution at the end of each 
+ * @author giograno
+ *
+ */
 public class MemeticAlgorithm extends GeneticAlgorithm implements
 		SerendipitousAlgorithm<LabeledEdge> {
 	private static final long serialVersionUID = -6964554472242168211L;
 
+	@SuppressWarnings("unused")
 	private int no_evaluation;
 
+	@SuppressWarnings("unused")
 	private Set<Solution> serendipitousSolutions;
+	@SuppressWarnings("unused")
 	private Set<LabeledEdge> serendipitousPotentials;
 
 	private SolutionSet lastPopulation;
@@ -52,6 +61,7 @@ public class MemeticAlgorithm extends GeneticAlgorithm implements
 	 * 
 	 * @return a <code>SolutionSet</code>
 	 */
+	@SuppressWarnings({ "unused", "rawtypes" })
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		int populationSize;
 		int maxEvaluations;

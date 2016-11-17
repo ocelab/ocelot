@@ -21,6 +21,10 @@
 
 package jmetal.operators.crossover;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 import jmetal.core.Solution;
 import jmetal.core.Variable;
 import jmetal.encodings.solutionType.ArrayParametersSolutionType;
@@ -28,31 +32,29 @@ import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.encodings.solutionType.RealSolutionType;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
-import jmetal.util.PseudoRandom;
-import jmetal.util.wrapper.XReal;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class allows to apply a SBX crossover operator using two parent
  * solutions.
  */
+@SuppressWarnings("serial")
 public class SBXGenericCrossover extends Crossover {
 	/**
 	 * EPS defines the minimum difference allowed between real values
 	 */
+	@SuppressWarnings("unused")
 	private static final double EPS = 1.0e-14;
 
 	private static final double ETA_C_DEFAULT_ = 20.0;
 	private Double crossoverProbability_ = 0.9;
+	@SuppressWarnings("unused")
 	private double distributionIndex_ = ETA_C_DEFAULT_;
 	private SBXCrossoverParams crossover;
 
 	/**
 	 * Valid solution types to apply this operator
 	 */
+	@SuppressWarnings("rawtypes")
 	private static final List VALID_TYPES = Arrays.asList(
 			RealSolutionType.class, ArrayRealSolutionType.class, ArrayParametersSolutionType.class);
 
@@ -118,6 +120,7 @@ public class SBXGenericCrossover extends Crossover {
 	 *            An object containing an array of two parents
 	 * @return An object containing the offSprings
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object execute(Object object) throws JMException {
 		Solution[] parents = (Solution[]) object;
 

@@ -1,28 +1,19 @@
 package it.unisa.ocelot.c;
 
-import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
-import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
-import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
-import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
-import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
-import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
-import it.unisa.ocelot.c.makefile.WindowsMakefileGenerator;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.util.Utils;
-
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.aspectj.util.FileUtil;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+
+import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
+import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.util.Utils;
 
 public class StandardBuilder extends Builder {
 	private String testFilename;

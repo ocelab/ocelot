@@ -10,11 +10,10 @@ import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
 import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 
 /**
  * This class represents a node of the Control Flow Graph. It references the
- * corrinsponding syntax tree node.
+ * corresponding syntax tree node.
  * 
  * @author simone
  *

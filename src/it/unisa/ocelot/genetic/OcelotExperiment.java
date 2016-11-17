@@ -5,8 +5,6 @@ import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.algorithms.AlgorithmStats;
-import it.unisa.ocelot.genetic.algorithms.CDG_GA;
-import it.unisa.ocelot.genetic.algorithms.GeneticAlgorithm;
 import it.unisa.ocelot.suites.budget.BudgetManager;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;
@@ -79,6 +77,7 @@ public abstract class OcelotExperiment extends Experiment {
 			return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Solution basicRun() throws ClassNotFoundException, jmetal.util.JMException {
 		this.algorithmSettings(this.problemList_[0], 0, new Algorithm[1]);
 		

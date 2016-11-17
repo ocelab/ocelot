@@ -1,20 +1,17 @@
 package it.unisa.ocelot.c.cfg;
 
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.NotPositiveException;
-import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.jgrapht.alg.CycleDetector;
+
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 
 /**
  * Calculate all linearly independent McCabe paths for a given control flow

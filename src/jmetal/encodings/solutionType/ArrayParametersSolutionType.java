@@ -5,7 +5,6 @@ import jmetal.core.Problem;
 import jmetal.core.SolutionType;
 import jmetal.core.Variable;
 import jmetal.encodings.variable.ArrayParameters;
-import jmetal.encodings.variable.ArrayReal;
 
 
 public class ArrayParametersSolutionType extends SolutionType {

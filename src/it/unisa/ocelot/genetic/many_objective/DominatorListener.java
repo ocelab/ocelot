@@ -1,7 +1,6 @@
 package it.unisa.ocelot.genetic.many_objective;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +36,7 @@ public class DominatorListener implements SimulatorListener {
 
 	private boolean targetVisited;
 
+	@SuppressWarnings("static-access")
 	public DominatorListener(CFG cfg, LabeledEdge target) {
 		this.cfg = cfg;
 		this.target = target;

@@ -12,11 +12,13 @@ import jmetal.encodings.solutionType.RealSolutionType;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 
+@SuppressWarnings("serial")
 public class GenericPolynomialMutation extends Mutation {
 	private static final double ETA_M_DEFAULT_ = 20.0;
 	private final double eta_m_ = ETA_M_DEFAULT_;
 
 	private Double mutationProbability_ = null;
+	@SuppressWarnings("unused")
 	private Double distributionIndex_ = eta_m_;
 	
 	private ConstantMetaMutation mutation;
@@ -24,6 +26,7 @@ public class GenericPolynomialMutation extends Mutation {
 	/**
 	 * Valid solution types to apply this operator
 	 */
+	@SuppressWarnings("rawtypes")
 	private static final List VALID_TYPES = Arrays.asList(
 			RealSolutionType.class, ArrayRealSolutionType.class, ArrayParametersSolutionType.class);
 
@@ -77,6 +80,7 @@ public class GenericPolynomialMutation extends Mutation {
 	 * @return An object containing the mutated solution
 	 * @throws JMException
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object execute(Object object) throws JMException {
 		Solution solution = (Solution) object;
 

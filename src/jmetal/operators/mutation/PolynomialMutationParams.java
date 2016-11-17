@@ -36,6 +36,11 @@ import java.util.List;
  * This class implements a polynomial mutation operator.
  */
 public class PolynomialMutationParams extends Mutation {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3670094424664932307L;
+	
 	private static final double ETA_M_DEFAULT_ = 20.0;
 	private final double eta_m_ = ETA_M_DEFAULT_;
 
@@ -45,6 +50,7 @@ public class PolynomialMutationParams extends Mutation {
 	/**
 	 * Valid solution types to apply this operator
 	 */
+	@SuppressWarnings("rawtypes")
 	private static final List VALID_TYPES = Arrays.asList(
 			ArrayParametersSolutionType.class);
 
@@ -117,6 +123,7 @@ public class PolynomialMutationParams extends Mutation {
 	 * @return An object containing the mutated solution
 	 * @throws JMException
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object execute(Object object) throws JMException {
 		Solution solution = (Solution) object;
 

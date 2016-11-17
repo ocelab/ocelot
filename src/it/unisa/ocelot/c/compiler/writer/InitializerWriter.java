@@ -14,7 +14,6 @@ package it.unisa.ocelot.c.compiler.writer;
 
 import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
-import org.eclipse.cdt.core.dom.ast.IASTInitializerExpression;
 import org.eclipse.cdt.core.dom.ast.IASTInitializerList;
 import org.eclipse.cdt.core.dom.ast.c.ICASTArrayDesignator;
 import org.eclipse.cdt.core.dom.ast.c.ICASTDesignatedInitializer;
@@ -37,6 +36,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class InitializerWriter extends NodeWriter{
 
 	public InitializerWriter(Scribe scribe, CPPASTVisitor visitor, NodeCommentMap commentMap) {

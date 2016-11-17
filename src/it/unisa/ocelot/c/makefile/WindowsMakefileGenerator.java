@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 
+	@Deprecated
 	public WindowsMakefileGenerator() {
 		super("jni/makefile");
 	}

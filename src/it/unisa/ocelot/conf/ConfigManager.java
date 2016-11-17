@@ -223,6 +223,7 @@ public class ConfigManager {
 			return null;
 		
 		String[] ranges = StringUtils.split(rangesString, " ");
+		@SuppressWarnings("unchecked")
 		Range<Double>[] result = new Range[ranges.length];
 		
 		for (int i = 0; i < ranges.length; i++) {
@@ -269,6 +270,7 @@ public class ConfigManager {
 		String argsString = this.properties.getProperty("test.simple");
 		String[] args = StringUtils.split(argsString, " ");
 		
+		@SuppressWarnings("rawtypes")
 		Class[] types = this.getTestParameters();
 		Object[] arguments = new Object[types.length];
 		
@@ -428,4 +430,42 @@ public class ConfigManager {
 	public boolean isExperimentMinimization() {
 		return this.properties.getProperty("experiment.minimization", "false").equalsIgnoreCase("true");
 	}
+	
+
+	public String getJavaHome() {
+		return this.properties.getProperty("config.javaHome", "/usr/lib/jvm/java-8-openjdk");
+	}
+	
+	public String getSystemInclude() {
+		return this.properties.getProperty("config.systemInclude", "/usr/include");
+	}
+	
+	public String[] getGlib2Paths() {
+		String paths = this.properties.getProperty("config.glib2Paths", "");
+		if (paths.equals(""))
+			return new String[0];
+		else
+			return paths.split("\\,");
+	}
+	
+	public String[] getJavaPaths() {
+		String paths = this.properties.getProperty("config.javaPaths", "");
+		if (paths.equals(""))
+			return new String[0];
+		else
+			return paths.split("\\,");
+	}
+	
+	public String getCFlags() {
+		return this.properties.getProperty("config.cflags", "-shared -fpic");
+	}
+	
+	public String getMakeCommand() {
+		return this.properties.getProperty("config.make", "make");
+	}
+	
+	public String getMoreOptions() {
+		return this.properties.getProperty("config.options", "");
+	}
+	
 }

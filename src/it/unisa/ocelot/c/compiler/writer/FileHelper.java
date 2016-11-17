@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Path;
 
 public class FileHelper {
 
+	@SuppressWarnings("unused")
 	private static final String DEFAULT_LINE_DELIMITTER = "\n"; //$NON-NLS-1$
 
 	public static IFile getIFilefromIASTNode(IASTNode node) {

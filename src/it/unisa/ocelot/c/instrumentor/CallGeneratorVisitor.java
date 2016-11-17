@@ -44,10 +44,10 @@ public class CallGeneratorVisitor extends ASTVisitor {
 	
 	private Map<String, IType> externalReferences;
 	
+	@SuppressWarnings("unused")
 	private List<String> localVariables;
+	@SuppressWarnings("unused")
 	private List<String> usedVariables;
-	
-	private ConfigManager config;
 	
 	public CallGeneratorVisitor(String pFunctionName, Map<String, IType> externalReferences) {
 		this.shouldVisitDeclarations = true;
@@ -71,7 +71,7 @@ public class CallGeneratorVisitor extends ASTVisitor {
 		this.call = "";
 		
 		try {
-			this.config = ConfigManager.getInstance();
+			ConfigManager.getInstance();
 		} catch (IOException e) {
 			throw new RuntimeException("No config file found!");
 		}

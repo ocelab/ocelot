@@ -1,5 +1,11 @@
 package it.unisa.ocelot.genetic.paths;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
@@ -7,16 +13,8 @@ import it.unisa.ocelot.simulator.CaseExecutionEvent;
 import it.unisa.ocelot.simulator.ExecutionEvent;
 import it.unisa.ocelot.simulator.SimulatorListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.DijkstraShortestPath;
-
 public class PathDistanceListener implements SimulatorListener {
+	@SuppressWarnings("unused")
 	private CFG cfg;
 	private List<LabeledEdge> targetPath;
 	private List<LabeledEdge> executionPath;
@@ -26,6 +24,7 @@ public class PathDistanceListener implements SimulatorListener {
 	
 	private int current;
 	
+	@SuppressWarnings("unused")
 	private int pathDistance;
 	private boolean onPath;
 	private boolean terminated;

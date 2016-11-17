@@ -1,17 +1,15 @@
 package it.unisa.ocelot.suites.generators;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.budget.BasicBudgetManager;
-import it.unisa.ocelot.suites.budget.BudgetManager;
-import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Test suite generator which combines multiple generators in cascade. The generators must

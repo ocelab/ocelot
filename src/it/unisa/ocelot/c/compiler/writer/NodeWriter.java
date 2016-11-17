@@ -24,6 +24,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class NodeWriter {
 
 	protected Scribe scribe;

@@ -1,17 +1,15 @@
 package jmetal.operators.localSearch;
 
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
-import it.unisa.ocelot.genetic.StandardProblem;
-
 import java.util.HashMap;
 import java.util.Set;
 
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
+import it.unisa.ocelot.genetic.StandardProblem;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.util.JMException;
-import jmetal.util.wrapper.XParam;
 import jmetal.util.wrapper.XParamArray;
 
 /**

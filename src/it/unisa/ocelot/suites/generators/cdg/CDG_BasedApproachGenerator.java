@@ -1,38 +1,27 @@
 package it.unisa.ocelot.suites.generators.cdg;
 
-import it.unisa.ocelot.TestCase;
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.edges.CaseEdge;
-import it.unisa.ocelot.c.cfg.edges.EdgeComparator;
-import it.unisa.ocelot.c.cfg.edges.FalseEdge;
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.edges.TrueEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.edges.CDG_BasedExperiment;
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.CoverageCalculator;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
-import it.unisa.ocelot.suites.TestSuiteGenerationException;
-import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
-import it.unisa.ocelot.suites.generators.CascadeableGenerator;
-import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
-import it.unisa.ocelot.util.Utils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import jmetal.core.Variable;
+import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.edges.EdgeComparator;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.VariableTranslator;
+import it.unisa.ocelot.genetic.edges.CDG_BasedExperiment;
+import it.unisa.ocelot.simulator.CBridge;
+import it.unisa.ocelot.simulator.EventsHandler;
+import it.unisa.ocelot.simulator.Simulator;
+import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
+import it.unisa.ocelot.suites.TestSuiteGenerationException;
+import it.unisa.ocelot.suites.generators.CascadeableGenerator;
+import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
+import it.unisa.ocelot.util.Utils;
 import jmetal.util.JMException;
-
-import org.eclipse.cdt.core.settings.model.util.Comparator;
 
 /**
  * Approach described in Harman et al. (Optimizing for the Number of Tests Generated in Search Based Test Data
@@ -89,7 +78,6 @@ public class CDG_BasedApproachGenerator extends TestSuiteGenerator implements Ca
 		
 		this.setupBudgetManager(branches.size());
 
-		int index = 0;
 		for (int i = 0; i < branches.size(); i++) {
 			LabeledEdge branch = branches.get(i);
 			if (!branch.isCovered()) {

@@ -1,5 +1,11 @@
 package it.unisa.ocelot.genetic.algorithms;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 //  pgGA.java
 //
 //  Author:
@@ -26,20 +32,12 @@ import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
-import it.unisa.ocelot.genetic.VariableTranslator;
-import jmetal.core.*;
+import jmetal.core.Problem;
+import jmetal.core.Solution;
+import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import jmetal.util.wrapper.XParamArray;
-
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import com.sun.xml.internal.ws.api.server.DocumentAddressResolver;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Comparison;
 
 
 /**
@@ -108,6 +106,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 	 *         solutions as a result of the algorithm execution
 	 * @throws jmetal.util.JMException
 	 */
+	@SuppressWarnings("unchecked")
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		try {
 			CType[] types = (CType[])getInputParameter("parametersTypes");
@@ -283,7 +282,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		
 		updateValue = Math.floor(updateValue / roundEpsilon) * roundEpsilon; //Rounds to the epsilonth decimal
 		
-		double prevValue = solutionModifier.getValue(currentKind, currentVariable);
+		solutionModifier.getValue(currentKind, currentVariable);
 		solutionModifier.setValue(currentKind, currentVariable, updateValue);
 		
 		this.prepareSerendipitous();
@@ -373,6 +372,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 			return 0;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void prepareSerendipitous() {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;
@@ -381,6 +381,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void checkSerendipitous(Solution solution) {
 		if (problem_ instanceof SerendipitousProblem<?>) {
 			SerendipitousProblem<LabeledEdge> problem = (SerendipitousProblem<LabeledEdge>)problem_;

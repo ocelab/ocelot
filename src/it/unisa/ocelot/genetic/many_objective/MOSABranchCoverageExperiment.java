@@ -1,10 +1,11 @@
 package it.unisa.ocelot.genetic.many_objective;
 
+import java.util.List;
+
+import org.apache.commons.lang3.Range;
+
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.edges.CaseEdge;
-import it.unisa.ocelot.c.cfg.edges.FalseEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
@@ -12,16 +13,8 @@ import it.unisa.ocelot.genetic.StandardSettings;
 import it.unisa.ocelot.genetic.algorithms.MOSA;
 import it.unisa.ocelot.genetic.settings.MOSASettings;
 import it.unisa.ocelot.genetic.settings.SettingsFactory;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import jmetal.core.Algorithm;
 import jmetal.core.SolutionSet;
-
-import org.apache.commons.lang3.Range;
 
 /**
  * A Branch Coverage experiment performed with MOSA algorithm proposed by

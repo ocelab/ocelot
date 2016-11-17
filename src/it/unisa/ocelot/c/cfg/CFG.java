@@ -29,7 +29,6 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	private List<Double> constantNumbers;
 	private List<String> constantStrings;
 	
-	@SuppressWarnings("rawtypes")
 	private CType[] parameterTypes;
 	
 	/**
@@ -88,7 +87,6 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 * Returns the types of the parameters
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	public CType[] getParameterTypes() {
 		return parameterTypes;
 	}
@@ -97,7 +95,6 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 * Sets the types of the parameters
 	 * @param parameterTypes
 	 */
-	@SuppressWarnings("rawtypes")
 	public void setParameterTypes(CType[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
@@ -142,12 +139,10 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	public List<LabeledEdge> getBranchesFromCFG() {
 		List<LabeledEdge> targets = new ArrayList<>();
 
-		int branchID = 0;
 		for (LabeledEdge edge : this.edgeSet()) {
 			if (!(edge instanceof FlowEdge)) {
 				// objectID correspond to the ID in multiple objective function 
 				targets.add(edge);
-				branchID++;
 			}
 		} // edges terminated
 		return targets;

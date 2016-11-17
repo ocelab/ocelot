@@ -1,24 +1,20 @@
 package it.unisa.ocelot.runnable.runners;
 
-import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.cfg.CFGBuilder;
-import it.unisa.ocelot.c.cfg.CFGVisitor;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
-import it.unisa.ocelot.c.compiler.GCC;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
-import it.unisa.ocelot.util.Utils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 
-import jmetal.experiments.Settings;
-
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+
+import it.unisa.ocelot.c.cfg.CFG;
+import it.unisa.ocelot.c.cfg.CFGBuilder;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
+import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.nodes.NodeCoverageExperiment;
+import it.unisa.ocelot.util.Utils;
+import jmetal.experiments.Settings;
 
 @Deprecated
 public class Execute {
@@ -28,7 +24,6 @@ public class Execute {
 		System.loadLibrary("Test");
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		ConfigManager.setFilename(CONFIG_FILENAME);
 		ConfigManager config = ConfigManager.getInstance();

@@ -6,11 +6,9 @@ import java.util.List;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
 /**
  * This visitor saves all the literals in two arrays: numbers and strings. Besides, it updates the

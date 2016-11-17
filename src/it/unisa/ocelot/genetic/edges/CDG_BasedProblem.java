@@ -1,6 +1,5 @@
 package it.unisa.ocelot.genetic.edges;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -14,16 +13,13 @@ import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.genetic.many_objective.DominatorListener;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.EventsHandler;
 import it.unisa.ocelot.simulator.SimulationException;
 import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.util.Utils;
-import jmetal.core.Problem;
 import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.util.JMException;
 
 public class CDG_BasedProblem extends StandardProblem {
@@ -42,7 +38,6 @@ public class CDG_BasedProblem extends StandardProblem {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
 	public CDG_BasedProblem(CFG controlFlowGraph, CType[] parameters, int pArraySize,
 			Range<Double>[] ranges, List<LabeledEdge> branches, LabeledEdge target) throws Exception {
 		super(parameters, ranges, pArraySize);

@@ -30,6 +30,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class TemplateParameterWriter extends NodeWriter {
 
 	private static final String GREATER_THAN_CLASS = "> class"; //$NON-NLS-1$

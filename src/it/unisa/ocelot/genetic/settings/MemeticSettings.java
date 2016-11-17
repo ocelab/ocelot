@@ -22,6 +22,7 @@ public class MemeticSettings extends GASettings {
 		super(pProblem, pConfig);
 	}
 	
+	@SuppressWarnings("unused")
 	public Algorithm configure() throws JMException {
 		Algorithm algorithm;
 		

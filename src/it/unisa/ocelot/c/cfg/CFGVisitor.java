@@ -1,24 +1,12 @@
 package it.unisa.ocelot.c.cfg;
 
-import it.unisa.ocelot.c.cfg.edges.CaseEdge;
-import it.unisa.ocelot.c.cfg.edges.FalseEdge;
-import it.unisa.ocelot.c.cfg.edges.FlowEdge;
-import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.cfg.edges.TrueEdge;
-import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
-import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
-import it.unisa.ocelot.c.types.CDouble;
-import it.unisa.ocelot.c.types.CInteger;
-import it.unisa.ocelot.c.types.CType;
-
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
@@ -30,15 +18,12 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTLabelStatement;
-import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IASTNullStatement;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
@@ -46,7 +31,18 @@ import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.model.ASTStringUtil;
+
+import it.unisa.ocelot.c.cfg.edges.CaseEdge;
+import it.unisa.ocelot.c.cfg.edges.FalseEdge;
+import it.unisa.ocelot.c.cfg.edges.FlowEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
+import it.unisa.ocelot.c.types.CDouble;
+import it.unisa.ocelot.c.types.CInteger;
+import it.unisa.ocelot.c.types.CType;
 
 public class CFGVisitor extends ASTVisitor {
 	private CFG graph;
@@ -149,29 +145,10 @@ public class CFGVisitor extends ASTVisitor {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public int visit(IASTDeclaration name) {
 
 		if (name instanceof CASTFunctionDefinition) {
 			IASTFunctionDefinition function = (CASTFunctionDefinition) name;
-
-			/* my code starts here */
-
-			IASTFunctionDeclarator declarator = function.getDeclarator();
-//			String[] types = ASTStringUtil
-//					.getParameterSignatureArray(declarator);
-//			Class[] parameterTypes = new Class[types.length];
-//			for (int i = 0; i < parameterTypes.length; i++) {
-//				if (types[i].startsWith("int"))
-//					parameterTypes[i] = Integer.class;
-//				else
-//					parameterTypes[i] = Double.class;
-//			}
-//			
-//			if (this.functionName.equals(function.getDeclarator().getName().toString()))
-//				this.graph.setParameterTypes(parameterTypes);
-
-			/* my code ends here */
 
 			if (!function.getDeclarator().getName().getRawSignature()
 					.equals(this.functionName))
@@ -257,9 +234,6 @@ public class CFGVisitor extends ASTVisitor {
 				} else {
 					keepItSimple = false;
 					if (currentSubGraph.getInput().get(0).isCase()) {
-						IASTCaseStatement caseSt = (IASTCaseStatement) currentSubGraph
-								.getInput().get(0).getLeadingNode();
-						String label = caseSt.getExpression().getRawSignature();
 						this.setOutput(lastSubGraph.getOutput(),
 								currentSubGraph.getInput(), FlowEdge.class);
 						//Here there was a bug once. No more. Maybe...
@@ -777,21 +751,6 @@ public class CFGVisitor extends ASTVisitor {
 		for (CFGNode out : pOut)
 			for (CFGNode in : pIn)
 				this.setOutput(out, in, pLabel);
-	}
-
-	/**
-	 * Links the given output to the given input in the CFG
-	 * 
-	 * @param pOut
-	 *            From which nodes start the edges
-	 * @param pIn
-	 *            In which nodes arrive the edges
-	 */
-	private void setOutput(List<CFGNode> pOut, List<CFGNode> pIn,
-			LabeledEdge pEdge) {
-		for (CFGNode out : pOut)
-			for (CFGNode in : pIn)
-				this.setOutput(out, in, pEdge);
 	}
 
 	/**

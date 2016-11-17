@@ -1,4 +1,6 @@
+*.DS_Store
 *.class
+.lastbuild.cks
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -47,3 +49,4 @@ src/it/unisa/ocelot/runnable/McCabe.java
 results/
 RESULTS/
 testobject/
+/target/

@@ -45,6 +45,7 @@ import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
  * @author Emanuel Graf IFS
  * 
  */
+@SuppressWarnings("deprecation")
 public class DeclSpecWriter extends NodeWriter {
 	private static final String MUTABLE = "mutable "; //$NON-NLS-1$
 	private static final String _COMPLEX = "_Complex "; //$NON-NLS-1$

@@ -15,6 +15,7 @@ public class TestFramework {
 		this.factory = pFactory;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public String writeTestSuite(Set<TestCase> pSuite, CFG pCfg, ConfigManager pConfig) throws TestWritingException {
 		Set<TestCaseWriter> testCaseWriters = new HashSet<>();
 		
