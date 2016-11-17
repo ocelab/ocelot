@@ -46,6 +46,7 @@ import jmetal.util.comparators.ObjectiveComparator;
  *
  */
 public class MOSA extends OcelotAlgorithm {
+	private static int debugI = 0;
 
 	// the final Solution Set produced by the algorithm
 	private SolutionSet archive;

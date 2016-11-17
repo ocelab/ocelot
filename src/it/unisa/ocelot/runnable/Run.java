@@ -17,6 +17,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.runnable.runners.ExecuteExperiment;
 import it.unisa.ocelot.runnable.runners.ExecuteWholeCoverage;
 import it.unisa.ocelot.runnable.runners.GenAndWrite;
+import it.unisa.ocelot.util.Debugger;
 import it.unisa.ocelot.util.Utils;
 
 public class Run {
@@ -173,6 +174,10 @@ public class Run {
 			new GenAndWrite().run();
 			break;
 		}
+		
+//		if (ConfigManager.getInstance().getDebug()) {
+			Debugger.printAll();
+//		}
 	}
 	
 	public void interpret(String arg) {

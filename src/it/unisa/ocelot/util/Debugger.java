@@ -1,12 +1,15 @@
 package it.unisa.ocelot.util;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Saves debug information on a file when required
  * @author simone
  */
 public class Debugger {
+	private static Map<String, Integer> traceMap = new HashMap<String, Integer>();
 	private String content;
 	private String filename;
 	
@@ -39,6 +42,17 @@ public class Debugger {
 	 */
 	public void reset() {
 		this.content = "";
+	}
+	
+	public static void trace(String methodName) {
+		if (!traceMap.containsKey(methodName))
+			traceMap.put(methodName, 0);
+		
+		traceMap.put(methodName, traceMap.get(methodName) + 1);
+	}
+	
+	public static void printAll() {
+		System.out.println(traceMap);
 	}
 	
 	/**

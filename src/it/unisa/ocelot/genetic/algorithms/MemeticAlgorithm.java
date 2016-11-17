@@ -155,8 +155,8 @@ public class MemeticAlgorithm extends GeneticAlgorithm implements
 						.get(i));
 				int oldEvaluations = evaluations;
 				evaluations = avmLocalOperator.getEvaluations();
-				System.out.println("Evaluations consumed during the AVM process = "
-						+ (evaluations - oldEvaluations));
+//				System.out.println("Evaluations consumed during the AVM process = "
+//						+ (evaluations - oldEvaluations));
 				population.add(bestCandidate);
 			}
 

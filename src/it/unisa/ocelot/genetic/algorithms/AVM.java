@@ -419,7 +419,7 @@ public class AVM extends OcelotAlgorithm implements SerendipitousAlgorithm<Label
 					kindMap.put(j, true);
 				} else {
 					if (types[typeIndex].isDiscrete()) {
-						System.out.println("Discrete");
+//						System.out.println("Discrete");
 						kindMap.put(j, true);
 					} else
 						kindMap.put(j, false);

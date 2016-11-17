@@ -24,8 +24,9 @@ import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
 
 /**
- * Dynamic McCabe path calculator. Select the first test case randomly. In a second phase it selects as a target
+ * LIPS calculator. Select the first test case randomly. In a second phase it selects as a target
  * the alternative branch of the last condition in the stack of covered conditions.
+ * TODO: update the name in LIPSCalculator
  * @author simone
  *
  */
