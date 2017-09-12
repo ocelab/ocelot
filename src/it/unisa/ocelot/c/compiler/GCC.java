@@ -50,8 +50,8 @@ public class GCC implements Compiler {
 		}
 	}
 	
-	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename, String[] pIncludePaths) 
-			throws IOException, CoreException {		
+	public static IASTTranslationUnit getTranslationUnit(String pSourceFilename, String[] pIncludePaths)
+			throws IOException, CoreException {
 		String codeString = Utils.readFile(pSourceFilename);
 		FileContent fileContent = FileContent.create(pSourceFilename, codeString.toCharArray());
 		Map<String, String> macroDefinitions = new HashMap<String, String>();
@@ -66,8 +66,8 @@ public class GCC implements Compiler {
 				fileContent, scannerInfo, includeContentProvider, index, options, log);
 	}
 	
-	public static IASTTranslationUnit getTranslationUnit(char[] code, String pSourceFilename) 
+	public static IASTTranslationUnit getTranslationUnit(String pSourceFilename)
 			throws IOException, CoreException {		
-		return getTranslationUnit(code, pSourceFilename, new String[0]);
+		return getTranslationUnit(pSourceFilename, new String[0]);
 	}
 }

@@ -89,7 +89,70 @@
       <version>1.0.2</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.eclipse.cdt</groupId>
+      <artifactId>core</artifactId>
+      <version>5.9.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/org.eclipse.cdt.core_5.9.1.201502131403.jar</systemPath>
+    </dependency>
 
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>runtime</artifactId>
+      <version>2.1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/eclipse-runtime-2.1.0.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.cdt</groupId>
+      <artifactId>codan</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/org.eclipse.cdt.codan.core.cxx_1.0.0.201109151620.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.uma.jmetal</groupId>
+      <artifactId>jmetal</artifactId>
+      <version>4.5</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/jmetal4.5.jar</systemPath>
+    </dependency>
+
+
+    <dependency>
+      <groupId>anarres</groupId>
+      <artifactId>cpp</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/anarres-cpp.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>lpsolve</groupId>
+      <artifactId>core</artifactId>
+      <version>55</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/lpsolve55j.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>javailp</groupId>
+      <artifactId>core</artifactId>
+      <version>1.2a</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/javailp-1.2a.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>tools</artifactId>
+      <version>1.6.6</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/aspectjtools-1.6.6.jar</systemPath>
+    </dependency>
 
   </dependencies>
 </project>

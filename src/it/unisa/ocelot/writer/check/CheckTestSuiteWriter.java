@@ -25,7 +25,7 @@ public class CheckTestSuiteWriter extends TestSuiteWriter<CheckTestCaseWriter> {
 		
 		try {
 			String code = Utils.readFile(config.getTestFilename());
-			IASTTranslationUnit translationUnit = GCC.getTranslationUnit(code.toCharArray(), config.getTestFilename());
+			IASTTranslationUnit translationUnit = GCC.getTranslationUnit(config.getTestFilename());
 			
 			String suite = "";
 			

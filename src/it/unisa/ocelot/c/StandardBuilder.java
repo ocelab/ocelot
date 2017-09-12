@@ -84,7 +84,6 @@ public class StandardBuilder extends Builder {
 		String code = Utils.readFile(this.testFilename);
 		
 		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
-				code.toCharArray(),
 				this.testFilename,
 				this.testIncludes).copy();
 		
@@ -104,32 +103,32 @@ public class StandardBuilder extends Builder {
 				
 		String outputCode = writer.write(translationUnit);
 		
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (IASTPreprocessorStatement macro : macros) {
 			if (macro instanceof IASTPreprocessorIncludeStatement) {
 				IASTPreprocessorIncludeStatement include = (IASTPreprocessorIncludeStatement)macro;
 				if (include.isSystemInclude())
-					result += macro.getRawSignature()+"\n";
+					result.append(macro.getRawSignature()).append("\n");
 			} else
-				result += macro.getRawSignature() + "\n";
+				result.append(macro.getRawSignature()).append("\n");
 		}
-		result += "#include \"ocelot.h\"\n";
-		result += outputCode;
+		result.append("#include \"ocelot.h\"\n");
+		result.append(outputCode);
 		
-		Utils.writeFile("jni/main.c", result);
+		Utils.writeFile("jni/main.c", result.toString());
 		
-		String mainHeader = "";
-		mainHeader += "#include \"ocelot.h\"\n";
-		mainHeader += "#include <stdio.h>\n";
-		mainHeader += "#include <math.h>\n";
+		StringBuilder mainHeader = new StringBuilder();
+		mainHeader.append("#include \"ocelot.h\"\n");
+		mainHeader.append("#include <stdio.h>\n");
+		mainHeader.append("#include <math.h>\n");
 		for (IASTNode typedef : instrumentor.getTypedefs()) {
-			mainHeader += writer.write(typedef);
-			mainHeader += "\n";
+			mainHeader.append(writer.write(typedef));
+			mainHeader.append("\n");
 		}
 
-		mainHeader += "#define OCELOT_TESTFUNCTION " + this.testFunction + "\n";
+		mainHeader.append("#define OCELOT_TESTFUNCTION ").append(this.testFunction).append("\n");
 
-		Utils.writeFile("jni/main.h", mainHeader);
+		Utils.writeFile("jni/main.h", mainHeader.toString());
 		
 		this.callMacro = macroDefiner.getCallMacro();
 		this.externDeclarations = referencesVisitor.getExternalDeclarations();
