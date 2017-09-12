@@ -51,7 +51,7 @@ public class CFGWindow extends JFrame {
 		}
 		
 		JGraphLayoutAlgorithm layout = new SugiyamaLayoutAlgorithm();
-		JGraphLayoutAlgorithm.applyLayout(jgraph, layout, roots.toArray()); 
+		//JGraphLayoutAlgorithm.applyLayout(jgraph, roots.toArray(), layout);
 	}
 
 	private void adjustDisplaySettings(JGraph jg) {

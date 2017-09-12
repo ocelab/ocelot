@@ -4,6 +4,8 @@ import java.io.IOException;
 
 public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 
+	private static String GTK_HOME = "C:/gtk/";
+
 	@Deprecated
 	public WindowsMakefileGenerator() {
 		super("jni/makefile");
@@ -26,13 +28,13 @@ public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String[] getGlib2Paths() {
-		return new String[] { "C:/gtk/include/gtk-3.0", "C:/gtk/include/cairo",
-				"C:/gtk/include/pango-1.0", "C:/gtk/include/atk-1.0",
-				"C:/gtk/include/cairo", "C:/gtk/include/pixman-1",
-				"C:/gtk/include", "C:/gtk/include/freetype2",
-				"C:/gtk/include/gdk-pixbuf-2.0",
-				"C:/gtk/include/libpng15", "C:/gtk/include/glib-2.0",
-				"C:/gtk/lib/glib-2.0/include"};
+		return new String[] { GTK_HOME + "include/gtk-3.0", GTK_HOME + "include/cairo",
+				GTK_HOME + "include/pango-1.0", GTK_HOME + "include/atk-1.0",
+				GTK_HOME + "include/cairo", GTK_HOME + "include/pixman-1",
+				GTK_HOME + "include", GTK_HOME + "include/freetype2",
+				GTK_HOME + "include/gdk-pixbuf-2.0",
+				GTK_HOME + "include/libpng15", GTK_HOME + "include/glib-2.0",
+				GTK_HOME + "lib/glib-2.0/include"};
 	}
 
 	@Override

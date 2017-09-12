@@ -47,7 +47,7 @@ public class CBridge {
 	/**
 	 * Executes the test function in order to populate the given the event handler
 	 * @param pHandler Event handler, it will contain the result of the test (each non-trivial choice)
-	 * @param arguments Parameters of the function
+	 * @param pValues Parameters of the function
 	 */
 	public void getEvents(EventsHandler pHandler, Object[] pValues, Object[][] pArrays, Object[] pPointers) {
 		if (!initialized)

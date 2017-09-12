@@ -6,8 +6,6 @@ import java.io.IOException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.sun.corba.se.impl.presentation.rmi.DynamicAccessPermission;
-
 import it.unisa.ocelot.c.Builder;
 import it.unisa.ocelot.c.BuildingException;
 import it.unisa.ocelot.c.StandardBuilder;

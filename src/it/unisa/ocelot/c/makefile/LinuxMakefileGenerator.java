@@ -2,7 +2,6 @@ package it.unisa.ocelot.c.makefile;
 
 import java.io.IOException;
 
-@Deprecated
 public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 	public LinuxMakefileGenerator() {
 		super("jni/makefile");
