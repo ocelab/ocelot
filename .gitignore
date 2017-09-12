@@ -2,6 +2,10 @@
 *.class
 .lastbuild.cks
 
+# idea project files
+ocelot.iml
+.idea/*
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
