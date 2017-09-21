@@ -116,7 +116,8 @@ public abstract class LabeledEdge extends DefaultWeightedEdge implements Compara
 		this.objectiveID = objectiveID;
 	}
 	
-	
+	public int getID() { return this.id; }
+
 	public boolean isCovered() {
 		return isCovered;
 	}
