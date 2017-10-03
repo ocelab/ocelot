@@ -138,7 +138,7 @@ public class ConfigManager {
 	public String getTestFilename() {
 		String basedir = this.getTestBasedir();
 		
-		return basedir + "/" + this.properties.getProperty("test.filename");
+		return basedir + this.properties.getProperty("test.filename");
 	}
 	
 	/**
@@ -148,7 +148,8 @@ public class ConfigManager {
 	public String getTestFunction() {
 		return this.properties.getProperty("test.function");
 	}
-	
+
+	@Deprecated
 	private CFGNodeNavigator getTestTargetNavigator(CFG pCfg) {
 		String targetString = this.properties.getProperty("test.target", "");
 		
@@ -248,7 +249,7 @@ public class ConfigManager {
 		
 		for (int i = 0; i < includes.length; i++) {
 			if (!includes[i].startsWith("/"))
-				includes[i] = basedir  + includes[i];
+				includes[i] = basedir + includes[i];
 		}
 		
 		return includes;
@@ -319,7 +320,10 @@ public class ConfigManager {
 	 * @return
 	 */
 	public String getTestBasedir() {
-		return this.properties.getProperty("test.basedir", "./");
+		String basedir = properties.getProperty("test.basedir", "./");
+		if (!basedir.endsWith("/"))
+			basedir += "/";
+		return basedir;
 	}
 
 	/**
@@ -408,7 +412,7 @@ public class ConfigManager {
 	public String[] getTestLink() {
 		String link = this.properties.getProperty("test.link", "");
 		if (link.equals(""))
-			return new String[0];
+			return new String[] {""};
 		else
 			return link.split("\\,");
 	}
