@@ -34,16 +34,11 @@ public class Debugger {
 	 * @param pLine Debug line
 	 */
 	public void write(String pLine) {
+		if (content==null)
+			content = "";
 		this.content += pLine+"\n";
 	}
-	
-	/**
-	 * Clears the debug information
-	 */
-	public void reset() {
-		this.content = "";
-	}
-	
+
 	public static void trace(String methodName) {
 		if (!traceMap.containsKey(methodName))
 			traceMap.put(methodName, 0);
