@@ -255,7 +255,8 @@ public class ConfigManagerTest {
     @Test
     public void getTestLink() throws Exception {
         String[] link = config.getTestLink();
-        assertEquals("", link[0]);
+
+        assertEquals(0, link.length);
     }
 
     @Test

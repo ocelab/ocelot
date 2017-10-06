@@ -412,7 +412,7 @@ public class ConfigManager {
 	public String[] getTestLink() {
 		String link = this.properties.getProperty("test.link", "");
 		if (link.equals(""))
-			return new String[] {""};
+			return new String[0];
 		else
 			return link.split("\\,");
 	}
