@@ -32,20 +32,20 @@ import static org.junit.Assert.*;
  */
 public class SimulatorTest {
 
-    private CFG cfg;
+    private static CFG cfg;
 
-    private CFGNode start;
-    private CFGNode n1;
-    private CFGNode n2;
-    private CFGNode n3;
-    private CFGNode end;
+    private static CFGNode start;
+    private static CFGNode n1;
+    private static CFGNode n2;
+    private static CFGNode n3;
+    private static CFGNode end;
 
-    private LabeledEdge target;
+    private static LabeledEdge target;
 
-    private Set<CFGNode> dominatorNodes;
+    private static Set<CFGNode> dominatorNodes;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         start = new CFGNode("start");
         n1 = new CFGNode("a==5");
         n2 = new CFGNode("b==1");
@@ -63,18 +63,18 @@ public class SimulatorTest {
         cfg.setStart(start);
         cfg.setEnd(end);
 
+
         cfg.addEdge(start, n1, new FlowEdge());
         cfg.addEdge(n1, n2, new TrueEdge());
-        cfg.addEdge(n1, n3, new FalseEdge());
+        cfg.addEdge(n1, n3, target=new FalseEdge());
         cfg.addEdge(n2, end, new FlowEdge());
         cfg.addEdge(n3, end, new FlowEdge());
 
-        this.target = cfg.getBranchesFromCFG().stream()
-                .filter(e ->
-                e.getID() == 2 ||
-                e.getID() == 7).collect(Collectors.toList()).get(0);
+//        this.target = cfg.getBranchesFromCFG().stream()
+//                .filter(e ->
+//                e.getID() == targetBranch.getID()).collect(Collectors.toList()).get(0);
 
-        Dominators<CFGNode, LabeledEdge> dominators = new Dominators<>(this.cfg, this.cfg.getStart());
+        Dominators<CFGNode, LabeledEdge> dominators = new Dominators<>(cfg, cfg.getStart());
         CFGNode parent = cfg.getEdgeSource(target);
         dominatorNodes = dominators.getStrictDominators(parent);
     }
