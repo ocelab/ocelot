@@ -35,7 +35,6 @@ public class GCC implements Compiler {
 	@Override
 	public void compile(File pInput, File pOutput) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	private String commandLine(String[] pCommand) {
