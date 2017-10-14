@@ -1,7 +1,5 @@
-package test.simulator;
+package it.unisa.ocelot.simulator;
 
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.EventsHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Test case for the it.unisa.ocelot.simulator.CBridge class
- * @author Giovanni Granog
+ * @author Giovanni Grano
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CBridge.class)

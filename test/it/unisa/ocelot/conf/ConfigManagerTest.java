@@ -1,6 +1,5 @@
-package test.conf;
+package it.unisa.ocelot.conf;
 
-import it.unisa.ocelot.conf.ConfigManager;
 import org.apache.commons.lang3.Range;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +15,7 @@ public class ConfigManagerTest {
 
     @Before
     public void setUp() throws IOException {
-        ConfigManager.setFilename("src/test/resources/test.properties");
+        ConfigManager.setFilename("resources/tests/test.properties");
         config = ConfigManager.getInstance();
     }
 
