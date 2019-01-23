@@ -1,10 +1,12 @@
 package it.unisa.ocelot.genetic;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.algorithms.AlgorithmStats;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.suites.budget.BudgetManager;
 import jmetal.core.Algorithm;
 import jmetal.core.Solution;
@@ -26,13 +28,15 @@ public abstract class OcelotExperiment extends Experiment {
 	private Set<Solution> serendipitousSolutions;
 	
 	protected BudgetManager budgetManager;
+
+	private List<Graph> graphList;
 	
 	public void initExperiment(BudgetManager pBudgetManager) {
 		this.budgetManager = pBudgetManager;
 		this.initExperiment();
 	}
 
-	public OcelotExperiment(String pResultsFolder, int pRuns) {
+	public OcelotExperiment(String pResultsFolder, int pRuns, List<Graph> graphList) {
 		this.experimentName_ = "TargetCoverage";
 		this.algorithmNameList_ = new String[] { "PGGA" };
 		this.problemList_ = new String[] { "TestCoverage" };
@@ -51,7 +55,11 @@ public abstract class OcelotExperiment extends Experiment {
 		
 		this.serendipitousPotentials = new HashSet<>();
 		this.serendipitousSolutions = new HashSet<>();
+
+		this.graphList = graphList;
 	}
+
+
 
 	@Override
 	public final void algorithmSettings(String problemName, int problemId, Algorithm[] algorithm)
@@ -116,6 +124,10 @@ public abstract class OcelotExperiment extends Experiment {
 	
 	public Set<Solution> getSerendipitousSolutions() {
 		return this.serendipitousSolutions;
+	}
+
+	public List<Graph> getGraphList() {
+		return graphList;
 	}
 
 	public double getFitnessValue() {

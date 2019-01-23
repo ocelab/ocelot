@@ -1,5 +1,6 @@
 package it.unisa.ocelot.genetic.edges;
 
+import java.util.List;
 import java.util.Set;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -7,14 +8,10 @@ import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
-import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.SimulationException;
-import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.util.Utils;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.simulator.*;
 
 import org.apache.commons.lang3.Range;
 
@@ -32,15 +29,15 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 
 	private boolean debug;
 
-	public EdgeCoverageProblem(CFG pCfg, CType[] pParameters, Range<Double>[] pRanges, int pArraySize)
+	public EdgeCoverageProblem(CFG pCfg, List<Graph> graphList, Range<Double>[] pRanges)
 			throws Exception {
-		super(pParameters, pRanges, pArraySize);
+		super(graphList, pRanges);
 		this.cfg = pCfg;
 		problemName_ = "EdgeCoverageProblem";
 	}
 	
-	public EdgeCoverageProblem(CFG pCfg, CType[] pParameters, int pArraySize) throws Exception {
-		this(pCfg, pParameters, null, pArraySize);
+	public EdgeCoverageProblem(CFG pCfg, List<Graph> graphList) throws Exception {
+		this(pCfg, graphList, null);
 	}
 
 	public CFG getCFG() {
@@ -67,16 +64,19 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 	}
 
 	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
-		Object[][][] arguments = this.getParameters(solution);
+		//Object[][][] arguments = this.getParameters(solution);
+		Graph graph = this.getGraphFromSolution(solution);
 
-		CBridge bridge = getCurrentBridge();
+		//CBridge bridge = getCurrentBridge();
+		CBridgeStub cBridgeStub  = (CBridgeStub) getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
 		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target, dominators);
 		bdalListener.setSerendipitousPotentials(this.serendipitousPotentials);
 		
 		try {
-			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+			//bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+			cBridgeStub.getEvents(handler, graph);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
 			return -1;
@@ -96,8 +96,8 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 		
 		solution.setObjective(0, objective);
 		
-		if (debug)
-			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);
+		/*if (debug)
+			System.out.println(Utils.printParameters(arguments) + "\nObjective: " + objective);*/
 		
 		return bdalListener.getBranchDistance();
 	}

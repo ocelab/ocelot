@@ -2,11 +2,11 @@ package it.unisa.ocelot.genetic.many_objective;
 
 import java.util.List;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
-import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.OcelotExperiment;
 import it.unisa.ocelot.genetic.StandardSettings;
@@ -26,18 +26,16 @@ import jmetal.core.SolutionSet;
  *
  */
 public class MOSABranchCoverageExperiment extends OcelotExperiment {
-	private CType[] parametersTypes;
 	private CFG cfg;
 	private ConfigManager config;
 	// all branches to cover (except FlowEdges)
 	private List<LabeledEdge> branches;
 
-	public MOSABranchCoverageExperiment(CFG cfg, List<LabeledEdge> pBranches, ConfigManager configManager, CType[] types) {
-		super(configManager.getResultsFolder(), configManager.getExperimentRuns());
+	public MOSABranchCoverageExperiment(CFG cfg, List<Graph> pGraphList, List<LabeledEdge> pBranches, ConfigManager configManager) {
+		super(configManager.getResultsFolder(), configManager.getExperimentRuns(), pGraphList);
 
 		this.cfg = cfg;
 		this.config = configManager;
-		this.parametersTypes = types;
 
 		this.algorithmNameList_ = new String[] { "MOSA" };
 		// this.branches = getTargetsFromCFG();
@@ -51,8 +49,7 @@ public class MOSABranchCoverageExperiment extends OcelotExperiment {
 
 			MOSABranchCoverageProblem problem = null;
 			if (ranges != null)
-				problem = new MOSABranchCoverageProblem(this.cfg, this.parametersTypes, config.getTestArraysSize(), 
-						ranges, branches);
+				problem = new MOSABranchCoverageProblem(this.cfg, this.getGraphList(), ranges, branches);
 			else
 				throw new RuntimeException("Error: please, set the ranges for the parameters for MOSA algorithm");
 			

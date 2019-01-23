@@ -3,6 +3,8 @@ package it.unisa.ocelot.c.cfg;
 import java.io.IOException;
 
 import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
 import it.unisa.ocelot.util.Utils;
 
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -21,6 +23,9 @@ public class CFGBuilder {
 
 		translationUnit.accept(cfgBuilder);
 		translationUnit.accept(constantsChecker);
+
+		Graph typeGraph = GraphGenerator.generateGraphFromFunction(graph.getParameterTypes());
+		graph.setTypeGraph(typeGraph);
 
 		return graph;
 	}

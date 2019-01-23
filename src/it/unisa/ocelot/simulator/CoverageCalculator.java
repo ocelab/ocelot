@@ -10,6 +10,7 @@ import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.FlowEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
 import it.unisa.ocelot.util.Utils;
 
@@ -26,8 +27,32 @@ public class CoverageCalculator {
 	public CoverageCalculator(CFG pCfg) {
 		this.cfg = pCfg;
 	}
-	
-	public void calculateCoverage(List<Object[][][]> pParametersList) {
+
+	public void calculateCoverage(List<Graph> pGraphList) {
+		this.coverageListener = new CoverageCalculatorListener(cfg);
+
+		for (Graph graph : pGraphList) {
+			CBridgeStub bridgeStub = new CBridgeStub();
+			EventsHandler h = new EventsHandler();
+
+			bridgeStub.getEvents(h, graph);
+
+			Simulator simulator = new Simulator(cfg, h.getEvents());
+
+			simulator.addListener(this.coverageListener);
+			simulator.simulate();
+
+			if (!simulator.isSimulationCorrect())
+				throw new RuntimeException("Simulation error for parameters " + Utils.printParameters(null));
+		}
+
+		this.coveredEdges = this.coverageListener.getCoveredEdges();
+		this.branchCoverage = this.coverageListener.getBranchCoverage();
+		this.blockCoverage = this.coverageListener.getBlockCoverage();
+	}
+
+	//MODIFICA NUOVA RAPPRESENTAZIONE
+	/*public void calculateCoverage(List<Object[][][]> pParametersList) {
 		this.coverageListener = new CoverageCalculatorListener(cfg);
 		
 		for (Object[][][] params : pParametersList) {
@@ -48,13 +73,21 @@ public class CoverageCalculator {
 		this.coveredEdges = this.coverageListener.getCoveredEdges();
 		this.branchCoverage = this.coverageListener.getBranchCoverage();
 		this.blockCoverage = this.coverageListener.getBlockCoverage();
+	}*/
+
+
+	public void calculateCoverage(Graph pGraph) {
+		List<Graph> graphList = new ArrayList<>();
+		graphList.add(pGraph);
+		this.calculateCoverage(graphList);
 	}
-	
-	public void calculateCoverage(Object[][][] pParameters) {
+
+	//MODIFICA NUOVA RAPPRESENTAZIONE
+	/*public void calculateCoverage(Object[][][] pParameters) {
 		List<Object[][][]> parametersList = new ArrayList<Object[][][]>();
 		parametersList.add(pParameters);
 		this.calculateCoverage(parametersList);
-	}
+	}*/
 	
 	public void calculateCoverage(Set<TestCase> pTestCases) {
 		Set<LabeledEdge> coveredEdges = new HashSet<LabeledEdge>();

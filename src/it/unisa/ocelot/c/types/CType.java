@@ -1,19 +1,23 @@
 package it.unisa.ocelot.c.types;
 
-public abstract class CType {
-	protected boolean pointer;
-	
-	protected CType(boolean pPointer) {
-		this.pointer = pPointer;
-	}
-	
-	public boolean isPointer() {
-		return pointer;
-	}
-	
-	public abstract Object getInstance(Object pOriginalValue);
-	public abstract double getMaxValue();
-	public abstract double getMinValue();
-	public abstract boolean isDiscrete();
-	
+public class CType {
+
+    @Override
+    public String toString() {
+        String message = null;
+
+        if (this instanceof CPointer) {
+            message = "Pointer";
+        }
+
+        if (this instanceof CStruct) {
+            message = "Struct";
+        }
+
+        if (this instanceof CPrimitive) {
+            message = "Primitive type";
+        }
+
+        return message;
+    }
 }

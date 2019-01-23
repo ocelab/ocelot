@@ -1,16 +1,14 @@
 package it.unisa.ocelot.suites.generators.random;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.genetic.encoding.graph.Node;
+import it.unisa.ocelot.genetic.encoding.graph.ScalarNode;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
-import it.unisa.ocelot.c.types.CDouble;
-import it.unisa.ocelot.c.types.CInteger;
-import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
@@ -36,7 +34,7 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator implements Casc
 	
 	@Override
 	public Set<TestCase> generateTestSuite(Set<TestCase> pSuite) throws TestSuiteGenerationException {
-		Set<TestCase> suite = new HashSet<TestCase>(pSuite);
+		Set<TestCase> suite = new HashSet<>(pSuite);
 		
 		this.startBenchmarks();
 		
@@ -95,35 +93,51 @@ public class RandomTestSuiteGenerator extends TestSuiteGenerator implements Casc
 	
 	private void coverRandom(Set<TestCase> suite) throws TestSuiteGenerationException {
 		for (int i = 0; i < this.config.getRandomGranularity(); i++) {
-			Object[][][] numericParams = random(cfg.getParameterTypes());
-			TestCase testCase = this.createTestCase(numericParams, suite.size());
+			//Object[][][] numericParams = random(cfg.getParameterTypes());
+			Graph graph = random(cfg.getTypeGraph());
+			TestCase testCase = this.createTestCase(graph, suite.size());
 			suite.add(testCase);
 		}
 	}
 	
 	//TODO Make this method work. Now it doesn't, due to the major change of parameters
-	private Object[][][] random(CType[] pParamTypes) {
-		Object[][][] parameters = new Object[pParamTypes.length][][];
-		parameters[0] = new Object[1][];
-		parameters[0][0] = new Object[pParamTypes.length];
-		
-		for (int i = 0; i < pParamTypes.length; i++) {
-			if (pParamTypes[i] instanceof CDouble) {
-				double param = random.nextDouble() * (ranges[i].getMaximum() - ranges[i].getMinimum());
-				param += ranges[i].getMinimum();
-				parameters[0][0][i] = param;
-			} else if (pParamTypes[i] instanceof CInteger) {
-				int param = random.nextInt((int)(ranges[i].getMaximum() - ranges[i].getMinimum()));
-				param += ranges[i].getMinimum();
-				parameters[0][0][i] = param;
-			} else {
-				double param = random.nextDouble() * (ranges[i].getMaximum() - ranges[i].getMinimum());
-				param += ranges[i].getMinimum();
-				parameters[0][0][i] = param;
+
+	/**
+	 * This function write random values into ScalarNode
+	 * @param typeGraph
+	 * @return
+	 */
+	private Graph random(Graph typeGraph) {
+		List<Node> nodes = new ArrayList<>();
+
+		for (Node node : typeGraph.getNodes()) {
+			if (node instanceof ScalarNode) {
+				ScalarNode tmpNode = new ScalarNode(node.getId(), node.getCType());
+
+				double param = random.nextDouble() * (ranges[0].getMaximum() - ranges[0].getMinimum());
+				param += ranges[0].getMinimum();
+				tmpNode.setValue(param);
+
+				nodes.add(tmpNode);
 			}
 		}
+
+
+		Graph graph = null;
+		try {
+			graph = (Graph) cfg.getTypeGraph().clone();
+		} catch (CloneNotSupportedException e) {
+			System.err.println("Impossible to clone Graph");;
+		}
+
+		for (int i = 0; i < graph.getNodes().size(); i++) {
+			int j = 0;
+			while (j < nodes.size() && nodes.get(j).equals(graph.getNode(i))) j++;
+
+			((ScalarNode)graph.getNode(i)).setValue(((ScalarNode)nodes.get(j)).getValue());
+		}
 		
-		return parameters; 
+		return graph;
 	}
 	
 	@Override

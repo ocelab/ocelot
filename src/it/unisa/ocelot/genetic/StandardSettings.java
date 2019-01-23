@@ -13,7 +13,9 @@ public abstract class StandardSettings extends Settings {
     protected int populationSize;
     protected int maxEvaluations;
     protected double mutationProbability;
-    protected double crossoverProbability;
+	protected double scalarMutationProbability;
+	protected double numberOfMutants;				//Number of mutants that must be muted, if mutation's operator is executed
+	protected double crossoverProbability;
     protected int threads;
     protected boolean debug;
     
@@ -27,8 +29,10 @@ public abstract class StandardSettings extends Settings {
 				
 		populationSize = 100;
         maxEvaluations = 25000;
-        mutationProbability = 1.0 / problem_.getNumberOfVariables();
         crossoverProbability = 0.9;
+		mutationProbability = 1.0 / problem_.getNumberOfVariables();
+		scalarMutationProbability = 0.2;
+		numberOfMutants = 0.2;
         threads = 1;
 	}
 	
@@ -52,7 +56,11 @@ public abstract class StandardSettings extends Settings {
 				mutationProbability = pConfig.getMutationProbability();
 			} catch (NumberFormatException e) {}
 		}
-		
+
+		scalarMutationProbability = 0.2;
+		numberOfMutants = 0.2;
+
+
 		try {
 			threads = pConfig.getThreads();
 		} catch (NumberFormatException e) {}

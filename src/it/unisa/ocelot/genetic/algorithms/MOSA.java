@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -64,14 +65,14 @@ public class MOSA extends OcelotAlgorithm {
 	 * @param problem
 	 *            Problem to solve
 	 */
-	public MOSA(MOSABranchCoverageProblem problem, List<LabeledEdge> targets) {
-		super(problem);
+	public MOSA(MOSABranchCoverageProblem problem, List<LabeledEdge> targets, List<Graph> graphList) {
+		super(problem, graphList);
+		
 		this.controlFlowGraph = problem.getControlFlowGraph();
 		allTargets = new ArrayList<>(targets);
 		evaluations = new ArrayList<>();
 		this.allBranches = this.controlFlowGraph.getBranchesFromCFG();
 		this.coveredBranches = new HashSet<>();
-		
 		
 		edgeGraph = new EdgeGraph<CFGNode, LabeledEdge>(
 				this.controlFlowGraph, this.controlFlowGraph.getStart(), this.controlFlowGraph.getEnd());
@@ -114,7 +115,8 @@ public class MOSA extends OcelotAlgorithm {
 		SolutionSet union;
 		this.archive = new SolutionSet(this.allTargets.size());
 
-		Operator mutationOperator;
+		Operator indexMutationOperator;
+		Operator scalarMutationOperator;
 		Operator crossoverOperator;
 		Operator selectionOperator;
 
@@ -123,7 +125,8 @@ public class MOSA extends OcelotAlgorithm {
 		evaluations = 0;
 
 		// Read the operators
-		mutationOperator = operators_.get("mutation");
+		indexMutationOperator = operators_.get("indexMutation");
+		scalarMutationOperator = operators_.get("scalarMutation");
 		crossoverOperator = operators_.get("crossover");
 		selectionOperator = operators_.get("selection");
 
@@ -149,9 +152,16 @@ public class MOSA extends OcelotAlgorithm {
 					// obtain parents
 					parents[0] = (Solution) selectionOperator.execute(population);
 					parents[1] = (Solution) selectionOperator.execute(population);
+
+					//crossover
 					Solution[] offSpring = (Solution[]) crossoverOperator.execute(parents);
-					mutationOperator.execute(offSpring[0]);
-					mutationOperator.execute(offSpring[1]);
+
+					//mutation
+					indexMutationOperator.execute(offSpring[0]);
+					indexMutationOperator.execute(offSpring[1]);
+					scalarMutationOperator.execute(offSpring[0]);
+					scalarMutationOperator.execute(offSpring[1]);
+
 					problem_.evaluate(offSpring[0]);
 					problem_.evaluate(offSpring[1]);
 					offspringPopulation.add(offSpring[0]);

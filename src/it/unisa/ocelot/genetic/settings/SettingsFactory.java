@@ -12,8 +12,8 @@ public class SettingsFactory {
 	public static StandardSettings getSettings(String pSettingsName, Problem pProblem, ConfigManager pConfig) {
 		if (pSettingsName.equalsIgnoreCase(GA)) {
 			return new GASettings(pProblem, pConfig);
-		} else if (pSettingsName.equalsIgnoreCase(AVM)) {
-			return new AVMSettings(pProblem, pConfig);
+		//} //else if (pSettingsName.equalsIgnoreCase(AVM)) {
+			//return new AVMSettings(pProblem, pConfig);
 		} else if (pSettingsName.equalsIgnoreCase(MEMETIC)){
 			return new MemeticSettings(pProblem, pConfig);
 		} else 

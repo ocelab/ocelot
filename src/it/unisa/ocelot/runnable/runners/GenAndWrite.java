@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Set;
 
+import it.unisa.ocelot.simulator.CBridgeStub;
 import org.apache.commons.io.output.TeeOutputStream;
 
 import it.unisa.ocelot.TestCase;
@@ -37,11 +38,12 @@ public class GenAndWrite {
 	
 			// Builds the CFG and sets the target
 			CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
-	
+
+
 			
 			CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
 			CBridge.initialize(
-					typeHandler.getValues().size(), 
+					typeHandler.getValues().size(),
 					typeHandler.getPointers().size(),
 					typeHandler.getPointers().size());
 	
@@ -50,7 +52,7 @@ public class GenAndWrite {
 			System.out.println("Cyclomatic complexity: " + mcCabePaths);
 	
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(config, cfg);
-			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config);
+			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config, cfg);
 			
 			System.out.println("Generator: " + generator.getClass().getSimpleName());
 			System.out.println("Minimizer: " + minimizer.getClass().getSimpleName());

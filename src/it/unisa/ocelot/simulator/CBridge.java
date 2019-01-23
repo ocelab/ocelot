@@ -18,7 +18,7 @@ public class CBridge {
 		this.coreId = pCoreID;
 	}
 	
-	public static void initialize(Object[][][] pParameters) {
+	public void initialize(Object[][][] pParameters) {
 		if (!initialized) {
 			while (true) {
 				try {

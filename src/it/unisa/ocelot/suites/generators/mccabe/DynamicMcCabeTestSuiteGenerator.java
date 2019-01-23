@@ -11,10 +11,10 @@ import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.DMCExperiment;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
-import it.unisa.ocelot.util.Utils;
 import jmetal.core.Solution;
 import jmetal.core.SolutionSet;
 import jmetal.util.JMException;
@@ -32,8 +32,8 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 	private int evaluations;
 
 	public DynamicMcCabeTestSuiteGenerator(ConfigManager pConfigManager, CFG pCFG) {
-		super(pCFG);
-		this.config = pConfigManager;
+		super(pCFG, pConfigManager);
+		//this.config = pConfigManager;
 	}
 
 	@Override
@@ -64,9 +64,11 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 		this.setupBudgetManager(mcCabeCalculator.extimateMissingTargets());
 		
 		SolutionSet seedPopulation = null;
-		
+
 		while (currentTarget != null && calculator.getBranchCoverage() < config.getRequiredCoverage()) {
-			DMCExperiment exp = new DMCExperiment(cfg, config, cfg.getParameterTypes(), currentTarget, 
+			/*DMCExperiment exp = new DMCExperiment(cfg, config, cfg.getParameterTypes(), currentTarget,
+					seedPopulation, this.config.getDMCSeedSize());*/
+			DMCExperiment exp = new DMCExperiment(cfg, config, this.graphList, currentTarget,
 					seedPopulation, this.config.getDMCSeedSize());
 			
 			exp.initExperiment(this.budgetManager);
@@ -97,20 +99,34 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			if (config.getSerendipitousCoverage())
 				for (Solution solution : exp.getSerendipitousSolutions()) {
 					VariableTranslator currentTranslator = new VariableTranslator(solution);
-					Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
-					calculator.calculateCoverage(serendipitousParameters);
+					//Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
+					Graph serendipitousGraph = null;
+					try {
+						serendipitousGraph = currentTranslator.getGraphFromSolution(this.graphList);
+					} catch (JMException e) {
+						e.printStackTrace();
+					}
+					calculator.calculateCoverage(serendipitousGraph);
 					mcCabeCalculator.addPath(calculator.getCoveredPath());
 				}
 
-			Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
+			//Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
+			Graph graph = null;
 
-			TestCase testCase = this.createTestCase(numericParams, suite.size());
+			try {
+				graph = translator.getGraphFromSolution(this.graphList);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
+
+			//TestCase testCase = this.createTestCase(numericParams, suite.size());
+			TestCase testCase = this.createTestCase(graph, suite.size());
 			
 
 			this.println("Fitness function: " + fitnessValue + ". ");
 			if (fitnessValue == 0.0) {
 				this.println("Target covered!");
-				calculator.calculateCoverage(numericParams);
+				calculator.calculateCoverage(graph);
 				mcCabeCalculator.addPath(calculator.getCoveredPath());
 				suite.add(testCase);
 				this.measureBenchmarks("McCabe target", suite, exp.getNumberOfEvaluation());
@@ -119,7 +135,7 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 				this.println("Useless test case. Discarded.");
 			}
 			
-			this.println("Parameters found: " + Utils.printParameters(numericParams));
+			//this.println("Parameters found: " + Utils.printParameters(numericParams));
 			
 			currentTarget = mcCabeCalculator.getNextTarget();
 			if (currentTarget != null && !getUncoveredEdges(suite).contains(currentTarget)) {

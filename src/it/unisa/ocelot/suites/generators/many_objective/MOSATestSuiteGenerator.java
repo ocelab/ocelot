@@ -10,6 +10,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.many_objective.MOSABranchCoverageExperiment;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.budget.BasicBudgetManager;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
@@ -63,9 +64,9 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 			throws TestSuiteGenerationException {
 
 		SolutionSet archiveSolutions = new SolutionSet();
-		
-		MOSABranchCoverageExperiment mosaExperiment = new MOSABranchCoverageExperiment(
-				cfg, pTargets, config, cfg.getParameterTypes());
+		MOSABranchCoverageExperiment mosaExperiment = new MOSABranchCoverageExperiment(cfg, this.graphList, pTargets, config);
+		//MOSABranchCoverageExperiment mosaExperiment = new MOSABranchCoverageExperiment(cfg, this.graphList, pTargets, config, cfg.getParameterTypes());
+		//MOSABranchCoverageExperiment mosaExperiment = null;
 		
 		this.setupBudgetManager(1);
 		try {
@@ -90,10 +91,17 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 			currentSolution = archiveSolutions.get(i);
 			VariableTranslator translator = new VariableTranslator(currentSolution);
 
-			Object[][][] numericParams = translator.translateArray(cfg
-					.getParameterTypes());
+			//Object[][][] numericParams = translator.translateArray(cfg
+			//		.getParameterTypes());
+			//Object[][][] numericParams = null;
+			Graph graph = null;
+			try {
+				graph = translator.getGraphFromSolution(this.graphList);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
 
-			TestCase testCase = this.createTestCase(numericParams, suite.size());
+			TestCase testCase = this.createTestCase(graph, suite.size());
 			suite.add(testCase);
 			
 			this.measureBenchmarks("MOSA Target", suite, numberOfEvaluations.get(i));

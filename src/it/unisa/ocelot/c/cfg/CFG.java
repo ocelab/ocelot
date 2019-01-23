@@ -3,11 +3,12 @@ package it.unisa.ocelot.c.cfg;
 import it.unisa.ocelot.c.cfg.edges.FlowEdge;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.types.CType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unisa.ocelot.c.types.CType;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 /**
@@ -21,15 +22,16 @@ import org.jgrapht.graph.ListenableDirectedGraph;
  */
 public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	private static final long serialVersionUID = 6995672951065896769L;
-	
+
 	private CFGNode start;
 	private CFGNode end;
 	private CFGNode target;
 	
 	private List<Double> constantNumbers;
 	private List<String> constantStrings;
-	
+
 	private CType[] parameterTypes;
+	private Graph typeGraph;
 	
 	/**
 	 * Creates an empty CFG
@@ -97,6 +99,14 @@ public class CFG extends ListenableDirectedGraph<CFGNode, LabeledEdge> {
 	 */
 	public void setParameterTypes(CType[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
+	}
+
+	public Graph getTypeGraph() {
+		return typeGraph;
+	}
+
+	public void setTypeGraph(Graph typeGraph) {
+		this.typeGraph = typeGraph;
 	}
 
 	/**

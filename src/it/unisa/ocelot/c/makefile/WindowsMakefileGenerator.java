@@ -4,7 +4,8 @@ import java.io.IOException;
 
 public class WindowsMakefileGenerator extends JNIMakefileGenerator {
 
-	private static String GTK_HOME = "C:/gtk/";
+	//private static String GTK_HOME = "C:/gtk/";
+	private static String GTK_HOME = "C:/msys64/mingw64/";
 
 	@Deprecated
 	public WindowsMakefileGenerator() {

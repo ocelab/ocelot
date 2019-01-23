@@ -3,6 +3,8 @@ package it.unisa.ocelot.genetic.edges;
 import java.util.List;
 import java.util.Set;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.simulator.*;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -10,15 +12,9 @@ import it.unisa.ocelot.c.cfg.CollateralCoverageEvaluator;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.SimulationException;
-import it.unisa.ocelot.simulator.Simulator;
 import it.unisa.ocelot.simulator.listeners.CoverageCalculatorListener;
-import it.unisa.ocelot.util.Utils;
 import jmetal.core.Solution;
 import jmetal.util.JMException;
 
@@ -38,9 +34,9 @@ public class CDG_BasedProblem extends StandardProblem {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public CDG_BasedProblem(CFG controlFlowGraph, CType[] parameters, int pArraySize,
-			Range<Double>[] ranges, List<LabeledEdge> branches, LabeledEdge target) throws Exception {
-		super(parameters, ranges, pArraySize);
+	public CDG_BasedProblem(CFG controlFlowGraph, List<Graph> graphList, Range<Double>[] ranges,
+							List<LabeledEdge> branches, LabeledEdge target) throws Exception {
+		super(graphList, ranges);
 		this.controlFlowGraph = controlFlowGraph;
 		this.branches = branches;
 		this.target = target;
@@ -55,14 +51,15 @@ public class CDG_BasedProblem extends StandardProblem {
 	@Override
 	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
-		Object[][][] arguments = translator.translateArray(this.parameters);
+		//Object[][][] arguments = translator.translateArray(this.parameters);
+		Graph graph = translator.getGraphFromSolution(this.graphList);
 
-		if (debug)
-			System.out.println(Utils.printParameters(arguments));
+		/*if (debug)
+			System.out.println(Utils.printParameters(arguments));*/
 
-		CBridge bridge = getCurrentBridge();
+		CBridgeStub cBridgeStub = (CBridgeStub) getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
-		bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		cBridgeStub.getEvents(handler, graph);
 
 		// listener
 		EdgeDistanceListener dominatorListener = new EdgeDistanceListener(this.controlFlowGraph, target, this.dominators);

@@ -1,36 +1,13 @@
 package it.unisa.ocelot.c.cfg;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTBreakStatement;
-import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
-import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
-import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
-import org.eclipse.cdt.core.dom.ast.IASTForStatement;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTGotoStatement;
-import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
-import org.eclipse.cdt.core.dom.ast.IASTLabelStatement;
-import org.eclipse.cdt.core.dom.ast.IASTNullStatement;
-import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
-import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
+import it.unisa.ocelot.c.instrumentor.StructNode;
+import it.unisa.ocelot.c.instrumentor.VarStructTree;
+import it.unisa.ocelot.c.types.*;
+import org.eclipse.cdt.core.dom.ast.*;
+import org.eclipse.cdt.internal.core.dom.parser.c.*;
 
 import it.unisa.ocelot.c.cfg.edges.CaseEdge;
 import it.unisa.ocelot.c.cfg.edges.FalseEdge;
@@ -40,9 +17,6 @@ import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
 import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
-import it.unisa.ocelot.c.types.CDouble;
-import it.unisa.ocelot.c.types.CInteger;
-import it.unisa.ocelot.c.types.CType;
 
 public class CFGVisitor extends ASTVisitor {
 	private CFG graph;
@@ -81,18 +55,85 @@ public class CFGVisitor extends ASTVisitor {
 		
 		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName, referencesVisitor.getExternalReferences());
 		tu.accept(typesDefiner);
-		
-		CType[] parameterTypes = new CType[typesDefiner.getFunctionParameters().size()];
-		for (int i = 0; i < typesDefiner.getFunctionParameters().size(); i++) {
-			String type = typesDefiner.getFunctionParameters().get(i).toString();
-			if (type.startsWith("int"))
-				parameterTypes[i] = new CInteger(type.contains("*"));
-			else
-				parameterTypes[i] = new CDouble(type.contains("*"));
-		}
-		
-		this.graph.setParameterTypes(parameterTypes);
+
 		return super.visit(tu);
+	}
+
+	private CType [] getFunctionParametersFromMacroDefinerVisitor (List<IType> functionParameters, String nameOfStruct) {
+		CType [] parameters = new CType[functionParameters.size()];
+		for (int i = 0; i < functionParameters.size(); i++) {
+			CType cType = null;
+			//String type = mpacroDefinerVisitor.getFunctionParameters().get(i).toString();
+			IType type = functionParameters.get(i);
+
+			int numberOfPointer = 0;
+			if (type instanceof CPointerType) {
+				while (type instanceof CPointerType) {
+					numberOfPointer++;
+					type = ((CPointerType) type).getType();
+				}
+
+				type = getType(type);
+			}
+
+
+			if (type instanceof CStructure) {
+				if (nameOfStruct == null || type.equals(nameOfStruct)) {
+					VarStructTree tree = new VarStructTree(type.toString(), (CStructure)type);
+					List<StructNode> basics = tree.getBasicVariables();
+					List<IType> structTypeVariables = new ArrayList<>();
+					for (StructNode structNode : basics) {
+						structTypeVariables.add(structNode.type);
+					}
+
+					CType [] structParameters = getFunctionParametersFromMacroDefinerVisitor(structTypeVariables, type.toString());
+					cType = new CStruct(type.toString(), structParameters);
+				} else {
+					cType = new CStruct(type.toString());
+				}
+			}
+
+			else {
+				if (type.toString().equals("char")) {
+					cType = new CChar();
+				}
+
+				else if (type.toString().equals("int")) {
+					cType = new CInteger();
+				}
+
+				else if (type.toString().equals("double")) {
+					cType = new CDouble();
+				}
+			}
+
+			//Pointer checker
+			while (numberOfPointer-- > 0) {
+				cType = new CPointer(cType);
+			}
+
+
+			parameters[i] = cType;
+		}
+
+
+		return parameters;
+	}
+
+	private IType getType(IType type) {
+		while (type instanceof CTypedef || type instanceof CQualifierType) {
+			if (type instanceof CTypedef) {
+				CTypedef tdef = (CTypedef)type;
+
+				type = tdef.getType();
+			} else if (type instanceof CQualifierType) {
+				CQualifierType qual = (CQualifierType)type;
+
+				type = qual.getType();
+			}
+		}
+
+		return type;
 	}
 
 	protected void onExit() {

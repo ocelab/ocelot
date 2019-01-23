@@ -2,12 +2,14 @@ package it.unisa.ocelot.genetic.many_objective;
 
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.conf.ConfigManager;
+import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.algorithms.MOSA;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import jmetal.core.Algorithm;
 import jmetal.core.Operator;
 import jmetal.experiments.Settings;
@@ -96,8 +98,11 @@ public class MOSABranchCoverageSettings extends Settings {
 
 		HashMap<String, Object> parameters;
 
+		StandardProblem sp = (StandardProblem)problem_;
+		List<Graph> graphList = sp.getGraphList();
+
 		// Creating the problem
-		algorithm = new MOSA((MOSABranchCoverageProblem) problem_, target);
+		algorithm = new MOSA((MOSABranchCoverageProblem) problem_, target, graphList);
 
 		algorithm.setInputParameter("populationSize", populationSize);
 		algorithm.setInputParameter("maxEvaluations", maxEvaluations);

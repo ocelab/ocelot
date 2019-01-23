@@ -1,27 +1,23 @@
 package it.unisa.ocelot.runnable;
 
+
+import it.unisa.ocelot.c.Builder;
+import it.unisa.ocelot.c.StandardBuilder;
+import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
+import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
+import it.unisa.ocelot.conf.ConfigManager;
+//import it.unisa.ocelot.runnable.runners.ExecuteExperiment;
+//import it.unisa.ocelot.runnable.runners.ExecuteWholeCoverage;
+import it.unisa.ocelot.runnable.runners.GenAndWrite;
+import it.unisa.ocelot.util.Debugger;
+import it.unisa.ocelot.util.Utils;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-import it.unisa.ocelot.c.Builder;
-import it.unisa.ocelot.c.BuildingException;
-import it.unisa.ocelot.c.StandardBuilder;
-import it.unisa.ocelot.c.makefile.DynamicMakefileGenerator;
-import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
-import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
-import it.unisa.ocelot.c.makefile.MacOSXMakefileGenerator;
-import it.unisa.ocelot.c.makefile.WindowsMakefileGenerator;
-import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.runnable.runners.ExecuteExperiment;
-import it.unisa.ocelot.runnable.runners.ExecuteWholeCoverage;
-import it.unisa.ocelot.runnable.runners.GenAndWrite;
-import it.unisa.ocelot.util.Debugger;
-import it.unisa.ocelot.util.Utils;
-
-@SuppressWarnings({ "unused", "deprecation", "restriction" })
+@SuppressWarnings("ALL")
 public class Run {
 	public static final String VERSION = "1.0";
 	
@@ -48,7 +44,7 @@ public class Run {
 		
 		runner.run();
 	}
-	
+
 	public Run(String[] args) throws IOException {
 		this.runnerType = RUNNER_WRITE;
 		this.forceBuild = false;
@@ -135,18 +131,9 @@ public class Run {
 				config.getTestFunction(), 
 				config.getTestIncludePaths());
 		
-		JNIMakefileGenerator generator = new DynamicMakefileGenerator(config);
-//		String os = System.getProperty("os.name");
-//		if (os.contains("Win"))
-//			generator = new WindowsMakefileGenerator();
-//		else if (os.contains("Mac"))
-//			generator = new MacOSXMakefileGenerator();
-//		else if (os.contains("nix") || os.contains("nux") || os.contains("aix"))
-//			generator = new LinuxMakefileGenerator();
-//		//else if (os.contains("sunos"))
-//		else {
-//			throw new BuildingException("Your operative system \"" + os + "\" is not supported");
-//		}
+		//JNIMakefileGenerator generator = new DynamicMakefileGenerator(config);
+		JNIMakefileGenerator generator = new LinuxMakefileGenerator();
+		//JNIMakefileGenerator generator = new WindowsMakefileGenerator();
 		
 		for (String linkLibrary : config.getTestLink())
 			generator.addLinkLibrary(linkLibrary);
@@ -159,17 +146,18 @@ public class Run {
 	
 	public void run() throws Exception {
 		System.loadLibrary("Test");
+
 		switch (this.runnerType) {
 		case RUNNER_SIMPLE_EXECUTE:
-			System.out.println("Running simple coverage test");
-			new ExecuteWholeCoverage().run();
+			/*System.out.println("Running simple coverage test");
+			new ExecuteWholeCoverage().run();*/
 			break;
 		case RUNNER_EXPERIMENT:
-			System.out.println("Running experiment");
+			/*System.out.println("Running experiment");
 			if (this.experimentGenerators == null)
 				new ExecuteExperiment().run();
 			else
-				new ExecuteExperiment(this.experimentGenerators).run();
+				new ExecuteExperiment(this.experimentGenerators).run();*/
 			break;
 		case RUNNER_WRITE:
 			System.out.println("Running coverage and writing");
@@ -177,9 +165,9 @@ public class Run {
 			break;
 		}
 		
-//		if (ConfigManager.getInstance().getDebug()) {
+		if (ConfigManager.getInstance().getDebug()) {
 			Debugger.printAll();
-//		}
+		}
 	}
 	
 	public void interpret(String arg) {

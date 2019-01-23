@@ -1,13 +1,15 @@
 package it.unisa.ocelot.suites.minimization;
 
 import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class AdditionalGreedyMinimizer extends TestSuiteMinimizer {
-	public AdditionalGreedyMinimizer() {
+	public AdditionalGreedyMinimizer(CFG cfg) {
+		super(cfg);
 	}
 	
 	@Override

@@ -3,6 +3,7 @@ package it.unisa.ocelot.suites.minimization;
 import java.util.Set;
 
 import it.unisa.ocelot.TestCase;
+import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.generators.CascadeableGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
@@ -15,8 +16,8 @@ public abstract class TestSuiteMinimizer extends TestSuiteGenerator implements C
 		return this.minimize(pSuite);
 	}
 	
-	public TestSuiteMinimizer() {
-		super(null);
+	public TestSuiteMinimizer(CFG cfg) {
+		super(cfg);
 	}
 	
 	/**

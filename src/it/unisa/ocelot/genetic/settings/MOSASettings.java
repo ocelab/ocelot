@@ -2,6 +2,8 @@ package it.unisa.ocelot.genetic.settings;
 
 import java.util.List;
 
+import it.unisa.ocelot.genetic.StandardProblem;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import jmetal.core.Algorithm;
 import jmetal.core.Problem;
 import jmetal.util.JMException;
@@ -27,7 +29,10 @@ public class MOSASettings extends GASettings {
 	}
 	
 	public Algorithm configure() throws JMException {
-		Algorithm algorithm = new MOSA((MOSABranchCoverageProblem)problem_, targetEdges);
+		StandardProblem sp = (StandardProblem)problem_;
+		List<Graph> graphList = sp.getGraphList();
+
+		Algorithm algorithm = new MOSA((MOSABranchCoverageProblem)problem_, targetEdges, graphList);
 		algorithm.setInputParameter("maxCoverage", this.config.getRequiredCoverage());
 		return super.configure(algorithm);
     }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
@@ -43,8 +44,8 @@ public class MemeticAlgorithm extends GeneticAlgorithm implements
 	 * @param problem
 	 *            Problem to solve
 	 */
-	public MemeticAlgorithm(Problem problem) {
-		super(problem);
+	public MemeticAlgorithm(Problem problem, List<Graph> graphList) {
+		super(problem, graphList);
 
 		this.problem = problem;
 

@@ -14,7 +14,7 @@ public class LinuxMakefileGenerator extends JNIMakefileGenerator {
 
 	@Override
 	public String getJavaHome() {
-		return "/usr/lib/jvm/java-8-openjdk";
+		return "/usr/lib/jvm/java-8-openjdk-amd64";
 	}
 
 	@Override

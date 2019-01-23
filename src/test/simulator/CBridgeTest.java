@@ -1,6 +1,7 @@
 package test.simulator;
 
 import it.unisa.ocelot.simulator.CBridge;
+import it.unisa.ocelot.simulator.CBridgeStub;
 import it.unisa.ocelot.simulator.EventsHandler;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,14 +25,15 @@ public class CBridgeTest {
     private int arrays;
     private int points;
 
-    private CBridge cBridge;
+    //private CBridge cBridge;
+    private CBridgeStub cBridgeStub;
 
     @Before
     public void setUp() {
-        this.values     = 2;
-        this.arrays     = 0;
-        this.points     = 0;
-        this.cBridge    = new CBridge(0);
+        this.values         = 2;
+        this.arrays         = 0;
+        this.points         = 0;
+        this.cBridgeStub    = new CBridgeStub(0, 9, 0, 0);
     }
 
     @Test
@@ -40,7 +42,7 @@ public class CBridgeTest {
         boolean initialized = Whitebox.getInternalState(CBridge.class, "initialized");
         assertEquals(initialized, false);
         PowerMockito.doNothing().when(CBridge.class, "privInit", values, arrays, points);
-        CBridge.initialize(values, arrays, points);
+        cBridgeStub.initialize(values, arrays, points);
         initialized = Whitebox.getInternalState(CBridge.class, "initialized");
         assertEquals(initialized, true);
     }
@@ -69,6 +71,6 @@ public class CBridgeTest {
     @Test(expected = RuntimeException.class)
     public void testGetEventNoInitialization() throws Exception {
         PowerMockito.mockStatic(CBridge.class);
-        this.cBridge.getEvents(null, (Object[]) null, null, null);
+        this.cBridgeStub.getEvents(null, (Object[]) null, null, null);
     }
 }

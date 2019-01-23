@@ -6,21 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.simulator.*;
 import org.apache.commons.lang3.Range;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
 import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
-import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.edges.EdgeDistanceListener;
-import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.SimulationException;
-import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.util.Utils;
 import jmetal.core.Solution;
 import jmetal.util.JMException;
 
@@ -45,9 +41,8 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public MOSABranchCoverageProblem(CFG cfg, CType[] parameters, int pArraySize,
-			Range<Double>[] ranges, List<LabeledEdge> branches) throws Exception {
-		super(parameters, ranges, pArraySize);
+	public MOSABranchCoverageProblem(CFG cfg, List<Graph> graphList, Range<Double>[] ranges, List<LabeledEdge> branches) throws Exception {
+		super(graphList, ranges);
 		numberOfObjectives_ = branches.size();
 		this.cfg = cfg;
 		this.targetBranches = new ArrayList<>(branches);
@@ -72,20 +67,35 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	@Override
 	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		VariableTranslator translator = new VariableTranslator(solution);
-		Object[][][] arguments = translator.translateArray(this.parameters);
-		
-		if (debug)
-			System.out.println(Utils.printParameters(arguments));
+		Graph graph = translator.getGraphFromSolution(graphList);
+		Object[][][] arguments = translator.translateGraph(graph);
 
-		CBridge bridge = getCurrentBridge();
+		/*if (debug)
+			System.out.println(Utils.printParameters(arguments));*/
+
+		CBridge cBridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
-		try {
-			bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
-		} catch (RuntimeException e) {
-			this.onError(solution, e);
+
+		int i = 0;
+		boolean error = true;
+		while (i++ < 10 && error) {
+			try {
+				//cBridgeStub.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+				cBridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+				error = false;
+			} catch (RuntimeException e) {
+				this.onError(solution, e);
+				//return -1;
+			}
+		}
+
+		if (i == 10 && error) {
 			return -1;
 		}
 
+
+		//!!!!!!!!IMPORTANT!!!!!!!!!!
+		//SIMULATOR: TO FIX (Daniel)
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 		EdgeDistanceListener edgeDistanceListener;
 //		DominatorListener edgeDistanceListener;
@@ -104,7 +114,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 
 			listeners.put(labeledEdge, edgeDistanceListener);
 			
-			simulator.addListener(edgeDistanceListener);
+			//simulator.addListener(edgeDistanceListener);
 		}
 		
 		simulator.simulate();

@@ -30,6 +30,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.genetic.OcelotAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousAlgorithm;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
@@ -60,8 +61,8 @@ public class GeneticAlgorithm extends OcelotAlgorithm implements SerendipitousAl
 	 * @param evaluator
 	 *            Parallel evaluator
 	 */
-	public GeneticAlgorithm(Problem problem) {
-		super(problem);
+	public GeneticAlgorithm(Problem problem, List<Graph> graphList) {
+		super(problem, graphList);
 		
 		this.serendipitousSolutions = new HashSet<Solution>();
 		this.serendipitousPotentials = new HashSet<LabeledEdge>();

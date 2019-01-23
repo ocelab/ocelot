@@ -2,8 +2,10 @@ package it.unisa.ocelot.genetic.algorithms;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import it.unisa.ocelot.genetic.OcelotAlgorithm;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import jmetal.core.Operator;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
@@ -20,8 +22,8 @@ public class CDG_GA extends OcelotAlgorithm {
 	IParallelEvaluator parallelEvaluator_;
 	private int no_evaluations;
 
-	public CDG_GA(Problem problem, IParallelEvaluator parallelEvaluator) {
-		super(problem);
+	public CDG_GA(Problem problem, IParallelEvaluator parallelEvaluator, List<Graph> graphList) {
+		super(problem, graphList);
 		parallelEvaluator_ = parallelEvaluator;
 		no_evaluations = 0;
 	}
