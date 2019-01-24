@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 import it.unisa.ocelot.c.instrumentor.StructNode;
 import it.unisa.ocelot.c.instrumentor.VarStructTree;
 import it.unisa.ocelot.c.types.*;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
 import org.eclipse.cdt.core.dom.ast.*;
 import org.eclipse.cdt.internal.core.dom.parser.c.*;
 
@@ -55,6 +57,9 @@ public class CFGVisitor extends ASTVisitor {
 		
 		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName, referencesVisitor.getExternalReferences());
 		tu.accept(typesDefiner);
+
+		CType[] parameterTypes = getFunctionParametersFromMacroDefinerVisitor(typesDefiner.getFunctionParameters(), null);
+		this.graph.setParameterTypes(parameterTypes);
 
 		return super.visit(tu);
 	}

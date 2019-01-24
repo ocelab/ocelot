@@ -19,6 +19,8 @@ public class GraphGenerator {
     }
 
     public static Graph generateGraphFromFunction (CType [] parameters) {
+        graphManager = new GraphManager();
+
         Graph graph = new Graph();
 
         //Root Creation
@@ -89,33 +91,34 @@ public class GraphGenerator {
         graph.addEdge(new Edge(pointerNode, graph.getLastNode()));
 
         ArrayNode arrayNode = (ArrayNode) graph.getLastNode();
-        ArrayList<Node> arrayNodes = null;
+        ArrayList<Node> arrayNodeChildren = null;
 
+        //Child of PointerNode
         CPointer arrayNodePointerType = (CPointer) arrayNode.getCType();
 
         if (arrayNodePointerType.getType() instanceof CPointer) {
             int i = 0;
             while (arrayNodePointerType.getType() instanceof CPointer && i < MAX_SIZE_ARRAY) {
-                arrayNodes = new ArrayList<>();
+                arrayNodeChildren = new ArrayList<>();
                 for (i = 0; i < MAX_SIZE_ARRAY; i++) {
-                    arrayNodes.add(new PointerNode(graph.getLastId()+1,
+                    arrayNodeChildren.add(new PointerNode(graph.getLastId()+1,
                             (((CPointer) arrayNode.getCType()).getType())));
 
-                    graph.addNode(arrayNodes.get(arrayNodes.size()-1));
+                    graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
                     graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
 
                     generateArrayNodeTree((PointerNode) graph.getLastNode(), graph);
                 }
-                ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodes);
-                //arrayNodes.add(new PointerNode(++actualId, pointerNode.getVariable()));
+                ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodeChildren);
+                //arrayNodeChildren.add(new PointerNode(++actualId, pointerNode.getVariable()));
             }
         } else {    //End of the tree
-            arrayNodes = new ArrayList<>();
+            arrayNodeChildren = new ArrayList<>();
             for (int i = 0; i < MAX_SIZE_ARRAY; i++) {
                 if (arrayNodePointerType.getType() instanceof CPrimitive) {
-                    arrayNodes.add(new ScalarNode(graph.getLastId()+1, arrayNodePointerType.getType()));
+                    arrayNodeChildren.add(new ScalarNode(graph.getLastId()+1, arrayNodePointerType.getType()));
 
-                    graph.addNode(arrayNodes.get(arrayNodes.size()-1));
+                    graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
                     graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
                 } else if (arrayNodePointerType.getType() instanceof CStruct) {
                     //Search deepLevel of struct parent, located into parent's pointer
@@ -125,25 +128,25 @@ public class GraphGenerator {
 
                     if (pointerParent instanceof RootNode) {
                         structVariable = (CStruct) arrayNodePointerType.getType();
-                        arrayNodes.add(new StructNode(graph.getLastId()+1,
+                        arrayNodeChildren.add(new StructNode(graph.getLastId()+1,
                                 structVariable, 0));
 
-                        graph.addNode(arrayNodes.get(arrayNodes.size()-1));
+                        graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
                         graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
                     } else {
                         pointerParent = (StructNode) graphManager.getNodeParent(pointerNode, graph);
                         structVariable = (CStruct) pointerParent.getCType();
-                        arrayNodes.add(new StructNode(graph.getLastId()+1, pointerParent.getCType(),
+                        arrayNodeChildren.add(new StructNode(graph.getLastId()+1, pointerParent.getCType(),
                                 (((StructNode) pointerParent).getDeepStructLevel() + 1)));
 
-                        graph.addNode(arrayNodes.get(arrayNodes.size()-1));
+                        graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
                         graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
                     }
 
                     generateStructNodeTree((StructNode) graph.getLastNode(), structVariable.getStructVariables(), graph);
                 }
             }
-            ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodes);
+            ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodeChildren);
         }
     }
 

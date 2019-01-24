@@ -57,7 +57,7 @@ public class GASettings extends StandardSettings {
         parameters.put("scalarMutationProbability", scalarMutationProbability);
         parameters.put("numberOfMutants", numberOfMutants);
         scalarMutation = new ScalarMutation(parameters, graphList);
-        indexMutation = new IndexMutation(parameters);
+        indexMutation = new IndexMutation(parameters, graphList);
 
         /*if (!this.useMetaMutator) {
 	        mutation = new PolynomialMutationParams(parameters);

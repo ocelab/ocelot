@@ -101,7 +101,7 @@ public abstract class TestSuiteGenerator {
 
 				//double param = random.nextDouble() * (ranges[0].getMaximum() - ranges[0].getMinimum());
 				//param += ranges[0].getMinimum();
-				double param = (random.nextDouble() * 20000) - 10000;
+				double param = (random.nextDouble() * 200) - 100;
 				tmpNode.setValue(param);
 
 				nodes.add(tmpNode);

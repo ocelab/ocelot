@@ -25,16 +25,14 @@ public abstract class StandardProblem extends Problem {
 	protected boolean debug;
 	protected int numberOfArrays;
 	protected int arraySize;
-	
+
 	protected double[][] lowerLimits;
 	protected double[][] upperLimits;
 	
 	protected Map<Thread, CBridge> bridges;
-	protected Map<Thread, CBridgeStub> bridgesStub;
 	
 	public StandardProblem(List<Graph> graphList, Range<Double>[] pRanges) throws Exception {
 		this.bridges = new HashMap<Thread, CBridge>();
-		this.bridgesStub = new HashMap<Thread, CBridgeStub>();
 		//this.arraySize = pArraySize;
 
 		this.graphList = graphList;
@@ -122,17 +120,6 @@ public abstract class StandardProblem extends Problem {
 			this.bridges.put(Thread.currentThread(), result); 
 		}
 		
-		return result;
-	}
-
-	protected CBridgeStub getCurrentBridgeStub() {
-		CBridgeStub result = this.bridgesStub.get(Thread.currentThread());
-
-		if (result == null) {
-			result = new CBridgeStub(this.bridges.size(), 9, 0, 0);
-			this.bridgesStub.put(Thread.currentThread(), result);
-		}
-
 		return result;
 	}
 	

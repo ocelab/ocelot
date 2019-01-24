@@ -1,6 +1,7 @@
 package it.unisa.ocelot.genetic;
 
 import it.unisa.ocelot.c.types.CDouble;
+import it.unisa.ocelot.c.types.CInteger;
 import it.unisa.ocelot.c.types.CPointer;
 import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.encoding.graph.Edge;
@@ -132,10 +133,10 @@ public class VariableTranslator {
 				if (parameterNode instanceof ScalarNode) {
 					ScalarNode scalarParameterNode = (ScalarNode) parameterNode;
 
-					if (scalarParameterNode.getCType() instanceof CDouble) {
-						scalarValue.add(scalarParameterNode.getValue());
-					} else {
+					if (scalarParameterNode.getCType() instanceof CInteger) {
 						scalarValue.add((int)scalarParameterNode.getValue());
+					} else {
+						scalarValue.add(scalarParameterNode.getValue());
 					}
 				}
 
@@ -145,7 +146,6 @@ public class VariableTranslator {
 
 
 		//Sets up the three parameters return types
-		int numberOfVariables = this.solution.getDecisionVariables().length;
 		Object[][][] result = new Object[3][][];
 		result[0] = new Object[1][];
 		result[1] = new Object[pointerValue.size()][];

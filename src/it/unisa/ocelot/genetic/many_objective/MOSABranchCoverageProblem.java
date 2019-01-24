@@ -76,20 +76,10 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 		CBridge cBridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
 
-		int i = 0;
-		boolean error = true;
-		while (i++ < 10 && error) {
-			try {
-				//cBridgeStub.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
-				cBridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
-				error = false;
-			} catch (RuntimeException e) {
-				this.onError(solution, e);
-				//return -1;
-			}
-		}
-
-		if (i == 10 && error) {
+		try {
+			cBridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+		} catch (RuntimeException e) {
+			this.onError(solution, e);
 			return -1;
 		}
 
@@ -114,7 +104,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 
 			listeners.put(labeledEdge, edgeDistanceListener);
 			
-			//simulator.addListener(edgeDistanceListener);
+			simulator.addListener(edgeDistanceListener);
 		}
 		
 		simulator.simulate();

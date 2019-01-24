@@ -2,6 +2,7 @@ package it.unisa.ocelot.writer.check;
 
 import java.util.Arrays;
 
+import it.unisa.ocelot.genetic.VariableTranslator;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 import it.unisa.ocelot.c.instrumentor.CallGeneratorVisitor;
@@ -45,7 +46,10 @@ public class CheckTestCaseWriter extends TestCaseWriter {
 	
 	private String writeInitialization() {
 		String initialization = "";
-		
+
+		VariableTranslator variableTranslator = new VariableTranslator(null);
+		this.testCase.setParameters(variableTranslator.translateGraph(this.testCase.getGraph()));
+
 		Object[] values = this.testCase.getParameters()[0][0];
 		Object[][] arrays = this.testCase.getParameters()[1];
 		Object[] pointers = this.testCase.getParameters()[2][0];
