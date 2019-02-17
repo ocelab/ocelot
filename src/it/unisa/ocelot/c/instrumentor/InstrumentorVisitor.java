@@ -661,9 +661,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 		} else if (op1Type instanceof ICPointerType && op2Type instanceof ICPointerType) {
 			operationFunction = makeFunctionCall("_f_ocelot_" + pOperator+ "_pointer", operationArgs);
 		} else {
-			System.err.println("NOTE: assuming argument numeric. Fix for types: " + op1Type.getClass().getSimpleName() + "-" + op2Type.getClass().getSimpleName());
+			System.err.println("NOTE: assuming argument pointer. Fix for types: " + op1Type.getClass().getSimpleName() + "-" + op2Type.getClass().getSimpleName());
 			System.err.println("NOTE: origin: " + operand1.getRawSignature() + " --- " + operand2.getRawSignature());
-			operationFunction = makeFunctionCall("_f_ocelot_" + pOperator+ "_numeric", operationArgs);
+			operationFunction = makeFunctionCall("_f_ocelot_" + pOperator+ "_pointer", operationArgs);
 		}
 		
 		return operationFunction;

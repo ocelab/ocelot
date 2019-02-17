@@ -10,12 +10,20 @@ public class CType {
             message = "Pointer";
         }
 
-        if (this instanceof CStruct) {
-            message = "Struct";
+        else if (this instanceof CStruct) {
+            message = ((CStruct)this).getNameOfStruct();
         }
 
-        if (this instanceof CPrimitive) {
-            message = "Primitive type";
+        else if (this instanceof CInteger) {
+            message = "Integer";
+        }
+
+        else if (this instanceof CDouble) {
+            message = "Double";
+        }
+
+        else {
+            message = "Char";
         }
 
         return message;

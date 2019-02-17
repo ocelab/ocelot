@@ -58,72 +58,14 @@ public class CFGVisitor extends ASTVisitor {
 		MacroDefinerVisitor typesDefiner = new MacroDefinerVisitor(this.functionName, referencesVisitor.getExternalReferences());
 		tu.accept(typesDefiner);
 
-		CType[] parameterTypes = getFunctionParametersFromMacroDefinerVisitor(typesDefiner.getFunctionParameters(), null);
+		CType[] parameterTypes = typesDefiner.getFunctionParametersFromMacroDefinerVisitor
+				(typesDefiner.getFunctionParametersMap(), null, null);
+
 		this.graph.setParameterTypes(parameterTypes);
 
 		return super.visit(tu);
 	}
 
-	private CType [] getFunctionParametersFromMacroDefinerVisitor (List<IType> functionParameters, String nameOfStruct) {
-		CType [] parameters = new CType[functionParameters.size()];
-		for (int i = 0; i < functionParameters.size(); i++) {
-			CType cType = null;
-			//String type = mpacroDefinerVisitor.getFunctionParameters().get(i).toString();
-			IType type = functionParameters.get(i);
-
-			int numberOfPointer = 0;
-			if (type instanceof CPointerType) {
-				while (type instanceof CPointerType) {
-					numberOfPointer++;
-					type = ((CPointerType) type).getType();
-				}
-
-				type = getType(type);
-			}
-
-
-			if (type instanceof CStructure) {
-				if (nameOfStruct == null || type.equals(nameOfStruct)) {
-					VarStructTree tree = new VarStructTree(type.toString(), (CStructure)type);
-					List<StructNode> basics = tree.getBasicVariables();
-					List<IType> structTypeVariables = new ArrayList<>();
-					for (StructNode structNode : basics) {
-						structTypeVariables.add(structNode.type);
-					}
-
-					CType [] structParameters = getFunctionParametersFromMacroDefinerVisitor(structTypeVariables, type.toString());
-					cType = new CStruct(type.toString(), structParameters);
-				} else {
-					cType = new CStruct(type.toString());
-				}
-			}
-
-			else {
-				if (type.toString().equals("char")) {
-					cType = new CChar();
-				}
-
-				else if (type.toString().equals("int")) {
-					cType = new CInteger();
-				}
-
-				else if (type.toString().equals("double")) {
-					cType = new CDouble();
-				}
-			}
-
-			//Pointer checker
-			while (numberOfPointer-- > 0) {
-				cType = new CPointer(cType);
-			}
-
-
-			parameters[i] = cType;
-		}
-
-
-		return parameters;
-	}
 
 	private IType getType(IType type) {
 		while (type instanceof CTypedef || type instanceof CQualifierType) {

@@ -65,7 +65,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 *            The solution to evaluate
 	 */
 	@Override
-	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
+	public double evaluateSolution(Solution solution) throws JMException {
 		VariableTranslator translator = new VariableTranslator(solution);
 		Graph graph = translator.getGraphFromSolution(graphList);
 		Object[][][] arguments = translator.translateGraph(graph);
@@ -77,7 +77,7 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 		EventsHandler handler = new EventsHandler();
 
 		try {
-			cBridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
+			cBridge.getEvents(handler, graph);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
 			return -1;

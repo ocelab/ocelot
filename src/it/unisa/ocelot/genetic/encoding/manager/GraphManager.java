@@ -4,6 +4,8 @@ import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.graph.Edge;
 
+import java.util.ArrayList;
+
 public class GraphManager {
 
     public Node getNodeParent (Node pNode, Graph pGraph) {
@@ -27,5 +29,29 @@ public class GraphManager {
         }
 
         return parent;
+    }
+
+    public ArrayList<Node> children (Graph graph, Node parent) {
+        if (parent.getId() >= graph.getNodes().size()) {
+            return null;
+        }
+
+        ArrayList<Node> children = new ArrayList<>();
+
+        //Search incident
+        int index = 0;
+        for (int i = 0; i < graph.getEdges().size(); i++) {
+            if (graph.getEdges().get(i).getNodeFrom().getId() == parent.getId() &&
+                    graph.getEdges().get(i).getNodeTo().getId() > parent.getId()){
+                children.add(graph.getEdges().get(i).getNodeTo());
+            }
+
+            else if (graph.getEdges().get(i).getNodeTo().getId() == parent.getId() &&
+                    graph.getEdges().get(i).getNodeFrom().getId() > parent.getId()) {
+                children.add(graph.getEdges().get(i).getNodeFrom());
+            }
+        }
+
+        return children;
     }
 }

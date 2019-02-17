@@ -57,9 +57,9 @@ public class CDG_BasedProblem extends StandardProblem {
 		/*if (debug)
 			System.out.println(Utils.printParameters(arguments));*/
 
-		CBridgeStub cBridgeStub = (CBridgeStub) getCurrentBridge();
+		CBridge cBridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
-		cBridgeStub.getEvents(handler, graph);
+		cBridge.getEvents(handler, graph);
 
 		// listener
 		EdgeDistanceListener dominatorListener = new EdgeDistanceListener(this.controlFlowGraph, target, this.dominators);

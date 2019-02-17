@@ -30,9 +30,9 @@ public abstract class StandardSettings extends Settings {
 		populationSize = 100;
         maxEvaluations = 25000;
         crossoverProbability = 0.9;
-		mutationProbability = 0.02;
-		scalarMutationProbability = 0.01;
-		numberOfMutants = 0.3;
+		mutationProbability = 0.05;
+		scalarMutationProbability = 0.05;
+		numberOfMutants = 0.05;
         threads = 1;
 	}
 	

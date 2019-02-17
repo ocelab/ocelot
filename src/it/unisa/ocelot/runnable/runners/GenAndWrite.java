@@ -5,15 +5,16 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Set;
 
-import it.unisa.ocelot.simulator.CBridgeStub;
+import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import it.unisa.ocelot.serverSocket.ServerSocket;
+import it.unisa.ocelot.serverSocket.ServerSocketThread;
+import it.unisa.ocelot.serverSocket.SocketMakefileGenerator;
 import org.apache.commons.io.output.TeeOutputStream;
 
 import it.unisa.ocelot.TestCase;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
-import it.unisa.ocelot.c.types.CTypeHandler;
 import it.unisa.ocelot.conf.ConfigManager;
-import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.generators.TestSuiteGenerator;
 import it.unisa.ocelot.suites.generators.TestSuiteGeneratorHandler;
@@ -27,7 +28,10 @@ public class GenAndWrite {
 	public void run() {
 		try {
 			ConfigManager config = ConfigManager.getInstance();
-	
+
+			ServerSocketThread serverSocketThread = new ServerSocketThread();
+			serverSocketThread.start();
+
 			// Sets up the output file
 			File outputDirectory = new File(config.getOutputFolder());
 			outputDirectory.mkdirs();
@@ -40,20 +44,16 @@ public class GenAndWrite {
 			CFG cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 
 
-			
-			CTypeHandler typeHandler = new CTypeHandler(cfg.getParameterTypes());
-			CBridge.initialize(
-					typeHandler.getValues().size(),
-					typeHandler.getPointers().size(),
-					typeHandler.getPointers().size());
-	
-			
 			int mcCabePaths = cfg.edgeSet().size() - cfg.vertexSet().size() + 1;
 			System.out.println("Cyclomatic complexity: " + mcCabePaths);
 	
 			TestSuiteGenerator generator = TestSuiteGeneratorHandler.getInstance(config, cfg);
 			TestSuiteMinimizer minimizer = TestSuiteMinimizerHandler.getInstance(config, cfg);
-			
+
+			//Graph graph = generator.generateStartingGraphList().get(0);
+
+
+			//sendGraph(graph);
 			System.out.println("Generator: " + generator.getClass().getSimpleName());
 			System.out.println("Minimizer: " + minimizer.getClass().getSimpleName());
 			Set<TestCase> suite = generator.generateTestSuite();
@@ -62,7 +62,9 @@ public class GenAndWrite {
 			CoverageCalculator calculator = new CoverageCalculator(cfg);
 			
 			calculator.calculateCoverage(minimizedSuite);
-	
+
+			serverSocketThread.interrupt();
+
 			System.out.println("-------------------------------------------------------");
 			System.out.println("Minimized test cases: " + minimizedSuite.size());
 			System.out.println("Branch coverage achieved: " + calculator.getBranchCoverage());
@@ -85,4 +87,6 @@ public class GenAndWrite {
 			throw new RuntimeException(e);
 		}
 	}
+
+	private native void sendGraph(Graph graph);
 }

@@ -3,8 +3,8 @@ package it.unisa.ocelot.runnable;
 
 import it.unisa.ocelot.c.Builder;
 import it.unisa.ocelot.c.StandardBuilder;
+import it.unisa.ocelot.c.makefile.DynamicJNIMakefileGenerator;
 import it.unisa.ocelot.c.makefile.JNIMakefileGenerator;
-import it.unisa.ocelot.c.makefile.LinuxMakefileGenerator;
 import it.unisa.ocelot.conf.ConfigManager;
 //import it.unisa.ocelot.runnable.runners.ExecuteExperiment;
 //import it.unisa.ocelot.runnable.runners.ExecuteWholeCoverage;
@@ -131,10 +131,8 @@ public class Run {
 				config.getTestFunction(), 
 				config.getTestIncludePaths());
 		
-		//JNIMakefileGenerator generator = new DynamicMakefileGenerator(config);
-		JNIMakefileGenerator generator = new LinuxMakefileGenerator();
-		//JNIMakefileGenerator generator = new WindowsMakefileGenerator();
-		
+		JNIMakefileGenerator generator = new DynamicJNIMakefileGenerator();
+
 		for (String linkLibrary : config.getTestLink())
 			generator.addLinkLibrary(linkLibrary);
 		

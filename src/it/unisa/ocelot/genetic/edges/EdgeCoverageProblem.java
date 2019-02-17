@@ -68,7 +68,7 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 		Graph graph = this.getGraphFromSolution(solution);
 
 		//CBridge bridge = getCurrentBridge();
-		CBridgeStub cBridgeStub  = (CBridgeStub) getCurrentBridge();
+		CBridge cBridge  = getCurrentBridge();
 
 		EventsHandler handler = new EventsHandler();
 		EdgeDistanceListener bdalListener = new EdgeDistanceListener(cfg, target, dominators);
@@ -76,7 +76,7 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 		
 		try {
 			//bridge.getEvents(handler, arguments[0][0], arguments[1], arguments[2][0]);
-			cBridgeStub.getEvents(handler, graph);
+			cBridge.getEvents(handler, graph);
 		} catch (RuntimeException e) {
 			this.onError(solution, e);
 			return -1;

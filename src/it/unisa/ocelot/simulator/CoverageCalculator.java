@@ -32,10 +32,10 @@ public class CoverageCalculator {
 		this.coverageListener = new CoverageCalculatorListener(cfg);
 
 		for (Graph graph : pGraphList) {
-			CBridgeStub bridgeStub = new CBridgeStub();
+			CBridge bridge = new CBridge();
 			EventsHandler h = new EventsHandler();
 
-			bridgeStub.getEvents(h, graph);
+			bridge.getEvents(h, graph);
 
 			Simulator simulator = new Simulator(cfg, h.getEvents());
 

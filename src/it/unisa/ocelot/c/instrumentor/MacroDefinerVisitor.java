@@ -1,15 +1,12 @@
 package it.unisa.ocelot.c.instrumentor;
 
+import it.unisa.ocelot.c.types.*;
 import it.unisa.ocelot.conf.ConfigManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
-import it.unisa.ocelot.c.types.CPointer;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
@@ -42,6 +39,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 	private String functionName;
 	private String[] neededParameters;
 	private List<IType> functionParameters;
+	private LinkedHashMap<String, IType> functionParametersMap;
 	private Map<String, IParameter> parameters;
 	private Map<String, IType> externalReferences;
 	
@@ -60,6 +58,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		this.externalReferences = externalReferences;
 		
 		this.functionParameters = new ArrayList<IType>();
+		this.functionParametersMap = new LinkedHashMap<>();
 		
 		this.parameters = new HashMap<String, IParameter>();
 		
@@ -74,9 +73,95 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			throw new RuntimeException("No config file found!");
 		}
 	}
-	
+
+	public CType[] getFunctionParametersFromMacroDefinerVisitor (LinkedHashMap<String, IType> functionParametersMap, String nameOfStruct, String typeDefName) {
+		CType [] parameters = new CType[functionParametersMap.size()];
+		int i = 0;
+
+		for (Map.Entry<String, IType> entry : functionParametersMap.entrySet()) {
+			CType cType = null;
+
+			String nameOfVariable = entry.getKey();
+			IType type = entry.getValue();
+
+			String typedefName = typeDefName;
+
+			if (type instanceof CTypedef) {
+				typedefName = ((CTypedef) type).getName();
+				type = ((CTypedef) type).getType();
+			}
+
+			int numberOfPointer = 0;
+			if (type instanceof CPointerType) {
+				while (type instanceof CPointerType) {
+					numberOfPointer++;
+					type = ((CPointerType) type).getType();
+				}
+
+				if (type instanceof CTypedef) {
+					CTypedef typeDef = (CTypedef)type;
+					typedefName = typeDef.getName();
+				}
+
+				type = getType(type);
+			}
+
+
+			if (type instanceof CStructure) {
+				/*
+				Name of struct == null -> first structure
+				Name of struct != null -> method called from structure
+				!type.toString().equals(nameOfStruct) -> struct different
+				 */
+				if (nameOfStruct == null || !type.toString().equals(nameOfStruct)) {
+					VarStructTree tree = new VarStructTree(type.toString(), (CStructure)type);;
+					List<StructNode> basics = tree.getBasicVariables();
+
+					LinkedHashMap<String, IType> structTypeVariablesMap = new LinkedHashMap<>();
+					for (StructNode structNode : basics) {
+						structTypeVariablesMap.put(structNode.name, structNode.type);
+					}
+
+					CType [] structParameters = getFunctionParametersFromMacroDefinerVisitor(structTypeVariablesMap, type.toString(), typedefName);
+					cType = new CStruct(nameOfVariable, type.toString(), typedefName, structParameters);
+				} else {
+					cType = new CStruct(nameOfVariable, type.toString(), typedefName);
+				}
+			}
+
+			else {
+				if (type.toString().equals("char")) {
+					cType = new CChar(nameOfVariable);
+				}
+
+				else if (type.toString().equals("int")) {
+					cType = new CInteger(nameOfVariable);
+				}
+
+				else if (type.toString().equals("double")) {
+					cType = new CDouble(nameOfVariable);
+				}
+			}
+
+			//Pointer checker
+			while (numberOfPointer-- > 0) {
+				cType = new CPointer(cType);
+			}
+
+
+			parameters[i++] = cType;
+		}
+
+
+		return parameters;
+	}
+
 	public List<IType> getFunctionParameters() {
 		return functionParameters;
+	}
+
+	public LinkedHashMap<String, IType> getFunctionParametersMap() {
+		return functionParametersMap;
 	}
 
 	private IType getType(IType type) {
@@ -205,276 +290,25 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			if (!functionName.getRawSignature().equals(this.functionName))
 				return PROCESS_CONTINUE;
 
-			
-			String[] callParameters = new String[parametersStringTypes.length];
-			String macro = "";
-			
-			macro += "#define OCELOT_CORES " + this.config.getThreads() + "\n";
-			macro += "#define OCELOT_ARRAYS_SIZE " + this.config.getTestArraysSize() + "\n";
-			macro += "#include \"CBridge.h\"\n";
-			macro += "#define OCELOT_TYPES {";
-			List<String> elements = new ArrayList<>();
-			for (int i = 0; i < parametersStringTypes.length; i++) {
-				String parameterStringName = parametersStringNames[i].replaceAll("\\*\\s*", "");
-				IParameter parameterRealType = this.parameters.get(parameterStringName);
-				IType type = getType(parameterRealType.getType());
-
-
-				if (type instanceof CStructure) {
-					//Handles structures with pointers
-					VarStructTree tree = new VarStructTree("", (CStructure)type);
-					List<StructNode> basics = tree.getBasicVariables();
-					for (StructNode var : basics) {
-//						
-						if (var.isPointer()) {
-							System.err.println("We can't handle structures with pointers yet.");
-//							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-//							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-//							pointerArgument++;
-//							//TODO Test!
-						}
-					}
-//					callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-					
-				} else {
-					if (parametersStringNames[i].contains("*")) {
-						IType realType = type;
-						if (type instanceof CPointerType) {
-							realType = getType(((CPointerType) type).getType());
-						}
-						
-						if (realType instanceof CStructure) {
-							//Just don't do anything...
-						} else {
-							String typeString = type.toString().replaceAll("\\*", "");
-							typeString = typeString.replaceAll("const", "");
-							typeString = typeString.replaceAll(" ", "");
-							typeString = typeString.toUpperCase();
-							
-							elements.add("TYPE_"+ typeString);
-						}
-					}
-				}
-			}
-			
-			for (Entry<String, IType> type : this.externalReferences.entrySet()) {
-				IType realType = getType(type.getValue());
-				if (realType instanceof CPointerType) {
-					String typeString = realType.toString().replaceAll("\\*", "");
-					typeString = typeString.replaceAll("const", "");
-					typeString = typeString.replaceAll(" ", "");
-					typeString = typeString.toUpperCase();
-					
-					elements.add("TYPE_"+ typeString);
-				}
-			}
-			
-			
-			macro += StringUtils.join(elements, ',');
-			macro += "}\n";
-			macro += "#define EXECUTE_OCELOT_TEST ";
-			int outputArgument = 0;
-			int inputArgument = 0;
-			int pointerArgument = 0;
 
 			for (int i = 0; i < parametersStringNames.length; i++) {
 				String parameterStringName = parametersStringNames[i].replaceAll("\\*\\s*", "");
-				String parameterStringType = null;
-				int pointers = 0;
-				for (Map.Entry<String, IParameter> entry : parameters.entrySet()) {
-					if (parameterStringName.equals(entry.getKey())) {
-						parameterStringType = entry.getValue().getType().toString().replaceAll("\\*\\s*", "").trim();
-						pointers = entry.getValue().getType().toString().replaceAll(" +", "").length() - parameterStringType.length();
-						break;
-					}
-				}
 
 				IParameter parameterRealType = this.parameters.get(parameterStringName);
 				IType type = getType(parameterRealType.getType());
 
 				this.functionParameters.add(type);
-
-				//Macro creation
-				//Struct type: extract fileds from structure, in order to add them to macro
-				if (type instanceof CStructure) {
-					macro += parameterStringType; //Type
-					macro += " __arg"+outputArgument+";\\\n";
-					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
-					List<StructNode> basics = tree.getBasicVariables();
-					for (StructNode var : basics) {
-						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
-
-						if (!var.isPointer()) {
-							macro += fieldType;
-							macro += " __str"+inputArgument;
-							macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-							macro += var.getCompleteName() + " = __str" + inputArgument + ";\\\n";
-
-							inputArgument++;
-						} else {
-							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-							pointerArgument++;
-							//TODO Test!
-						}
-					}
-					callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-				}
-
-				//Pointer type: extract the real type from pointer
-				else if (type instanceof CPointer) {
-					IType realType = getType(type);
-
-					if (realType instanceof CStructure) {
-						macro += parameterStringType.replace("const", ""); //Type
-						macro += " __arg"+outputArgument+";\\\n";
-						VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)realType);
-
-						List<StructNode> basics = tree.getBasicVariables();
-						for (StructNode var : basics) {
-							String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
-
-							if (!var.isPointer()) {
-								macro += fieldType;
-								macro += " __str"+inputArgument;
-								macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-								macro += var.getCompleteNameWithPointers() + " = __str" + inputArgument + ";\\\n";
-
-								inputArgument++;
-							} else {
-								String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-								macro += var.getCompleteNameWithPointers() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-								pointerArgument++;
-								//TODO Test!
-							}
-						}
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-					} else {
-						if (pointers == 0) {
-							macro += parameterStringType;//Type
-							macro += " __arg" +outputArgument; //Name
-							macro += " = OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-
-							callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-							inputArgument++;
-						} else {
-							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "_v_ocelot_pointers[(int)(" + argcall + ")]";
-							pointerArgument++;
-						}
-					}
-				}
-
-				else {
-					if (pointers == 0) {
-						macro += parameterStringType;//Type
-						macro += " __arg" +outputArgument; //Name
-						macro += " = OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-						inputArgument++;
-					} else {
-						String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "_v_ocelot_pointers[(int)(" + argcall + ")]";
-						pointerArgument++;
-					}
-				}
-				outputArgument++;
+				this.functionParametersMap.put(parameterStringName, type);
 			}
 
-			//DA MODIFICARE
-
-			/*for (int i = 0; i < parametersStringTypes.length; i++) {
-				String parameterStringName = parametersStringNames[i].replaceAll("\\*\\s*", "");
-				String parameterStringType = parametersStringTypes[i];
-
-				IParameter parameterRealType = this.parameters.get(parameterStringName);				
-				IType type = getType(parameterRealType.getType());
-				IType realType = type;
-
-				if (type instanceof CPointerType) {
-					realType = getType(((CPointerType) type).getType());
-				}
-				int pointers = parametersStringNames[i].length() - parametersStringNames[i].replaceAll("\\*", "").length();
-				
-				if (type instanceof CStructure) {
-					macro += parameterStringType; //Type
-					macro += " __arg"+outputArgument+";\\\n";
-					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)type);
-					List<StructNode> basics = tree.getBasicVariables();
-					for (StructNode var : basics) {
-						this.functionParameters.add(var.type);
-						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
-						
-						if (!var.isPointer()) {
-							macro += fieldType;
-							macro += " __str"+inputArgument;
-							macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-							macro += var.getCompleteName() + " = __str" + inputArgument + ";\\\n";
-						
-							inputArgument++;
-						} else {
-							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-							pointerArgument++;
-							//TODO Test!
-						}
-					}
-					callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-				} else if (realType instanceof CStructure) {
-					macro += parameterStringType.replace("const", ""); //Type
-					macro += " __arg"+outputArgument+";\\\n";
-					VarStructTree tree = new VarStructTree("__arg"+outputArgument, (CStructure)realType);
-					
-					List<StructNode> basics = tree.getBasicVariables();
-					for (StructNode var : basics) {
-						this.functionParameters.add(var.type);
-						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
-						
-						if (!var.isPointer()) {
-							macro += fieldType;
-							macro += " __str"+inputArgument;
-							macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-							macro += var.getCompleteNameWithPointers() + " = __str" + inputArgument + ";\\\n";
-						
-							inputArgument++;
-						} else {
-							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							macro += var.getCompleteNameWithPointers() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-							pointerArgument++;
-							//TODO Test!
-						}
-					}
-					callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-				} else {
-					this.functionParameters.add(type);
-					
-					if (pointers == 0) {
-						macro += parameterStringType;//Type
-						macro += " __arg" +outputArgument; //Name
-						macro += " = OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-						
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "__arg" + outputArgument;
-						inputArgument++;
-					} else {
-						String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-						callParameters[outputArgument] = StringUtils.repeat('&', pointers) + "_v_ocelot_pointers[(int)(" + argcall + ")]";
-						pointerArgument++;
-					}
-				}
-				outputArgument++;
-			}*/
 			
 			for (Entry<String, IType> entry : this.externalReferences.entrySet()) {
 				IType type = entry.getValue();
 				IType realType = type;
 				String variableName = entry.getKey();
 				
-				int pointers = 0;
-				
 				while (realType instanceof CPointerType) {
 					realType = ((CPointerType)realType).getType();
-					pointers++;
 				}
 				
 				if (realType instanceof CStructure) {
@@ -482,41 +316,13 @@ public class MacroDefinerVisitor extends ASTVisitor {
 					List<StructNode> basics = tree.getBasicVariables();
 					for (StructNode var : basics) {
 						this.functionParameters.add(var.type);
-						String fieldType = var.type.toString().replaceAll("\\*\\s*", "");
-						
-						if (!var.isPointer()) {
-							macro += fieldType;
-							macro += " __str"+inputArgument;
-							macro += " = (" + fieldType +")OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-							macro += var.getCompleteName() + " = __str" + inputArgument + ";\\\n";
-						
-							inputArgument++;
-						} else {
-							String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-							macro += var.getCompleteName() + " = " + "&_v_ocelot_pointers[(int)(" + argcall + ")];\\\n";
-							pointerArgument++;
-							//TODO Test!
-						}
 					}
 				} else {
 					this.functionParameters.add(type);
-					
-					if (pointers == 0) {
-						macro += variableName + " = OCELOT_NUM(OCELOT_ARGUMENT_VALUE(" + inputArgument + "));\\\n"; //Assign
-						
-						inputArgument++;
-					} else {
-						String argcall = "OCELOT_NUM(OCELOT_ARGUMENT_POINTER(" + pointerArgument + "))";
-						macro += variableName + " = &_v_ocelot_pointers[(int)(" + argcall + ")];\\\n"; //Assign
-						pointerArgument++;
-					}
 				}
 			}
-
-			macro += "OCELOT_TESTFUNCTION (" + StringUtils.join(callParameters, ",") + ");";
-
-			this.callMacro = macro;
 		}
+
 		return result;
 	}
 	

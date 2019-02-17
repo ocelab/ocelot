@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "pointers.h"
-#include "lists.h"
+#include "Event.h"
 
 #ifndef _Included_OcelotHeader
 #define _Included_OcelotHeader
@@ -22,22 +22,13 @@ extern "C" {
 
 extern _t_ocelot_array *_v_ocelot_pointers;
 
-typedef struct {
-	int kind;
-	int choice;
-	double distanceTrue;
-	double distanceFalse;
-} _T_ocelot_event;
+Event *events;
+Call *calls;
 
-typedef struct {
-	int kind;
-	int choice;
-	double distance;
-	double chosen;
-} _T_ocelot_event_case;
 
 void _f_ocelot_init();
 void _f_ocelot_end();
+
 /*
  * Traces the branches
  */
@@ -81,8 +72,6 @@ double _f_ocelot_or(double, double);
 double _f_ocelot_istrue(double);
 double _f_ocelot_isfalse(double);
 
-_T_ocelot_list *_v_ocelot_events;
-_T_ocelot_list *_v_ocelot_fcalls;
 
 #ifdef __cplusplus
 }

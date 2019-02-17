@@ -32,6 +32,16 @@ public class Graph {
         return nodes;
     }
 
+    public Node [] getStaticNodes() {
+        Node [] nodesToReturn = new Node[nodes.size()];
+
+        for (int i = 0; i < nodes.size(); i++) {
+            nodesToReturn[i] = nodes.get(i);
+        }
+
+        return nodesToReturn;
+    }
+
     public ArrayList<Node> getIncidentNodes (Node node) {
         ArrayList<Node> incidentNodes = new ArrayList<>();
 
@@ -54,6 +64,16 @@ public class Graph {
 
     public ArrayList<Edge> getEdges() {
         return edges;
+    }
+
+    public Edge [] getStaticEdges() {
+        Edge [] edgesToReturn = new Edge[edges.size()];
+
+        for (int i = 0; i < edges.size(); i++) {
+            edgesToReturn[i] = edges.get(i);
+        }
+
+        return edgesToReturn;
     }
 
     public void addEdge (Edge pEdge) {

@@ -6,7 +6,6 @@ import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
 import it.unisa.ocelot.simulator.CBridge;
-import it.unisa.ocelot.simulator.CBridgeStub;
 import it.unisa.ocelot.simulator.SimulationException;
 
 import jmetal.core.Variable;
@@ -85,6 +84,10 @@ public abstract class StandardProblem extends Problem {
 
 	public List<Graph> getGraphList() {
 		return graphList;
+	}
+
+	public void setGraphList(List<Graph> graphList) {
+		this.graphList = graphList;
 	}
 
 	public void setDebug(boolean debug) {

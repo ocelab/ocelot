@@ -5,7 +5,8 @@ public class CInteger extends CPrimitive {
     private boolean shortFlag;
     private boolean longFlag;
 
-    public CInteger () {
+    public CInteger (String pName) {
+        super(pName);
         this.longFlag = false;
         this.shortFlag = false;
         this.signedFlag = true;

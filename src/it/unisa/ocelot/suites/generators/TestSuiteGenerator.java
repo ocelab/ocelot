@@ -9,6 +9,7 @@ import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.graph.ScalarNode;
+import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
@@ -32,7 +33,7 @@ public abstract class TestSuiteGenerator {
 
 	private Range<Double>[] ranges;
 
-	protected List<Graph> graphList;
+	protected ArrayList<Graph> graphList;
 	
 	@SuppressWarnings("rawtypes")
 	public TestSuiteGenerator(CFG pCFG) {
@@ -81,10 +82,11 @@ public abstract class TestSuiteGenerator {
 			benchmarkCalculator.removeLast();
 	}
 
-	public List<Graph> generateStartingGraphList () {
-		List<Graph> graphList = new ArrayList<>();
+	public ArrayList<Graph> generateStartingGraphList () {
+		ArrayList<Graph> graphList = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			graphList.add(generateRandomGraph(cfg.getTypeGraph()));
+			Graph randomGraph = generateRandomGraph(cfg.getTypeGraph());
+			graphList.add(randomGraph);
 		}
 
 		return graphList;
@@ -101,7 +103,7 @@ public abstract class TestSuiteGenerator {
 
 				//double param = random.nextDouble() * (ranges[0].getMaximum() - ranges[0].getMinimum());
 				//param += ranges[0].getMinimum();
-				double param = (random.nextDouble() * 200) - 100;
+				double param = (random.nextDouble() * 20000) - 10000;
 				tmpNode.setValue(param);
 
 				nodes.add(tmpNode);
@@ -109,12 +111,7 @@ public abstract class TestSuiteGenerator {
 		}
 
 
-		Graph graph = null;
-		try {
-			graph = (Graph) cfg.getTypeGraph().clone();
-		} catch (CloneNotSupportedException e) {
-			System.err.println("Impossible to clone Graph");;
-		}
+		Graph graph = GraphGenerator.generateGraphFromFunction(cfg.getParameterTypes());
 
 		for (int i = 0; i < nodes.size(); i++) {
 			int j = 0;

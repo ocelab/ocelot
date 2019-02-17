@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import it.unisa.ocelot.genetic.StandardProblem;
+import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -134,16 +136,26 @@ public class MOSA extends OcelotAlgorithm {
 		Solution newSolution;
 		for (int i = 0; i < populationSize; i++) {
 			newSolution = new Solution(problem_);
-			problem_.evaluate(newSolution);
-			evaluations++;
 			population.add(newSolution);
+		}
+
+		resetPopulation(population);
+
+		for (int i = 0; i < populationSize; i++) {
+			problem_.evaluate(population.get(i));
+			evaluations++;
 		}
 
 		// store every T.C. that covers previously uncovered branches in the
 		// archive
 		this.updateArchive(population, evaluations);
 
+		System.out.print("Evaluation done: " + (evaluations+1) + " of " + maxEvaluations);
 		while (evaluations < maxEvaluations && calculateCoverage() < maxCoverage) {
+
+			updateGraphList(population);
+			resetPopulation(population);
+
 			offspringPopulation = new SolutionSet(populationSize);
 			Solution[] parents = new Solution[2];
 
@@ -215,11 +227,34 @@ public class MOSA extends OcelotAlgorithm {
 			this.updateArchive(population, evaluations);
 			evaluations++;
 
+			System.out.print("\rEvaluation done: " + (evaluations+1) + " of " + maxEvaluations);
 		}// while
 		
 		this.algorithmStats.setEvaluations(evaluations);
 
 		return this.archive;
+	}
+
+	private void resetPopulation(SolutionSet population) throws JMException {
+		for (int i = 0; i < population.size(); i++) {
+			for (int j = 0; j < population.get(i).getDecisionVariables().length; j++) {
+				population.get(i).getDecisionVariables()[j].setValue(i);
+			}
+		}
+	}
+
+	private void updateGraphList (SolutionSet population) throws JMException {
+		StandardProblem sp = (StandardProblem)problem_;
+		List<Graph> graphList = sp.getGraphList();
+		List<Graph> newGraphList = new ArrayList<>();
+
+		for (int i = 0; i < population.size(); i++) {
+			VariableTranslator variableTranslator = new VariableTranslator(population.get(i));
+			Graph newGraph = variableTranslator.getGraphFromSolution(graphList);
+			newGraphList.add(newGraph);
+		}
+
+		sp.setGraphList(newGraphList);
 	}
 
 	/**
