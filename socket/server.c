@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
             Event *eventList = executeFunction(functionParameters, &eventSize);
 
             //Crash simulation
-            if (i == 35666) {
+            if (i == 100000) {
                 abort();
             }
 

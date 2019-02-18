@@ -30,6 +30,7 @@ public class GenAndWrite {
 			ConfigManager config = ConfigManager.getInstance();
 
 			ServerSocketThread serverSocketThread = new ServerSocketThread();
+			serverSocketThread.initialize();
 			serverSocketThread.start();
 
 			// Sets up the output file

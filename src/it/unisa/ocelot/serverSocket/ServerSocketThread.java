@@ -18,8 +18,6 @@ public class ServerSocketThread extends Thread {
 
         this.lock = new ReentrantLock();
         this.pid = -1;
-
-        initialize();
     }
 
 
@@ -33,12 +31,10 @@ public class ServerSocketThread extends Thread {
                 //Reboot
                 pid = serverSocket.startServer();
                 System.out.println("New Server PID Process: " + pid);
-            } else {
-                System.out.println("Server PID Process: " + pid);
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -86,7 +82,7 @@ public class ServerSocketThread extends Thread {
 
             String strLine = null;
             while ((strLine= bReader.readLine()) != null) {
-                System.out.println(strLine);
+                //System.out.println(strLine);
                 if (strLine.contains(" " + pid + " ")) {
                     return true;
                 }
@@ -94,7 +90,7 @@ public class ServerSocketThread extends Thread {
 
             return false;
         } catch (Exception ex) {
-            return true;
+            return false;
         }
     }
 

@@ -14,6 +14,15 @@ int createSocket(int port) {
     if (socket_desc == -1) {
         printf("Could not create socket");
     }
+
+    if (setsockopt(socket_desc, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0) {
+        printf("setsockopt(SO_REUSEADDR) failed!");
+    }
+
+    if (setsockopt(socket_desc, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int)) < 0) {
+        printf("setsockopt(SO_REUSEPORT) failed!");
+    }
+
     //puts("Socket created");
 
     bzero(&servaddr, sizeof (servaddr));
