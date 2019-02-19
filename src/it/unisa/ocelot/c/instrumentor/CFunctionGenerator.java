@@ -44,6 +44,12 @@ public class CFunctionGenerator {
             }
         }
 
+        code += "\n";
+
+        code += generateFreeParametersMethod();
+
+        code += "\n";
+
         code += "double absValue(double value) {\n" +
                 "    if (value < 0)\n" +
                 "        return value * (-1);\n" +
@@ -101,6 +107,10 @@ public class CFunctionGenerator {
             }
         }
 
+        code += "\n";
+
+        code += "void freeParameters (FunctionParameters functionParameters);\n";
+
         code += "\ndouble absValue(double value);";
 
         return code;
@@ -113,12 +123,12 @@ public class CFunctionGenerator {
                 "    \n";
 
         //Parameter section
-        ArrayList<Node> paramterNodes = graphManager.children(graph, graph.getNode(0));
-        for (int i = 0; i < paramterNodes.size(); i++) {
+        ArrayList<Node> parameterNodes = graphManager.children(graph, graph.getNode(0));
+        for (int i = 0; i < parameterNodes.size(); i++) {
             //Variable info
-            String variableName = getName(paramterNodes.get(i).getCType());
-            String typeName = getTypeName(paramterNodes.get(i).getCType());
-            String pointerString = getPointerString(paramterNodes.get(i).getCType());
+            String variableName = getName(parameterNodes.get(i).getCType());
+            String typeName = getTypeName(parameterNodes.get(i).getCType());
+            String pointerString = getPointerString(parameterNodes.get(i).getCType());
 
             code += "    functionParameters." + variableName +
                     " = extractParameter_" + typeName + pointerString + "(graph, variableNodes[" + i + "]);\n";
@@ -325,6 +335,21 @@ public class CFunctionGenerator {
         return code;
     }
 
+    private String generateFreeParametersMethod () {
+        String code = "void freeParameters (FunctionParameters functionParameters) {\n";
+
+        //Parameter section
+        ArrayList<Node> parameterNodes = graphManager.children(graph, graph.getNode(0));
+        for (int i = 0; i < parameterNodes.size(); i++) {
+            //Variable info
+            String variableName = getName(parameterNodes.get(i).getCType());
+            code += "    free(functionParameters." + variableName + ");\n";
+        }
+
+        code += "}\n";
+
+        return code;
+    }
 
 
 

@@ -53,30 +53,26 @@ int main(int argc, char** argv) {
 
             graph.edges = malloc(sizeof(Edge) * graph.sizeEdges);
             read_size = recv(client_sock, graph.edges, (sizeof(Edge) * graph.sizeEdges), 0);
-
-
+            
             //Get parameters
             FunctionParameters functionParameters = extractParametersFromGraph(graph);
-
 
             //Execute function
             int eventSize = 0;
             Event *eventList = executeFunction(functionParameters, &eventSize);
 
-            //Crash simulation
-            if (i == 100000) {
-                abort();
-            }
-
             //Send events to client
             write(client_sock, &eventSize, sizeof(int));
             write(client_sock, eventList, (sizeof(Event) * eventSize));
-
+            
+            /*if (i > 0) {
+                printf("\r");
+            }
+            printf("Client: %d", i++);*/
 
             //Free memory
             free(eventList);
-            free(functionParameters.d);
-            free(functionParameters.str);
+            freeParameters(functionParameters);
             free(graph.nodes);
             free(graph.edges);
 

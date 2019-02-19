@@ -16,10 +16,10 @@ int sizeEventList(Event *events) {
     return size;
 }
 
-int sizeCallList(Call* calls) {
+int sizeCallList(CallList *list) {
     int size = 0;
 
-    Call *actualCall = calls;
+    Call *actualCall = list->head;
 
     while (actualCall != NULL) {
         actualCall = actualCall->next;
@@ -65,30 +65,31 @@ Event* removeFirstEventElement(Event *events) {
     }
 
     events = events->next;
+    
     return;
 }
 
-void addCall(Call *calls, Call * call) {
-    if (calls == NULL) {
-        calls = call;
+void addCall(CallList *list, Call *call) {
+    if (list->head == NULL) {
+        list->head = call;
         return;
     }
+    
+    Call *currentCall = list->head;
 
-    Call *nextCall = calls->next;
-
-    while (nextCall != NULL) {
-        nextCall = nextCall->next;
+    while (currentCall->next != NULL) {
+        currentCall = currentCall->next;
     }
 
-    nextCall = call;
+    currentCall->next = call;
 }
 
-Call* getCall(Call *calls, int index) {
-    if (calls == NULL) {
+Call* getCall(CallList *list, int index) {
+    if (list == NULL) {
         return NULL;
     }
 
-    Call *callToReturn = calls;
+    Call *callToReturn = list->head;;
     int i = 0;
 
     while (callToReturn != NULL && i++ < index) {
@@ -98,25 +99,25 @@ Call* getCall(Call *calls, int index) {
     return callToReturn;
 }
 
-void removeCall(Call* calls, int index) {
-    if (calls == NULL) {
+void removeCall(CallList *list, int index) {
+    if (list == NULL || list->head == NULL) {
         return;
     }
 
     //Remove first element
     if (index == 0) {
-        calls = calls->next;
+        list->head = list->head->next;
+        
         return;
     }
 
-    Call *actualCall = calls;
-    Call *previousCall = NULL;
+    Call *actualCall = list->head->next;
+    Call *previousCall = list->head;
 
     int i = 0;
     while (actualCall != NULL && i < index) {
         previousCall = actualCall;
         actualCall = actualCall->next;
-
         i++;
     }
 
@@ -124,4 +125,6 @@ void removeCall(Call* calls, int index) {
         return;
 
     previousCall->next = actualCall->next;
+    
+    printf("Size after remove: %d\n", sizeCallList(list));
 }

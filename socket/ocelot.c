@@ -4,11 +4,17 @@
 void _f_ocelot_init() {
     events = malloc(sizeof(Event));
     events->next = NULL;
+    
+    callList = malloc(sizeof(CallList));
+    callList->head = NULL;
 }
 
 void _f_ocelot_end() {
     free(events);
     events = NULL;
+    
+    free(callList);
+    callList = NULL;
 }
 
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
@@ -23,7 +29,6 @@ int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
     event->next = NULL;
     
     addEvent(events, event);
-    
     return result;
 }
 
@@ -42,13 +47,13 @@ int _f_ocelot_trace_case(int branch, double distanceTrue, int isChosen) {
 }
 
 double _f_ocelot_reg_fcall_numeric(double fcall, int howMany) {
-    //printf("Function call numeric");
     int i;
     for (i = 0; i < howMany; i++) {
         Call *call = malloc(sizeof(Call));
         call->value = fcall;
         call->next = NULL;
-        addCall(calls, call);
+        
+        addCall(callList, call);
     }
     
     //fprintf(stderr, "\n\nAllocated. Size = %d",OCLIST_SIZE(_v_ocelot_fcalls));
@@ -56,23 +61,22 @@ double _f_ocelot_reg_fcall_numeric(double fcall, int howMany) {
 }
 
 double _f_ocelot_reg_fcall_pointer(void* fcall, int howMany) {
-    //printf("Function call pointer");
     int i;
     for (i = 0; i < howMany; i++) {
         Call *call = malloc(sizeof(Call));
         call->value = *(double*)fcall;
         call->next = NULL;
-        addCall(calls, call);
+        addCall(callList, call);
     }
     
     return (double) *(double*) fcall;
 }
 
 double _f_ocelot_get_fcall() {
-    if (sizeCallList(calls) != 0) {
-        Call *call = getCall(calls, 0);
+    if (sizeCallList(callList) != 0) {
+        Call *call = getCall(callList, 0);
         double element = call->value;
-        removeCall(calls, 0);
+        removeCall(callList, 0);
         return element;
     } else {
         fprintf(stderr, "Empty function queue!\n");

@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "pointers.h"
 #include "Event.h"
 
 #ifndef _Included_OcelotHeader
@@ -20,10 +19,9 @@ extern "C" {
 
 #define OCELOD_DEREF(type, variable) ((type)*((double*)variable))
 
-extern _t_ocelot_array *_v_ocelot_pointers;
 
 Event *events;
-Call *calls;
+CallList *callList;
 
 
 void _f_ocelot_init();

@@ -5,11 +5,19 @@ import java.util.ArrayList;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
+import it.unisa.ocelot.c.compiler.GCC;
 import it.unisa.ocelot.c.instrumentor.CFunctionGenerator;
+import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
+import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
+import it.unisa.ocelot.c.instrumentor.MacroDefinerVisitor;
 import org.apache.commons.io.IOUtils;
 
 import it.unisa.ocelot.conf.ConfigManager;
 import it.unisa.ocelot.util.Utils;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIncludeStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.core.runtime.CoreException;
 
 public class StandardBuilder extends Builder {
@@ -40,9 +48,9 @@ public class StandardBuilder extends Builder {
 			throw new BuildingException("No output stream specified");
 
 		try {
-			//this.stream.print("Instrumenting C file... \n");
-			//instrument();
-			//this.stream.println("Done!\n");
+			this.stream.print("Instrumenting C file... \n");
+			instrument();
+			this.stream.println("Done!\n");
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BuildingException(e.getMessage());
@@ -87,6 +95,60 @@ public class StandardBuilder extends Builder {
 		}
 
 		this.stream.println("\nEverything done.");
+	}
+
+	private void instrument() throws Exception {
+		String code = Utils.readFile(this.testFilename);
+
+		IASTTranslationUnit translationUnit = GCC.getTranslationUnit(
+				this.testFilename,
+				this.testIncludes).copy();
+
+		IASTPreprocessorStatement[] macros =  translationUnit.getAllPreprocessorStatements();
+
+		ExternalReferencesVisitor referencesVisitor = new ExternalReferencesVisitor(this.testFunction);
+		translationUnit.accept(referencesVisitor);
+
+		InstrumentorVisitor instrumentor = new InstrumentorVisitor(this.testFunction);
+		MacroDefinerVisitor macroDefiner = new MacroDefinerVisitor(this.testFunction, referencesVisitor.getExternalReferences());
+
+		//NOTE: macroDefine MUST preceed instrumentor in visit
+		translationUnit.accept(macroDefiner);
+		translationUnit.accept(instrumentor);
+
+		it.unisa.ocelot.c.compiler.writer.ASTWriter writer = new it.unisa.ocelot.c.compiler.writer.ASTWriter();
+
+		String outputCode = writer.write(translationUnit);
+
+		StringBuilder result = new StringBuilder();
+		for (IASTPreprocessorStatement macro : macros) {
+			if (macro instanceof IASTPreprocessorIncludeStatement) {
+				IASTPreprocessorIncludeStatement include = (IASTPreprocessorIncludeStatement)macro;
+				if (include.isSystemInclude())
+					result.append(macro.getRawSignature()).append("\n");
+			} else
+				result.append(macro.getRawSignature()).append("\n");
+		}
+		result.append("#include \"ocelot.h\"\n");
+		result.append(outputCode);
+
+		Utils.writeFile("socket/main.c", result.toString());
+
+		StringBuilder mainHeader = new StringBuilder();
+		mainHeader.append("#include \"ocelot.h\"\n");
+		mainHeader.append("#include <stdio.h>\n");
+		mainHeader.append("#include <math.h>\n");
+		for (IASTNode typedef : instrumentor.getTypedefs()) {
+			mainHeader.append(writer.write(typedef));
+			mainHeader.append("\n");
+		}
+
+		mainHeader.append("#define OCELOT_TESTFUNCTION ").append(this.testFunction).append("\n");
+
+		Utils.writeFile("socket/main.h", mainHeader.toString());
+
+		this.callMacro = macroDefiner.getCallMacro();
+		this.externDeclarations = referencesVisitor.getExternalDeclarations();
 	}
 
 }

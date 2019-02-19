@@ -22,13 +22,17 @@ typedef struct {
     struct Call *next;
 } Call;
 
+typedef struct {
+    Call *head;
+} CallList;
+
 int sizeEventList(Event* events);
-int sizeCallList(Call* calls);
+int sizeCallList(CallList *list);
 
 void addEvent(Event* events, Event* event);
 Event* getEvent(Event* eventList, int index);
 Event* removeFirstEventElement(Event *events);
 
-void addCall(Call* calls, Call* call);
-Call* getCall(Call* calls, int index);
-void removeCall(Call* calls, int index);
+void addCall(CallList *list, Call* call);
+Call* getCall(CallList *list, int index);
+void removeCall(CallList *list, int index);

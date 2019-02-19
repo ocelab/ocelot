@@ -4,46 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTArraySubscriptExpression;
-import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
-import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
-import org.eclipse.cdt.core.dom.ast.IASTCastExpression;
-import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTConditionalExpression;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFieldReference;
-import org.eclipse.cdt.core.dom.ast.IASTForStatement;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
-import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
-import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.IASTTypeIdExpression;
-import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
-import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
-import org.eclipse.cdt.core.dom.ast.IBasicType;
-import org.eclipse.cdt.core.dom.ast.IEnumeration;
-import org.eclipse.cdt.core.dom.ast.IType;
+import org.eclipse.cdt.core.dom.ast.*;
 import org.eclipse.cdt.core.dom.ast.c.ICPointerType;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompositeTypeSpecifier;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTCompoundStatement;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTExpressionStatement;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionCallExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTIdExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTLiteralExpression;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTName;
-import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
+import org.eclipse.cdt.core.parser.IToken;
+import org.eclipse.cdt.internal.core.dom.parser.c.*;
 import org.eclipse.cdt.internal.core.dom.rewrite.astwriter.ASTWriter;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -176,7 +140,28 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	public IASTExpression transformDistanceExpression(IASTExpression expression, boolean pNegation, boolean pTransPerformed) {
+		//Fix pointer with not operator
+		if (expression instanceof IASTUnaryExpression) {
+			IType opType = getType(((IASTUnaryExpression) expression).getOperand());
+			if (opType instanceof ICPointerType) {
+				//Artificial binary expression
+				IASTExpression tmpExpression = new CASTBinaryExpression();
+				((CASTBinaryExpression) tmpExpression).setOperator(IASTBinaryExpression.op_equals);
+				((CASTBinaryExpression) tmpExpression).setOperand1(((IASTUnaryExpression) expression).getOperand());
+
+				//Operand 0
+				IASTExpression operator0 = new CASTLiteralExpression();
+				char [] value = new char[1];
+				value[0] = '0';
+				((CASTLiteralExpression) operator0).setValue(value);
+				((CASTBinaryExpression) tmpExpression).setOperand2(operator0);
+
+				expression = tmpExpression;
+			}
+		}
+
 		if (expression instanceof IASTBinaryExpression) {
+
 			IASTBinaryExpression realExpression = (IASTBinaryExpression)expression;
 			if (realExpression.getOperator() == IASTBinaryExpression.op_equals)
 				return this.transformEquals(realExpression, pNegation, pTransPerformed);
@@ -219,7 +204,8 @@ public class InstrumentorVisitor extends ASTVisitor {
 					realExpression.getOperator() == IASTBinaryExpression.op_moduloAssign ||
 					realExpression.getOperator() == IASTBinaryExpression.op_multiplyAssign ||
 					realExpression.getOperator() == IASTBinaryExpression.op_shiftRightAssign) {
-				
+
+
 				int operator = -1;
 				switch (realExpression.getOperator()) {
 					case IASTBinaryExpression.op_plusAssign:
@@ -324,8 +310,9 @@ public class InstrumentorVisitor extends ASTVisitor {
 				expression instanceof IASTTypeIdExpression) {
 			if (!pTransPerformed) {
 				IASTExpression[] arguments = new IASTExpression[1];
-				arguments[0] = expression; 
-						
+				arguments[0] = expression;
+
+
 				IASTExpression result;
 				if (!pNegation)
 					result = makeFunctionCall("_f_ocelot_istrue", arguments);
@@ -348,6 +335,27 @@ public class InstrumentorVisitor extends ASTVisitor {
 	}
 	
 	public IASTExpression transformOriginalExpression(IASTExpression expression) {
+		if (expression instanceof IASTUnaryExpression) {
+			IType opType = getType((((IASTUnaryExpression)this.cloneExpression(expression)).getOperand()));
+			if (opType instanceof ICPointerType) {
+				//Artificial binary expression
+				IASTExpression tmpExpression = new CASTBinaryExpression();
+				((CASTBinaryExpression) tmpExpression).setOperator(IASTBinaryExpression.op_equals);
+				((CASTBinaryExpression) tmpExpression).setOperand1(((IASTUnaryExpression) expression).getOperand());
+
+				//Operand 0
+				IASTExpression operator0 = new CASTLiteralExpression();
+				char [] value = new char[1];
+				value[0] = '0';
+				((CASTLiteralExpression) operator0).setValue(value);
+				((CASTBinaryExpression) tmpExpression).setOperand2(operator0);
+
+				expression = tmpExpression;
+			}
+		}
+
+		expression = expression.copy();
+
 		if (expression instanceof IASTBinaryExpression) {
 			IASTBinaryExpression realExpression = (IASTBinaryExpression)expression;
 			
@@ -375,7 +383,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 	//TODO start from here
 	public void visit(IASTIfStatement statement) {
 		IASTExpression[] instrArgs = new IASTExpression[3];
-		instrArgs[0] = this.transformOriginalExpression(statement.getConditionExpression().copy());
+		instrArgs[0] = this.transformOriginalExpression(statement.getConditionExpression());
 		instrArgs[1] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), false, false);
 		instrArgs[2] = this.transformDistanceExpression(this.cloneExpression(statement.getConditionExpression()), true, false);
 		
@@ -630,7 +638,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 		auxExpression.setOperand1(instrumentedOp1);
 		auxExpression.setOperand2(instrumentedOp2);
 		operationArgs[0] = auxExpression;
-				
+
 		IASTExpression result;
 		if (negation)
 			result = makeFunctionCall("_f_ocelot_istrue", operationArgs);

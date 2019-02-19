@@ -5,7 +5,7 @@ START_TEST(ocelot_testcase1)
 
 
 
-case2(__ptr0,__ptr1);
+case4(__ptr0);
 
 /* REPLACE THE ASSERTION BELOW */
 ck_assert_str_eq("OK", "OK");
@@ -13,12 +13,12 @@ ck_assert_str_eq("OK", "OK");
 END_TEST
 
 
-Suite * ocelot_generated_6420b6d3(void)
+Suite * ocelot_generated_196cd198(void)
 {
 Suite *s;
 TCase *temp_tc;
 
-s = suite_create("ocelot_generated_6420b6d3");
+s = suite_create("ocelot_generated_196cd198");
 
 temp_tc = tcase_create("ocelot_testcase1");
 tcase_add_test(temp_tc, ocelot_testcase1);
@@ -32,7 +32,7 @@ int number_failed;
 Suite *s;
 SRunner *sr;
 
-s = ocelot_generated_6420b6d3();
+s = ocelot_generated_196cd198();
 sr = srunner_create(s);
 
 srunner_run_all(sr, CK_NORMAL);
