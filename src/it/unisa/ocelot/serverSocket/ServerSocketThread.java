@@ -1,7 +1,5 @@
 package it.unisa.ocelot.serverSocket;
 
-import sun.tools.jar.CommandLine;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,9 +59,9 @@ public class ServerSocketThread extends Thread {
     private boolean isStillAlive (int pid) {
         String pidStr = String.valueOf(pid);
         String os = System.getProperty("os.name").toLowerCase();
-        String command = null;
+        String command;
 
-        if (os.contains("Win")) {
+        if (os.contains("win")) {
             command = "cmd /c tasklist /FI \"PID eq " + pidStr + "\"";
         } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
             command = "ps -p " + pidStr;
@@ -82,8 +80,7 @@ public class ServerSocketThread extends Thread {
 
             String strLine = null;
             while ((strLine= bReader.readLine()) != null) {
-                //System.out.println(strLine);
-                if (strLine.contains(" " + pid + " ")) {
+                if (strLine.contains(pid)) {
                     return true;
                 }
             }

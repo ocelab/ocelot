@@ -1,12 +1,13 @@
 package it.unisa.ocelot.c.cfg.dominators;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
+import it.unisa.ocelot.c.cfg.edges.FlowEdge;
+import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
+import it.unisa.ocelot.c.cfg.edges.TrueEdge;
+import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -36,8 +37,10 @@ public class Dominators<V, E> implements IDominators<V> {
 	}
 
 	protected V getIDom(V vertex) {
-		if (idom == null)
+		if (idom == null) {
 			computeDominators();
+		}
+
 		if(vertex == null)
 			System.out.println("Cazzo");
 		return idom.get(vertex);
@@ -88,7 +91,7 @@ public class Dominators<V, E> implements IDominators<V> {
 
 	}
 
-	protected void computeDominators() {
+	public void computeDominators() {
 		if (this.idom != null)
 			return;
 		this.idom = new Hashtable<V, V>();

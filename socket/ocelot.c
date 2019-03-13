@@ -7,6 +7,9 @@ void _f_ocelot_init() {
     
     callList = malloc(sizeof(CallList));
     callList->head = NULL;
+
+    pointerList = malloc(sizeof(PointerMapList));
+    pointerList->head = NULL;
 }
 
 void _f_ocelot_end() {
@@ -15,6 +18,9 @@ void _f_ocelot_end() {
     
     free(callList);
     callList = NULL;
+
+    free(pointerList);
+    pointerList = NULL;
 }
 
 int _f_ocelot_trace(int result, double distanceTrue, double distanceFalse) {
@@ -200,6 +206,6 @@ double _f_ocelot_isfalse(double flag) {
 }
 
 int _f_ocelot_pointertotab(void* ptr) {
-    //int result = (ptr - (void*) _v_ocelot_pointers) / sizeof (_t_ocelot_array);
-    return 0;
+   int value = getValueOfPointer(pointerList, ptr);
+   return value;
 }

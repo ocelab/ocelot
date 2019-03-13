@@ -13,9 +13,9 @@ int test_if(int a, int b, int c){
 		}
 	}
 
-	if (a == 0)
-		flag = 1;
-	flag=3;
+    if (a == 0)
+        flag = 1;
+    flag=3;
 
 	return flag;
 }

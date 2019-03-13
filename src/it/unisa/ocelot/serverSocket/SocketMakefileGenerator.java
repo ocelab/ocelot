@@ -24,7 +24,7 @@ public class SocketMakefileGenerator {
 
     public void generate () throws IOException {
         String result = "CC = " + getCCompiler() + "\n\n" +
-                "SRCS = Event.c function.c graph.c main.c ocelot.c server.c ServerSocket.c\n\n" +
+                "SRCS = Event.c function.c graph.c main.c ocelot.c PointerMap.c server.c ServerSocket.c\n\n" +
                 "SERVER_MAIN = ../" + getExecName() + "\n\n" +
                 ".PHONY: clean all\n" +
                 "all:\n"+

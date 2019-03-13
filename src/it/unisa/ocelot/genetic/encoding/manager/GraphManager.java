@@ -1,5 +1,7 @@
 package it.unisa.ocelot.genetic.encoding.manager;
 
+import it.unisa.ocelot.c.types.CPointer;
+import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.graph.Edge;
@@ -53,5 +55,14 @@ public class GraphManager {
         }
 
         return children;
+    }
+
+    public CType getRealType (CType pointerType) {
+        CType actualType = pointerType;
+        while (actualType instanceof CPointer) {
+            actualType = ((CPointer) actualType).getType();
+        }
+
+        return actualType;
     }
 }

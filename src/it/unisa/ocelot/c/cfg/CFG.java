@@ -5,6 +5,7 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import it.unisa.ocelot.c.types.CType;

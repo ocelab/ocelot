@@ -141,6 +141,10 @@ public class MacroDefinerVisitor extends ASTVisitor {
 				else if (type.toString().equals("double")) {
 					cType = new CDouble(nameOfVariable);
 				}
+
+				else if (type.toString().equals("float")) {
+					cType = new CFloat(nameOfVariable);
+				}
 			}
 
 			//Pointer checker

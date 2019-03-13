@@ -141,9 +141,12 @@ public class MOSA extends OcelotAlgorithm {
 
 		resetPopulation(population);
 
+		System.out.println("Starting evaluation");
+		System.out.print("Evaluation done: " + evaluations + " of " + populationSize);
 		for (int i = 0; i < populationSize; i++) {
 			problem_.evaluate(population.get(i));
 			evaluations++;
+			System.out.print("\rEvaluation done: " + (evaluations) + " of " + populationSize);
 		}
 
 		// store every T.C. that covers previously uncovered branches in the

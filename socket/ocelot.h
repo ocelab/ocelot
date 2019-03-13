@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Event.h"
+#include "PointerMap.h"
 
 #ifndef _Included_OcelotHeader
 #define _Included_OcelotHeader
@@ -22,7 +23,7 @@ extern "C" {
 
 Event *events;
 CallList *callList;
-
+PointerMapList *pointerList;
 
 void _f_ocelot_init();
 void _f_ocelot_end();

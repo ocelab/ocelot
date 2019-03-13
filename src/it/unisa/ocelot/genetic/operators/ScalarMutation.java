@@ -59,7 +59,7 @@ public class ScalarMutation extends Mutation {
                     int indexOfScalarNode = indexOfScalarNodes.get(i);
                     int indexOfGraph = scalarNodeMap.get(indexOfScalarNode);
 
-                    double randomValue = (Math.random() * 20000) - 10000;
+                    double randomValue = (Math.random() * 200) - 100;
                     ((ScalarNode)graphList.get(indexOfGraph).getNodes().get(indexOfScalarNode)).setValue(randomValue);
                 }
             }

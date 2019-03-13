@@ -1,6 +1,6 @@
 CC = gcc
 
-SRCS = Event.c function.c graph.c main.c ocelot.c server.c ServerSocket.c
+SRCS = Event.c function.c graph.c main.c ocelot.c PointerMap.c server.c ServerSocket.c
 
 SERVER_MAIN = ../server
 

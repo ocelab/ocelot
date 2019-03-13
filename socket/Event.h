@@ -22,6 +22,7 @@ typedef struct {
     struct Call *next;
 } Call;
 
+
 typedef struct {
     Call *head;
 } CallList;

@@ -1,14 +1,12 @@
 package it.unisa.ocelot.c.instrumentor;
 
 import it.unisa.ocelot.c.types.*;
-import it.unisa.ocelot.genetic.encoding.graph.Graph;
-import it.unisa.ocelot.genetic.encoding.graph.Node;
+import it.unisa.ocelot.genetic.encoding.graph.*;
 import it.unisa.ocelot.genetic.encoding.graph.StructNode;
 import it.unisa.ocelot.genetic.encoding.manager.GraphManager;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javax.xml.transform.sax.SAXSource;
+import java.util.*;
 
 public class CFunctionGenerator {
     private static int ARRAY_LENGTH = 3;
@@ -28,6 +26,9 @@ public class CFunctionGenerator {
         code += "#include \"function.h\"\n\n";
 
         code += generateExtractParameterFromGraphMethod();
+        code += "\n";
+
+        code += generatePointerMap();
         code += "\n";
 
         code += generateExecuteFunctionMethod();
@@ -91,6 +92,7 @@ public class CFunctionGenerator {
 
         //Method
         code += "FunctionParameters extractParametersFromGraph(Graph graph);\n" +
+                "void generatePointerMap (FunctionParameters parameters);\n" +
                 "Event* executeFunction(FunctionParameters functionParameters, int *size);\n\n\n";
 
         LinkedHashMap<String, Integer> typeList = graphTypeList();
@@ -140,6 +142,21 @@ public class CFunctionGenerator {
                 "    \n" +
                 "    return functionParameters;\n" +
                 "}\n";
+
+        return code;
+    }
+
+    private String generatePointerMap () {
+        String code = "void generatePointerMap (FunctionParameters parameters) {\n";
+
+        LinkedHashSet<String> pointerList = getPointerList(graph.getNode(0), "");
+
+        int i = 0;
+        for (String s : pointerList) {
+            code += "    addPointerMap(pointerList, parameters." + s + ", " + i++ + ");\n";
+        }
+
+        code += "}\n";
 
         return code;
     }
@@ -213,6 +230,12 @@ public class CFunctionGenerator {
                         "    \n" +
                         "    return val;\n" +
                         "}\n";
+            } else if (type.equals("float")) {
+                code += "float extractParameter_float (Graph graph, Node variableNode) {\n" +
+                        "    float val = variableNode.value;\n" +
+                        "    \n" +
+                        "    return val;\n" +
+                        "}\n";
             } else if (type.equals("char")) {
                 code += "char extractParameter_char (Graph graph, Node variableNode) {\n" +
                         "    char val = (char)(((int)absValue(variableNode.value) % 58) + 65);\n" +
@@ -228,7 +251,9 @@ public class CFunctionGenerator {
                 for (Node node : graph.getNodes()) {
                     if (node instanceof StructNode) {
                         CStruct structType = (CStruct) node.getCType();
-                        if (structType.getTypedefName().equals(type) || structType.getNameOfStruct().equals(type)) {
+                        if (structType.getNameOfStruct().equals(type) ||
+                                (structType.getTypedefName() != null &&
+                                        structType.getTypedefName().equals(type))) {
                             struct = structType;
                             variableTypes = structType.getStructVariables();
                             break;
@@ -343,7 +368,13 @@ public class CFunctionGenerator {
         for (int i = 0; i < parameterNodes.size(); i++) {
             //Variable info
             String variableName = getName(parameterNodes.get(i).getCType());
-            code += "    free(functionParameters." + variableName + ");\n";
+            CType variableType = parameterNodes.get(i).getCType();
+
+            //Do the free only on pointers
+            if (variableType instanceof CPointer) {
+                code += "    free(functionParameters." + variableName + ");\n";
+            }
+
         }
 
         code += "}\n";
@@ -384,6 +415,8 @@ public class CFunctionGenerator {
             typeName = "double";
         } else if (actualType instanceof CChar) {
             typeName = "char";
+        } else if (actualType instanceof  CFloat) {
+            typeName = "float";
         } else {
             String typeDef = ((CStruct)actualType).getTypedefName();
             if (typeDef == null) {
@@ -434,5 +467,38 @@ public class CFunctionGenerator {
         }
 
         return typeList;
+    }
+
+    //To test with all possible cases
+    private LinkedHashSet<String> getPointerList (Node root, String variablePrefix) {
+        LinkedHashSet<String> variableNames = new LinkedHashSet<>();
+
+        ArrayList<Node> children = graphManager.children(graph, root);
+
+        for (Node node : children) {
+            if (node instanceof PointerNode) {
+                String variableName = variablePrefix + getName(node.getCType());
+                variableNames.add(variableName);
+
+                if (graphManager.getRealType(node.getCType()) instanceof CStruct) {
+                    Node arrayNode = graphManager.children(graph, node).get(0);
+
+                    //Take the fisrt struct node, inside the relative arrayNode
+                    Node structNode = graphManager.children(graph, arrayNode).get(0);
+
+                    LinkedHashSet<String> variableNamesOfSubGraph = getPointerList(structNode, variableName + "->");
+                    variableNames.addAll(variableNamesOfSubGraph);
+                }
+            }
+
+            else if (node instanceof StructNode) {
+                String variableName = variablePrefix + getName(node.getCType());
+
+                LinkedHashSet<String> variableNamesOfSubGraph = getPointerList(node, variableName + ".");
+                variableNames.addAll(variableNamesOfSubGraph);
+            }
+        }
+
+        return variableNames;
     }
 }

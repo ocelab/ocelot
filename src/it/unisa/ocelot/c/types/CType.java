@@ -22,6 +22,10 @@ public class CType {
             message = "Double";
         }
 
+        else if (this instanceof CFloat) {
+            message = "Float";
+        }
+
         else {
             message = "Char";
         }
