@@ -26,9 +26,10 @@ public class SocketMakefileGenerator {
         String result = "CC = " + getCCompiler() + "\n\n" +
                 "SRCS = Event.c function.c graph.c main.c ocelot.c PointerMap.c server.c ServerSocket.c\n\n" +
                 "SERVER_MAIN = ../" + getExecName() + "\n\n" +
+                "MOREOPTS = -lm\n\n"+
                 ".PHONY: clean all\n" +
                 "all:\n"+
-                "\t$(CC) -o $(SERVER_MAIN) $(SRCS)\n"+
+                "\t$(CC) -o $(SERVER_MAIN) $(SRCS) $(MOREOPTS)\n"+
                 "clean:\n" +
                 "\t$(RM) $(SERVER_MAIN)\n";
 

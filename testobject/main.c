@@ -51,7 +51,7 @@ cliparc(cx, cy, rad, start, end, iclipx, iclipy, icliprad, flag)
     cliprad = (double) icliprad;
     x = cx - clipx;
     y = cy - clipy;
-    dist = sqrt((double) (x * x + y * y));
+    dist = sqrtf((double) (x * x + y * y));
 
     if (!rad || !cliprad)
         return(-1);
@@ -100,8 +100,8 @@ cliparc(cx, cy, rad, start, end, iclipx, iclipy, icliprad, flag)
         a2 -= M_PI * 2;
 
     tx = cos(start) * rad + x;
-    ty = sin(start) * rad + y;
-    d = sqrt((double) tx * tx + ty * ty);
+    ty = sinf(start) * rad + y;
+    d = sqrtf((double) tx * tx + ty * ty);
     in = (d > cliprad) ? false : true;
 
     /* Now begin with start.  If the point is in, draw to either end, a1,

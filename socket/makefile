@@ -4,8 +4,10 @@ SRCS = Event.c function.c graph.c main.c ocelot.c PointerMap.c server.c ServerSo
 
 SERVER_MAIN = ../server
 
+MOREOPTS = -lm
+
 .PHONY: clean all
 all:
-	$(CC) -o $(SERVER_MAIN) $(SRCS)
+	$(CC) -o $(SERVER_MAIN) $(SRCS) $(MOREOPTS)
 clean:
 	$(RM) $(SERVER_MAIN)

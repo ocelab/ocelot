@@ -126,7 +126,7 @@ public class GraphGenerator {
                     Node pointerParent = graphManager.getNodeParent(pointerNode, graph);
                     CStruct structVariable = null;
 
-                    if (pointerParent instanceof RootNode) {
+                    if (pointerParent instanceof RootNode || pointerParent instanceof ArrayNode) {
                         structVariable = (CStruct) arrayNodePointerType.getType();
                         arrayNodeChildren.add(new StructNode(graph.getLastId()+1,
                                 structVariable, 0));
@@ -134,7 +134,7 @@ public class GraphGenerator {
                         graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
                         graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
                     } else {
-                        pointerParent = (StructNode) graphManager.getNodeParent(pointerNode, graph);
+                        pointerParent = graphManager.getNodeParent(pointerNode, graph);
                         structVariable = (CStruct) pointerParent.getCType();
                         arrayNodeChildren.add(new StructNode(graph.getLastId()+1, pointerParent.getCType(),
                                 (((StructNode) pointerParent).getDeepStructLevel() + 1)));
