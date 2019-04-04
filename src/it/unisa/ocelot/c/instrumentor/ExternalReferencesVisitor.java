@@ -69,7 +69,7 @@ public class ExternalReferencesVisitor extends ASTVisitor {
 			}
 			
 			//Goes on only if 
-			if (!functionName.getRawSignature().equals(this.functionName))
+			if (!functionName.getRawSignature().equals(this.functionName) || !this.functionName.equals(""))
 				return false;
 			else
 				return true;

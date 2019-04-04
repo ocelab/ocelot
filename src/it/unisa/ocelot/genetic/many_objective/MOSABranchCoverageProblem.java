@@ -66,12 +66,8 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 	 */
 	@Override
 	public double evaluateSolution(Solution solution) throws JMException {
-		VariableTranslator translator = new VariableTranslator(solution);
-		Graph graph = translator.getGraphFromSolution(graphList);
-		Object[][][] arguments = translator.translateGraph(graph);
-
-		/*if (debug)
-			System.out.println(Utils.printParameters(arguments));*/
+		VariableTranslator translator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
+		Graph graph = translator.getGraphFromSolution(solution);
 
 		CBridge cBridge = getCurrentBridge();
 		EventsHandler handler = new EventsHandler();
@@ -85,7 +81,6 @@ public class MOSABranchCoverageProblem extends StandardProblem {
 
 
 		//!!!!!!!!IMPORTANT!!!!!!!!!!
-		//SIMULATOR: TO FIX (Daniel)
 		Simulator simulator = new Simulator(cfg, handler.getEvents());
 		EdgeDistanceListener edgeDistanceListener;
 //		DominatorListener edgeDistanceListener;

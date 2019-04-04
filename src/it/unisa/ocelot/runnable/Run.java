@@ -9,6 +9,7 @@ import it.unisa.ocelot.conf.ConfigManager;
 //import it.unisa.ocelot.runnable.runners.ExecuteExperiment;
 //import it.unisa.ocelot.runnable.runners.ExecuteWholeCoverage;
 import it.unisa.ocelot.runnable.runners.GenAndWrite;
+import it.unisa.ocelot.runnable.runners.RunExperimantation;
 import it.unisa.ocelot.util.Debugger;
 import it.unisa.ocelot.util.Utils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -38,15 +39,15 @@ public class Run {
 	
 	public static void main(String[] args) throws Exception {
 		Run runner = new Run(args);
-		if (runner.mustBuild())
+		/*if (runner.mustBuild())
 			runner.build();
-		runner.saveHash();
+		runner.saveHash();*/
 		
 		runner.run();
 	}
 
 	public Run(String[] args) throws IOException {
-		this.runnerType = RUNNER_WRITE;
+		this.runnerType = RUNNER_EXPERIMENT;
 		this.forceBuild = false;
 		this.forceNoBuild = false;
 		this.configFilename = CONFIG_FILENAME;
@@ -125,20 +126,20 @@ public class Run {
 	
 	public void build() throws Exception {
 		ConfigManager config = ConfigManager.getInstance();
-		
+
 		Builder builder = new StandardBuilder(
-				config.getTestFilename(), 
-				config.getTestFunction(), 
+				config.getTestFilename(),
+				config.getTestFunction(),
 				config.getTestIncludePaths());
-		
+
 		JNIMakefileGenerator generator = new DynamicJNIMakefileGenerator();
 
 		for (String linkLibrary : config.getTestLink())
 			generator.addLinkLibrary(linkLibrary);
-		
+
 		builder.setMakefileGenerator(generator);
 		builder.setOutput(System.out);
-		
+
 		builder.build();
 	}
 	
@@ -151,11 +152,8 @@ public class Run {
 			new ExecuteWholeCoverage().run();*/
 			break;
 		case RUNNER_EXPERIMENT:
-			/*System.out.println("Running experiment");
-			if (this.experimentGenerators == null)
-				new ExecuteExperiment().run();
-			else
-				new ExecuteExperiment(this.experimentGenerators).run();*/
+			System.out.println("Running experimentation");
+			new RunExperimantation().run();
 			break;
 		case RUNNER_WRITE:
 			System.out.println("Running coverage and writing");

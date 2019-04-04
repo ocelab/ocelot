@@ -59,7 +59,7 @@ public class CFGVisitor extends ASTVisitor {
 		tu.accept(typesDefiner);
 
 		CType[] parameterTypes = typesDefiner.getFunctionParametersFromMacroDefinerVisitor
-				(typesDefiner.getFunctionParametersMap(), null, null);
+				(typesDefiner.getFunctionParametersMap(), null, null, null);
 
 		this.graph.setParameterTypes(parameterTypes);
 

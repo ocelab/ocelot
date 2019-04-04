@@ -7,10 +7,11 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.encoding.graph.*;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class GraphGenerator {
-    public static final int MAX_SIZE_ARRAY = 3;
-    public static final int STRUCT_DEEP = 1;
+    public static final int MAX_SIZE_ARRAY = 1;
+    public static final int STRUCT_DEEP = 0;
 
     private static GraphManager graphManager;
 
@@ -18,190 +19,221 @@ public class GraphGenerator {
         this.graphManager = new GraphManager();
     }
 
-    public static Graph generateGraphFromFunction (CType [] parameters) {
+    public static Graph generateGraph (CType[] parameters) {
         graphManager = new GraphManager();
-
         Graph graph = new Graph();
+
+        Stack<Node> backTrackingNodes= new Stack<>();
 
         //Root Creation
         graph.addNode(new RootNode(0));
 
+        //Add root in the stack
+        backTrackingNodes.push(graph.getLastNode());
+
+
         for (CType paramenter : parameters) {
-            //No pointer
-            if (!(paramenter instanceof CPointer)) {
-                //Scalar/primitive type
-                if (paramenter instanceof CPrimitive) {
-                    graph.addNode(new ScalarNode(graph.getLastId()+1, paramenter));
-                    graph.addEdge(new Edge(graph.getNode(0), graph.getLastNode()));
-                }
+            Node parameterNode = null;
 
-                //Struct type
-                else if (paramenter instanceof CStruct) {
-                    graph.addNode(new StructNode(graph.getLastId()+1, paramenter, 0));
-                    graph.addEdge(new Edge(graph.getNode(0), graph.getLastNode()));
+            if (paramenter instanceof  CPrimitive) {
+                parameterNode = new ScalarNode(graph.getLastId()+1, paramenter);
+            }
+            else if (paramenter instanceof CStruct) {
+                parameterNode = new StructNode(graph.getLastId()+1, paramenter);
+            }
+            else {
+                parameterNode = new PointerNode(graph.getLastId()+1, paramenter);
+            }
 
-                    CStruct structVariable = (CStruct) paramenter;
-                    generateStructNodeTree((StructNode) graph.getLastNode(),
-                            structVariable.getStructVariables(), graph);
-                }
-            } else {
-                //Create pointer
-                graph.addNode(new PointerNode(graph.getLastId()+1, paramenter));
-                graph.addEdge(new Edge(graph.getNode(0), graph.getLastNode()));
+            graph.addNode(parameterNode);
+            graph.addEdge(new Edge(graph.getNode(0), parameterNode));
 
-                generateArrayNodeTree((PointerNode) graph.getLastNode(), graph);
+
+            Node actualNode = null;
+            Node newNode = null;
+
+            //Generation of parameter subtree
+            if (!(paramenter instanceof CPrimitive)) {
+                backTrackingNodes.push(parameterNode);
+
+                do {
+                    actualNode = backTrackingNodes.peek();
+                    newNode = null;
+
+                    if (actualNode instanceof ArrayNode) {
+                        //I have to create MAX_SIZE_ARRAY elements, of ArrayNode's ctype
+
+                        //Check if I have already created MAX_SIZE_ARRAY elements
+                        ArrayList<Node> children = graphManager.children(graph, actualNode);
+                        if (children.size() < MAX_SIZE_ARRAY) {
+                            CType pointerType = ((CPointer)actualNode.getCType()).getType();
+
+                            if (pointerType instanceof CPrimitive) {
+                                newNode = new ScalarNode(graph.getLastId()+1, pointerType);
+                            }
+                            else if (pointerType instanceof CStruct) {
+                                int deepLevel = getDeepLevel(backTrackingNodes, pointerType);
+
+                                if (deepLevel <= STRUCT_DEEP) {
+                                    newNode = new StructNode(graph.getLastId()+1, pointerType);
+                                } else {
+                                    newNode = new StructNode(graph.getLastId()+1, null);
+                                }
+                            }
+                            else {
+                                newNode = new PointerNode(graph.getLastId()+1, pointerType);
+                            }
+                        }
+
+                        //In this case, remove the arrayNode from stack
+                        else {
+                            //ArrayNode
+                            backTrackingNodes.pop();
+
+                            //PointerNode
+                            backTrackingNodes.pop();
+                        }
+                    }
+
+                    else if (actualNode instanceof StructNode) {
+                        CStruct structType = (CStruct) actualNode.getCType();
+                        CType [] structVariables = structType.getStructVariables();
+                        int numberOfChildren = graphManager.children(graph, actualNode).size();
+
+                        if (numberOfChildren < structVariables.length) {
+                            CType structVariable = structVariables[numberOfChildren];
+
+                            if (structVariable instanceof CPrimitive) {
+                                newNode = new ScalarNode(graph.getLastId()+1, structVariable);
+                            }
+                            else if (structVariable instanceof CStruct) {
+                                CType newStructType = structVariable;
+
+                                //Check if structVariable is the same of parent. In that case, take the last one, because the variables of structvariable will be null
+                                if (((CStruct) structVariable).getStructVariables() == null)
+                                    newStructType = structType;
+
+
+                                int deepLevel = getDeepLevel(backTrackingNodes, structVariable);
+
+                                if (deepLevel <= STRUCT_DEEP) {
+                                    newNode = new StructNode(graph.getLastId()+1, newStructType);
+                                } else {
+                                    newNode = new StructNode(graph.getLastId()+1, null);
+                                }
+                            }
+                            else {
+                                CType pointerNodeRealType = graphManager.getRealType(structVariable);
+
+                                if (pointerNodeRealType instanceof CStruct) {
+                                    CType newStructType = structVariable;
+
+                                    //Check if structVariable is the same of parent. In that case, take the last one, because the variables of structvariable will be null
+                                    if (((CStruct) pointerNodeRealType).getStructVariables() == null) {
+                                        newStructType = structType;
+
+                                        CType actualType = structVariable;
+                                        while (actualType instanceof CPointer) {
+                                            newStructType = new CPointer(newStructType);
+                                            actualType = ((CPointer) actualType).getType();
+                                        }
+                                    }
+
+
+                                    int deepLevel = getDeepLevel(backTrackingNodes, pointerNodeRealType);
+
+                                    if (deepLevel <= STRUCT_DEEP) {
+                                        newNode = new PointerNode(graph.getLastId()+1, newStructType);
+                                    } else {
+                                        newNode = new PointerNode(graph.getLastId()+1, null);
+                                    }
+                                } else {
+                                    newNode = new PointerNode(graph.getLastId()+1, structVariable);
+                                }
+                            }
+                        } else {
+                            //StructNode
+                            backTrackingNodes.pop();
+                        }
+                    }
+
+                    else if (actualNode instanceof PointerNode) {
+                        newNode = new ArrayNode(graph.getLastId()+1, actualNode.getCType());
+                    }
+
+                    if (newNode != null) {
+                        //Add node to stack, only if it may have children or it is a valid pointerNode
+                        if (!(newNode instanceof ScalarNode) &&
+                                !((newNode instanceof PointerNode || newNode instanceof StructNode) && newNode.getCType() == null)) {
+                            backTrackingNodes.push(newNode);
+                        }
+
+                        graph.addNode(newNode);
+                        graph.addEdge(new Edge(actualNode, newNode));
+                    }
+
+                } while (backTrackingNodes.peek().getId() != 0);
             }
         }
 
         return graph;
     }
 
-    public Graph generateGraphFromArrayNodes (ArrayList<Node> nodes, Graph modelGraph) {
-        ArrayList<Node> newNodes = new ArrayList<>(nodes);
-        ArrayList<Edge> edges = modelGraph.getEdges();
-        ArrayList<Edge> newEdges = new ArrayList<>();
+    private static int getDeepLevel(Stack<Node> stack, CType type) {
+        int deepLevel = 0;
 
-        for (Edge edge : edges) {
-            Node nodeFrom = edge.getNodeFrom();
-            Node nodeTo = edge.getNodeTo();
-            Node newNodeFrom = null;
-            Node newNodeTo = null;
+        //Check the number of same struct that i have already created in the subtree
+        for (Node stackNode : stack) {
+            if (stackNode instanceof StructNode) {
+                String stackNodeTypedefName = ((CStruct)stackNode.getCType()).getTypedefName();
+                String stackNodeNameOfStruct = ((CStruct)stackNode.getCType()).getNameOfStruct();
 
-            int i = 0;
-            while (i < nodes.size() && (newNodeFrom == null || newNodeTo == null)) {
-                if (nodes.get(i).equals(nodeFrom))
-                    newNodeFrom = nodes.get(i);
-
-                else if (nodes.get(i).equals(nodeTo))
-                    newNodeTo = nodes.get(i);
-
-                i++;
+                if (stackNodeTypedefName != null && stackNodeTypedefName.equals(((CStruct) type).getTypedefName()) ||
+                        stackNodeNameOfStruct.equals(((CStruct) type).getNameOfStruct())) {
+                    deepLevel++;
+                }
             }
-
-            Edge newEdge = new Edge(newNodeFrom, newNodeTo);
-            newEdges.add(newEdge);
         }
 
-        return new Graph(newNodes, newEdges);
+        return deepLevel;
     }
 
-    private static void generateArrayNodeTree(PointerNode pointerNode, Graph graph) {
-        //Create arrayNode
-        graph.addNode(new ArrayNode(graph.getLastId()+1, pointerNode.getCType()));
-        graph.addEdge(new Edge(pointerNode, graph.getLastNode()));
+    private static boolean checkIfExistAnotherStruct(Stack<Node> stack, CType type) {
+        CType realType = graphManager.getRealType(type);
 
-        ArrayNode arrayNode = (ArrayNode) graph.getLastNode();
-        ArrayList<Node> arrayNodeChildren = null;
+        //Check the number of same struct that i have already created in the subtree
+        for (Node stackNode : stack) {
+            if (stackNode instanceof StructNode) {
+                String stackNodeTypedefName = ((CStruct)stackNode.getCType()).getTypedefName();
+                String stackNodeNameOfStruct = ((CStruct)stackNode.getCType()).getNameOfStruct();
 
-        //Child of PointerNode
-        CPointer arrayNodePointerType = (CPointer) arrayNode.getCType();
-
-        if (arrayNodePointerType.getType() instanceof CPointer) {
-            int i = 0;
-            while (arrayNodePointerType.getType() instanceof CPointer && i < MAX_SIZE_ARRAY) {
-                arrayNodeChildren = new ArrayList<>();
-                for (i = 0; i < MAX_SIZE_ARRAY; i++) {
-                    arrayNodeChildren.add(new PointerNode(graph.getLastId()+1,
-                            (((CPointer) arrayNode.getCType()).getType())));
-
-                    graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
-                    graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
-
-                    generateArrayNodeTree((PointerNode) graph.getLastNode(), graph);
-                }
-                ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodeChildren);
-                //arrayNodeChildren.add(new PointerNode(++actualId, pointerNode.getVariable()));
-            }
-        } else {    //End of the tree
-            arrayNodeChildren = new ArrayList<>();
-            for (int i = 0; i < MAX_SIZE_ARRAY; i++) {
-                if (arrayNodePointerType.getType() instanceof CPrimitive) {
-                    arrayNodeChildren.add(new ScalarNode(graph.getLastId()+1, arrayNodePointerType.getType()));
-
-                    graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
-                    graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
-                } else if (arrayNodePointerType.getType() instanceof CStruct) {
-                    //Search deepLevel of struct parent, located into parent's pointer
-                    //See if parent's pointer is a structure or a root
-                    Node pointerParent = graphManager.getNodeParent(pointerNode, graph);
-                    CStruct structVariable = null;
-
-                    if (pointerParent instanceof RootNode || pointerParent instanceof ArrayNode) {
-                        structVariable = (CStruct) arrayNodePointerType.getType();
-                        arrayNodeChildren.add(new StructNode(graph.getLastId()+1,
-                                structVariable, 0));
-
-                        graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
-                        graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
-                    } else {
-                        pointerParent = graphManager.getNodeParent(pointerNode, graph);
-                        structVariable = (CStruct) pointerParent.getCType();
-                        arrayNodeChildren.add(new StructNode(graph.getLastId()+1, pointerParent.getCType(),
-                                (((StructNode) pointerParent).getDeepStructLevel() + 1)));
-
-                        graph.addNode(arrayNodeChildren.get(arrayNodeChildren.size()-1));
-                        graph.addEdge(new Edge(arrayNode, graph.getLastNode()));
-                    }
-
-                    generateStructNodeTree((StructNode) graph.getLastNode(), structVariable.getStructVariables(), graph);
+                if (stackNodeTypedefName != null && stackNodeTypedefName.equals(((CStruct) realType).getTypedefName()) ||
+                        stackNodeNameOfStruct.equals(((CStruct) realType).getNameOfStruct())) {
+                    return true;
                 }
             }
-            ((ArrayNode)graph.getNode(arrayNode.getId())).setArrayNodes(arrayNodeChildren);
         }
+
+        return false;
     }
 
-    private static void generateStructNodeTree(StructNode parentNode, CType[] parameters, Graph pGraph) {
-        int actualDeepLevel = parentNode.getDeepStructLevel();
-        CStruct actualStructType = null;
+    private static CType getOriginalStructType (Stack<Node> stack, CType type) {
+        CType realType = graphManager.getRealType(type);
 
-        for (CType parameter : parameters) {
-            if (!(parameter instanceof CPointer)) {
-                if (parameter instanceof CPrimitive) {
-                    pGraph.addNode(new ScalarNode(pGraph.getLastId()+1, parameter));
-                    pGraph.addEdge(new Edge(parentNode, pGraph.getLastNode()));
-                }
+        //Check the number of same struct that i have already created in the subtree
+        for (Node stackNode : stack) {
+            if (stackNode instanceof StructNode) {
+                String stackNodeTypedefName = ((CStruct)stackNode.getCType()).getTypedefName();
+                String stackNodeNameOfStruct = ((CStruct)stackNode.getCType()).getNameOfStruct();
 
-                else if (parameter instanceof CStruct) {
-                    actualStructType = (CStruct) parameter;
-
-                    if (actualStructType.equals(parentNode.getCType()) && actualDeepLevel < STRUCT_DEEP) {
-                        //We take variables of parent because, if the struct is the same, the info about its variables are
-                        //contained only in the original struct
-                        pGraph.addNode(new StructNode(pGraph.getLastId()+1, parentNode.getCType(),
-                                actualDeepLevel + 1));
-                        pGraph.addEdge(new Edge(parentNode, pGraph.getLastNode()));
-
-                        generateStructNodeTree((StructNode) pGraph.getLastNode(), parameters, pGraph);
-                    }   //No else, because in this case we should create a null node
-
-                    else if (!actualStructType.equals(parentNode.getCType())) {
-                        pGraph.addNode(new StructNode(pGraph.getLastId()+1, parameter, 0));
-                        pGraph.addEdge(new Edge(parentNode, pGraph.getLastNode()));
-
-                        generateStructNodeTree((StructNode) pGraph.getLastNode(),
-                                actualStructType.getStructVariables(), pGraph);
-                    }
-                }
-            } else {
-                //Se type of pointer
-                CType typeOfPointer = ((CPointer) parameter).getType();
-
-                if (!(typeOfPointer instanceof CStruct)) {
-                    pGraph.addNode(new PointerNode(pGraph.getLastId()+1, parameter));
-                    pGraph.addEdge(new Edge(parentNode, pGraph.getLastNode()));
-
-                    generateArrayNodeTree((PointerNode) pGraph.getLastNode(), pGraph);
-                } else {
-                    //Check if create another pointer of struct
-                    actualStructType = (CStruct) typeOfPointer;
-                    if (!actualStructType.equals(parentNode.getCType()) || (actualStructType.equals(parentNode.getCType()) && actualDeepLevel < STRUCT_DEEP)) {
-                        pGraph.addNode(new PointerNode(pGraph.getLastId()+1, parameter));
-                        pGraph.addEdge(new Edge(parentNode, pGraph.getLastNode()));
-
-                        generateArrayNodeTree((PointerNode) pGraph.getLastNode(), pGraph);
-                    }
+                if (stackNodeTypedefName != null && stackNodeTypedefName.equals(((CStruct) realType).getTypedefName()) ||
+                        stackNodeNameOfStruct.equals(((CStruct) realType).getNameOfStruct())) {
+                    if (((CStruct) stackNode.getCType()).getStructVariables() != null)
+                        return stackNode.getCType();
                 }
             }
         }
+
+        return type;
     }
 }

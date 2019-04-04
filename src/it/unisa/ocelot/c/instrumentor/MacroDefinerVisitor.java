@@ -20,13 +20,7 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IBinding;
 import org.eclipse.cdt.core.dom.ast.IParameter;
 import org.eclipse.cdt.core.dom.ast.IType;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDeclarator;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTFunctionDefinition;
-import org.eclipse.cdt.internal.core.dom.parser.c.CASTKnRFunctionDeclarator;
-import org.eclipse.cdt.internal.core.dom.parser.c.CPointerType;
-import org.eclipse.cdt.internal.core.dom.parser.c.CQualifierType;
-import org.eclipse.cdt.internal.core.dom.parser.c.CStructure;
-import org.eclipse.cdt.internal.core.dom.parser.c.CTypedef;
+import org.eclipse.cdt.internal.core.dom.parser.c.*;
 
 /**
  * Generates the macro that will contain the call. Besides, it removes all typedefs from the tree, putting them in the
@@ -74,7 +68,11 @@ public class MacroDefinerVisitor extends ASTVisitor {
 		}
 	}
 
-	public CType[] getFunctionParametersFromMacroDefinerVisitor (LinkedHashMap<String, IType> functionParametersMap, String nameOfStruct, String typeDefName) {
+	public CType[] getFunctionParametersFromMacroDefinerVisitor (LinkedHashMap<String, IType> functionParametersMap, String nameOfStruct, String typeDefName, ArrayList<String> parentsStruct) {
+		if (parentsStruct == null) {
+			parentsStruct = new ArrayList<>();
+		}
+
 		CType [] parameters = new CType[functionParametersMap.size()];
 		int i = 0;
 
@@ -86,12 +84,26 @@ public class MacroDefinerVisitor extends ASTVisitor {
 
 			String typedefName = typeDefName;
 
+
+			if (type instanceof CFunctionType) {
+				IType functionType = (CFunctionType)type;
+				type = ((CFunctionType) functionType).getReturnType();
+			}
+
+
 			if (type instanceof CTypedef) {
 				typedefName = ((CTypedef) type).getName();
 				type = ((CTypedef) type).getType();
 			}
 
 			int numberOfPointer = 0;
+
+			if (type instanceof CArrayType) {
+				IType value = ((CArrayType)type).getType();
+				type = new CPointerType();
+				((CPointerType) type).setType(value);
+			}
+
 			if (type instanceof CPointerType) {
 				while (type instanceof CPointerType) {
 					numberOfPointer++;
@@ -113,7 +125,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 				Name of struct != null -> method called from structure
 				!type.toString().equals(nameOfStruct) -> struct different
 				 */
-				if (nameOfStruct == null || !type.toString().equals(nameOfStruct)) {
+				if (nameOfStruct == null || (!type.toString().equals(nameOfStruct) && !parentsStruct.contains(type.toString()))) {
 					VarStructTree tree = new VarStructTree(type.toString(), (CStructure)type);;
 					List<StructNode> basics = tree.getBasicVariables();
 
@@ -122,7 +134,10 @@ public class MacroDefinerVisitor extends ASTVisitor {
 						structTypeVariablesMap.put(structNode.name, structNode.type);
 					}
 
-					CType [] structParameters = getFunctionParametersFromMacroDefinerVisitor(structTypeVariablesMap, type.toString(), typedefName);
+					ArrayList<String> tmpList = new ArrayList<>(parentsStruct);
+					tmpList.add(type.toString());
+
+					CType [] structParameters = getFunctionParametersFromMacroDefinerVisitor(structTypeVariablesMap, type.toString(), typedefName, tmpList);
 					cType = new CStruct(nameOfVariable, type.toString(), typedefName, structParameters);
 				} else {
 					cType = new CStruct(nameOfVariable, type.toString(), typedefName);
@@ -130,12 +145,20 @@ public class MacroDefinerVisitor extends ASTVisitor {
 			}
 
 			else {
-				if (type.toString().equals("char")) {
+				if (type.toString().contains("char")) {
 					cType = new CChar(nameOfVariable);
+
+					if (type.toString().equals("unsigned char")) {
+						((CChar) cType).setSignedFlag(false);
+					}
 				}
 
-				else if (type.toString().equals("int")) {
+				else if (type.toString().contains("int")) {
 					cType = new CInteger(nameOfVariable);
+
+					if (type.toString().equals("unsigned int")) {
+						((CInteger) cType).setSignedFlag(false);
+					}
 				}
 
 				else if (type.toString().equals("double")) {
@@ -316,7 +339,7 @@ public class MacroDefinerVisitor extends ASTVisitor {
 				}
 				
 				if (realType instanceof CStructure) {
-					VarStructTree tree = new VarStructTree(variableName, (CStructure)type);
+					VarStructTree tree = new VarStructTree(variableName, (CStructure)realType);
 					List<StructNode> basics = tree.getBasicVariables();
 					for (StructNode var : basics) {
 						this.functionParameters.add(var.type);

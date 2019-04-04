@@ -11,4 +11,8 @@ public class CInteger extends CPrimitive {
         this.shortFlag = false;
         this.signedFlag = true;
     }
+
+    public void setSignedFlag (boolean signedFlag) {
+        this.signedFlag = signedFlag;
+    }
 }

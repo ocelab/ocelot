@@ -10,6 +10,7 @@ import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.graph.ScalarNode;
 import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
+import it.unisa.ocelot.genetic.encoding.manager.GraphManager;
 import it.unisa.ocelot.simulator.CoverageCalculator;
 import it.unisa.ocelot.suites.TestSuiteGenerationException;
 import it.unisa.ocelot.suites.benchmarks.BenchmarkCalculator;
@@ -19,6 +20,7 @@ import it.unisa.ocelot.suites.budget.BudgetManagerHandler;
 import java.util.*;
 
 import jmetal.core.Solution;
+import jmetal.encodings.variable.Int;
 import jmetal.util.JMException;
 import org.apache.commons.lang3.Range;
 
@@ -34,6 +36,7 @@ public abstract class TestSuiteGenerator {
 	private Range<Double>[] ranges;
 
 	protected ArrayList<Graph> graphList;
+	protected Map<Integer, Integer> scalarNodeIndexMap;
 	
 	@SuppressWarnings("rawtypes")
 	public TestSuiteGenerator(CFG pCFG) {
@@ -41,22 +44,27 @@ public abstract class TestSuiteGenerator {
 		this.cfg = pCFG;
 		this.calculator = new CoverageCalculator(pCFG);
 		this.fixedBudget = -1;
-
-		//this.ranges = this.config.getTestRanges();
-
-		this.graphList = generateStartingGraphList();
 	}
 
 	public TestSuiteGenerator(CFG pCFG, ConfigManager pConfigManager) {
+		this.config = pConfigManager;
+		this.ranges = this.config.getTestRanges();
+
 		this.benchmarkCalculators = new ArrayList<BenchmarkCalculator>();
 		this.cfg = pCFG;
 		this.calculator = new CoverageCalculator(pCFG);
 		this.fixedBudget = -1;
 
-		this.config = pConfigManager;
-		this.ranges = this.config.getTestRanges();
-
 		this.graphList = generateStartingGraphList();
+
+
+		GraphManager graphManager = new GraphManager();
+		ArrayList<ScalarNode> scalarNodes = graphManager.getScalarNodes(graphList.get(0));
+		this.scalarNodeIndexMap = new HashMap<>();
+
+		for (int i = 0; i < scalarNodes.size(); i++) {
+			this.scalarNodeIndexMap.put(i, scalarNodes.get(i).getId());
+		}
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -84,7 +92,7 @@ public abstract class TestSuiteGenerator {
 
 	public ArrayList<Graph> generateStartingGraphList () {
 		ArrayList<Graph> graphList = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < config.getPopulationSize(); i++) {
 			Graph randomGraph = generateRandomGraph(cfg.getTypeGraph());
 			graphList.add(randomGraph);
 		}
@@ -103,7 +111,7 @@ public abstract class TestSuiteGenerator {
 
 				//double param = random.nextDouble() * (ranges[0].getMaximum() - ranges[0].getMinimum());
 				//param += ranges[0].getMinimum();
-				double param = (random.nextDouble() * 200) - 100;
+				double param = (random.nextDouble() * (ranges[0].getMaximum()*2)) + ranges[0].getMinimum();
 				tmpNode.setValue(param);
 
 				nodes.add(tmpNode);
@@ -111,7 +119,7 @@ public abstract class TestSuiteGenerator {
 		}
 
 
-		Graph graph = GraphGenerator.generateGraphFromFunction(cfg.getParameterTypes());
+		Graph graph = GraphGenerator.generateGraph(cfg.getParameterTypes());
 
 		for (int i = 0; i < nodes.size(); i++) {
 			int j = 0;
@@ -194,15 +202,10 @@ public abstract class TestSuiteGenerator {
 		Set<Solution> solutions = exp.getSerendipitousSolutions();
 		
 		for (Solution solution : solutions) {
-			VariableTranslator translator = new VariableTranslator(solution);
+			VariableTranslator translator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
 			
 			//Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
-			Graph graph = null;
-			try {
-				graph = translator.getGraphFromSolution(this.graphList);
-			} catch (JMException e) {
-				e.printStackTrace();
-			}
+			Graph graph = translator.getGraphFromSolution(solution);
 
 			//TestCase testCase = this.createTestCase(numericParams, suite.size());
 			TestCase testCase = this.createTestCase(graph, suite.size());

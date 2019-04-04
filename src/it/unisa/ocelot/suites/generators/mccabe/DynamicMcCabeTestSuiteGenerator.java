@@ -94,30 +94,18 @@ public class DynamicMcCabeTestSuiteGenerator extends TestSuiteGenerator implemen
 			this.addSerendipitousTestCases(exp, suite);
 
 			double fitnessValue = exp.getFitnessValue();
-			VariableTranslator translator = new VariableTranslator(exp.getSolution());
+			VariableTranslator translator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
 			
 			if (config.getSerendipitousCoverage())
 				for (Solution solution : exp.getSerendipitousSolutions()) {
-					VariableTranslator currentTranslator = new VariableTranslator(solution);
-					//Object[][][] serendipitousParameters = currentTranslator.translateArray(cfg.getParameterTypes());
-					Graph serendipitousGraph = null;
-					try {
-						serendipitousGraph = currentTranslator.getGraphFromSolution(this.graphList);
-					} catch (JMException e) {
-						e.printStackTrace();
-					}
+					Graph serendipitousGraph = translator.getGraphFromSolution(solution);
+
 					calculator.calculateCoverage(serendipitousGraph);
 					mcCabeCalculator.addPath(calculator.getCoveredPath());
 				}
 
 			//Object[][][] numericParams = translator.translateArray(cfg.getParameterTypes());
-			Graph graph = null;
-
-			try {
-				graph = translator.getGraphFromSolution(this.graphList);
-			} catch (JMException e) {
-				e.printStackTrace();
-			}
+			Graph graph = translator.getGraphFromSolution(exp.getSolution());
 
 			//TestCase testCase = this.createTestCase(numericParams, suite.size());
 			TestCase testCase = this.createTestCase(graph, suite.size());

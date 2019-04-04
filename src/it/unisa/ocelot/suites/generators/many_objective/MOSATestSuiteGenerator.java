@@ -31,8 +31,7 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 	private int evaluations;
 
 	public MOSATestSuiteGenerator(ConfigManager config, CFG cfg) {
-		super(cfg);
-		this.config = config;
+		super(cfg, config);
 	}
 
 	@Override
@@ -89,17 +88,12 @@ public class MOSATestSuiteGenerator extends TestSuiteGenerator implements Cascad
 		List<Integer> numberOfEvaluations = mosaExperiment.getNumberOfEvaluations();
 		for (int i = 0; i < archiveSolutions.size(); i++) {
 			currentSolution = archiveSolutions.get(i);
-			VariableTranslator translator = new VariableTranslator(currentSolution);
+			VariableTranslator translator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
 
 			//Object[][][] numericParams = translator.translateArray(cfg
 			//		.getParameterTypes());
 			//Object[][][] numericParams = null;
-			Graph graph = null;
-			try {
-				graph = translator.getGraphFromSolution(this.graphList);
-			} catch (JMException e) {
-				e.printStackTrace();
-			}
+			Graph graph = translator.getGraphFromSolution(currentSolution);
 
 			TestCase testCase = this.createTestCase(graph, suite.size());
 			suite.add(testCase);

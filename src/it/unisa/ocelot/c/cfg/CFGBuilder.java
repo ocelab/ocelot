@@ -35,7 +35,7 @@ public class CFGBuilder {
 		//Remove code that will never be coveraged
 		removeInfeasiblePathFromCFG(graph);
 
-		Graph typeGraph = GraphGenerator.generateGraphFromFunction(graph.getParameterTypes());
+		Graph typeGraph = GraphGenerator.generateGraph(graph.getParameterTypes());
 		graph.setTypeGraph(typeGraph);
 
 		return graph;

@@ -45,8 +45,8 @@ public class InstrumentatorParameter {
         translationUnit.accept(instrumentor);
 
         CType[] parameterTypes = macroDefiner.getFunctionParametersFromMacroDefinerVisitor(
-                macroDefiner.getFunctionParametersMap(), null, null);
-        Graph graph = GraphGenerator.generateGraphFromFunction(parameterTypes);
+                macroDefiner.getFunctionParametersMap(), null, null, null);
+        Graph graph = GraphGenerator.generateGraph(parameterTypes);
 
         //Source
         String sourceFunction = getSourceCodeFromGraph(graph);

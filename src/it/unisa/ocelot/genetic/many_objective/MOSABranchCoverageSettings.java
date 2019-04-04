@@ -16,6 +16,7 @@ import jmetal.experiments.Settings;
 import jmetal.operators.crossover.CrossoverFactory;
 import jmetal.operators.mutation.ConstantMetaMutation;
 import jmetal.operators.mutation.MutationFactory;
+import jmetal.operators.mutation.UniformMutation;
 import jmetal.operators.selection.SelectionFactory;
 import jmetal.util.JMException;
 import jmetal.util.MOSADominanceComparator;
@@ -114,6 +115,8 @@ public class MOSABranchCoverageSettings extends Settings {
 				parameters);
 
 		parameters = new HashMap<String, Object>();
+
+
 		parameters.put("probability", mutationProbability);
 		parameters.put("realOperator", MutationFactory.getMutationOperator(
 				"PolynomialMutation", parameters));

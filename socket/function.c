@@ -4,9 +4,9 @@ FunctionParameters extractParametersFromGraph(Graph graph) {
     FunctionParameters functionParameters;
     Node* variableNodes = children(graph, graph.nodes[0]);
     
-    functionParameters.p1 = extractParameter_characS(graph, variableNodes[0]);
-    functionParameters.pp2 = extractParameter_characSS(graph, variableNodes[1]);
-    functionParameters.node_ptr = extractParameter_NodeSS(graph, variableNodes[2]);
+    functionParameters.s = extractParameter_strbuf_tS(graph, variableNodes[0]);
+    functionParameters.len = extractParameter_int(graph, variableNodes[1]);
+    functionParameters.fmt = extractParameter_charS(graph, variableNodes[2]);
 
     free(variableNodes);
     
@@ -14,16 +14,14 @@ FunctionParameters extractParametersFromGraph(Graph graph) {
 }
 
 void generatePointerMap (FunctionParameters parameters) {
-    addPointerMap(pointerList, parameters.p1, 0);
-    addPointerMap(pointerList, parameters.p1->PREV, 1);
-    addPointerMap(pointerList, parameters.p1->NEXT, 2);
-    addPointerMap(pointerList, parameters.pp2, 3);
-    addPointerMap(pointerList, parameters.node_ptr, 4);
+    addPointerMap(pointerList, parameters.s, 0);
+    addPointerMap(pointerList, parameters.s->buf, 1);
+    addPointerMap(pointerList, parameters.fmt, 2);
 }
 
 Event* executeFunction(FunctionParameters functionParameters, int *size) {
     _f_ocelot_init();
-    OCELOT_TESTFUNCTION(functionParameters.p1, functionParameters.pp2, functionParameters.node_ptr);
+    OCELOT_TESTFUNCTION(functionParameters.s, functionParameters.len, functionParameters.fmt);
     events = removeFirstEventElement(events);
     
     int eventSize = sizeEventList(events);
@@ -53,61 +51,35 @@ Event* executeFunction(FunctionParameters functionParameters, int *size) {
     return eventToReturn;
 }
 
-charac extractParameter_charac (Graph graph, Node variableNode) {
+strbuf_t extractParameter_strbuf_t (Graph graph, Node variableNode) {
     Node *structVariables = children(graph, variableNode);
     int numberOfVariables = size(graph, variableNode);
     int i = 0;
     
-    charac val;
+    strbuf_t val;
     
-    val.info = extractParameter_char(graph, structVariables[i++]);
-    val.LINE_NUM = extractParameter_int(graph, structVariables[i++]);
-    if (i < numberOfVariables) {
-        val.PREV = extractParameter_characS(graph, structVariables[i++]);
-    if (i < numberOfVariables) {
-        val.NEXT = extractParameter_characS(graph, structVariables[i++]);
-    }
-
+    val.buf = extractParameter_charS(graph, structVariables[i++]);
+    val.size = extractParameter_int(graph, structVariables[i++]);
+    val.length = extractParameter_int(graph, structVariables[i++]);
+    val.increment = extractParameter_int(graph, structVariables[i++]);
+    val.dynamic = extractParameter_int(graph, structVariables[i++]);
+    val.reallocs = extractParameter_int(graph, structVariables[i++]);
+    val.debug = extractParameter_int(graph, structVariables[i++]);
     free(structVariables);
     
     return val;
 }
 
-charac* extractParameter_characS (Graph graph, Node variableNode) {
+strbuf_t* extractParameter_strbuf_tS (Graph graph, Node variableNode) {
     int size = 0;
     int *index = getIndexOfVariableNode(graph, variableNode, &size);
     
     int i = 0;
     
-    charac *val = malloc(sizeof(charac) * ARRAY_LENGTH);
-    val[0] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[1] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[2] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    
-    free(index);
-    
-    return val;
-}
-
-charac** extractParameter_characSS (Graph graph, Node variableNode) {
-    int size = 0;
-    int *index = getIndexOfVariableNode(graph, variableNode, &size);
-    
-    int i = 0;
-    
-    charac **val = malloc(sizeof(charac*) * ARRAY_LENGTH);
-    val[0] = malloc(sizeof(charac) * ARRAY_LENGTH);
-    val[1] = malloc(sizeof(charac) * ARRAY_LENGTH);
-    val[2] = malloc(sizeof(charac) * ARRAY_LENGTH);
-    val[0][0] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[0][1] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[0][2] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[1][0] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[1][1] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[1][2] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[2][0] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[2][1] = extractParameter_charac(graph, graph.nodes[index[i++]]);
-    val[2][2] = extractParameter_charac(graph, graph.nodes[index[i++]]);
+    strbuf_t *val = malloc(sizeof(strbuf_t) * ARRAY_LENGTH);
+    val[0] = extractParameter_strbuf_t(graph, graph.nodes[index[i++]]);
+    val[1] = extractParameter_strbuf_t(graph, graph.nodes[index[i++]]);
+    val[2] = extractParameter_strbuf_t(graph, graph.nodes[index[i++]]);
     
     free(index);
     
@@ -120,87 +92,32 @@ char extractParameter_char (Graph graph, Node variableNode) {
     return val;
 }
 
+char* extractParameter_charS (Graph graph, Node variableNode) {
+    int size = 0;
+    int *index = getIndexOfVariableNode(graph, variableNode, &size);
+    
+    int i = 0;
+    
+    char *val = malloc(sizeof(char) * ARRAY_LENGTH);
+    val[0] = extractParameter_char(graph, graph.nodes[index[i++]]);
+    val[1] = extractParameter_char(graph, graph.nodes[index[i++]]);
+    val[2] = extractParameter_char(graph, graph.nodes[index[i++]]);
+    
+    free(index);
+    
+    return val;
+}
+
 int extractParameter_int (Graph graph, Node variableNode) {
     int val = (int)variableNode.value;
     
     return val;
 }
 
-Node extractParameter_Node (Graph graph, Node variableNode) {
-    Node *structVariables = children(graph, variableNode);
-    int numberOfVariables = size(graph, variableNode);
-    int i = 0;
-    
-    Node val;
-    
-    val.OMIT_ORIENT = extractParameter_int(graph, structVariables[i++]);
-    val.PCOORD = extractParameter_int(graph, structVariables[i++]);
-    val.QCOORD = extractParameter_int(graph, structVariables[i++]);
-    val.THEA = extractParameter_double(graph, structVariables[i++]);
-    val.PHEA = extractParameter_double(graph, structVariables[i++]);
-    val.PSEA = extractParameter_double(graph, structVariables[i++]);
-    val.ANGLE_UNIT = extractParameter_int(graph, structVariables[i++]);
-    if (i < numberOfVariables) {
-        val.NEXT = extractParameter_NodeS(graph, structVariables[i++]);
-    }
-
-    free(structVariables);
-    
-    return val;
-}
-
-Node* extractParameter_NodeS (Graph graph, Node variableNode) {
-    int size = 0;
-    int *index = getIndexOfVariableNode(graph, variableNode, &size);
-    
-    int i = 0;
-    
-    Node *val = malloc(sizeof(Node) * ARRAY_LENGTH);
-    val[0] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[1] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[2] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    
-    free(index);
-    
-    return val;
-}
-
-Node** extractParameter_NodeSS (Graph graph, Node variableNode) {
-    int size = 0;
-    int *index = getIndexOfVariableNode(graph, variableNode, &size);
-    
-    int i = 0;
-    
-    Node **val = malloc(sizeof(Node*) * ARRAY_LENGTH);
-    val[0] = malloc(sizeof(Node) * ARRAY_LENGTH);
-    val[1] = malloc(sizeof(Node) * ARRAY_LENGTH);
-    val[2] = malloc(sizeof(Node) * ARRAY_LENGTH);
-    val[0][0] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[0][1] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[0][2] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[1][0] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[1][1] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[1][2] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[2][0] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[2][1] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    val[2][2] = extractParameter_Node(graph, graph.nodes[index[i++]]);
-    
-    free(index);
-    
-    return val;
-}
-
-double extractParameter_double (Graph graph, Node variableNode) {
-    double val = variableNode.value;
-    
-    return val;
-}
-
 
 void freeParameters (FunctionParameters functionParameters) {
-    free(functionParameters.p1);
-    free(functionParameters.pp2);
-    free(functionParameters.node_ptr);
+    free(functionParameters.s);
+    free(functionParameters.fmt);
 }
 
 double absValue(double value) {

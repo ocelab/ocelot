@@ -287,17 +287,13 @@ public class CFunctionGenerator {
                         code += "    val." + name + " = extractParameter_" + structVariableType +
                                 pointerString + "(graph, structVariables[i++]);\n";
                     } else {
-                        if (ifStatement) {
-                            code += "    if (i < numberOfVariables) {\n";
-                        }
+                        code += "    if (structVariables[i++].type >= 0) {\n";
 
                         code += "        val." + name + " = extractParameter_" + structVariableType +
-                                pointerString + "(graph, structVariables[i++]);\n";
-                    }
-                }
+                                pointerString + "(graph, structVariables[i-1]);\n";
 
-                if (ifStatement) {
-                    code += "    }\n\n";
+                        code += "    }\n";
+                    }
                 }
 
 
@@ -476,7 +472,7 @@ public class CFunctionGenerator {
         ArrayList<Node> children = graphManager.children(graph, root);
 
         for (Node node : children) {
-            if (node instanceof PointerNode) {
+            if (node instanceof PointerNode && node.getCType() != null) {
                 String variableName = variablePrefix + getName(node.getCType());
                 variableNames.add(variableName);
 

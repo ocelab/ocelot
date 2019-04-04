@@ -50,9 +50,9 @@ public class CDG_BasedProblem extends StandardProblem {
 
 	@Override
 	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
-		VariableTranslator translator = new VariableTranslator(solution);
+		VariableTranslator translator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
 		//Object[][][] arguments = translator.translateArray(this.parameters);
-		Graph graph = translator.getGraphFromSolution(this.graphList);
+		Graph graph = translator.getGraphFromSolution(solution);
 
 		/*if (debug)
 			System.out.println(Utils.printParameters(arguments));*/

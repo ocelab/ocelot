@@ -5,6 +5,7 @@ import it.unisa.ocelot.c.types.CType;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
 import it.unisa.ocelot.genetic.encoding.graph.Edge;
+import it.unisa.ocelot.genetic.encoding.graph.ScalarNode;
 
 import java.util.ArrayList;
 
@@ -64,5 +65,21 @@ public class GraphManager {
         }
 
         return actualType;
+    }
+
+    public ArrayList<ScalarNode> getScalarNodes (Graph graph) {
+        ArrayList<ScalarNode> scalarNodes = new ArrayList<>();
+
+        for (Node node : graph.getNodes()) {
+            if (node instanceof ScalarNode) {
+                scalarNodes.add((ScalarNode) node);
+            }
+        }
+
+        return scalarNodes;
+    }
+
+    public int getNumberOfScalarNodes (Graph graph) {
+        return getScalarNodes(graph).size();
     }
 }

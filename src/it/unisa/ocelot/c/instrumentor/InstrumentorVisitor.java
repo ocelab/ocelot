@@ -679,8 +679,11 @@ public class InstrumentorVisitor extends ASTVisitor {
 	
 	private IASTExpression registerFcallExpression(IASTExpression expression, int pHowMany) {
 		String howMany = String.valueOf(pHowMany);
+
+
 		IASTExpression[] arguments = new IASTExpression[2];
-		arguments[0] = expression; 
+
+		arguments[0] = expression;
 		arguments[1] = new CASTLiteralExpression(CASTLiteralExpression.lk_integer_constant, howMany.toCharArray());
 		
 		IType type = getType(expression);
@@ -755,7 +758,7 @@ public class InstrumentorVisitor extends ASTVisitor {
 			realCopy.setArgument(realOrig.getArgument());
 		}
 		
-		
+
 		return copy;
 	}
 	

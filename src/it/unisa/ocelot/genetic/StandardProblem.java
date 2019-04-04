@@ -4,12 +4,19 @@ import java.util.*;
 
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.genetic.encoding.graph.Node;
+import it.unisa.ocelot.genetic.encoding.graph.ScalarNode;
 import it.unisa.ocelot.genetic.encoding.manager.GraphGenerator;
+import it.unisa.ocelot.genetic.encoding.manager.GraphManager;
 import it.unisa.ocelot.simulator.CBridge;
 import it.unisa.ocelot.simulator.SimulationException;
 
 import jmetal.core.Variable;
+import jmetal.encodings.solutionType.ArrayParametersSolutionType;
+import jmetal.encodings.solutionType.ArrayRealSolutionType;
 import jmetal.encodings.solutionType.IntSolutionType;
+import jmetal.encodings.solutionType.RealSolutionType;
+import jmetal.encodings.variable.ArrayParameters;
+import jmetal.encodings.variable.ArrayReal;
 import org.apache.commons.lang3.Range;
 
 import jmetal.core.Problem;
@@ -27,6 +34,8 @@ public abstract class StandardProblem extends Problem {
 
 	protected double[][] lowerLimits;
 	protected double[][] upperLimits;
+
+	protected Map<Integer, Integer> scalarNodeIndexMap;
 	
 	protected Map<Thread, CBridge> bridges;
 	
@@ -37,49 +46,33 @@ public abstract class StandardProblem extends Problem {
 		this.graphList = graphList;
 		//this.parameters = pParameters;
 
-		numberOfVariables_ = graphList.get(0).getNodes().size();
+		GraphManager graphManager = new GraphManager();
+		numberOfVariables_ = graphManager.getNumberOfScalarNodes(graphList.get(0));
 		numberOfObjectives_ = 1;
 		numberOfConstraints_ = 0;
 
-		lowerLimit_ = new double[numberOfVariables_];
-		upperLimit_ = new double[numberOfVariables_];
+		//lowerLimit_ = new double[numberOfVariables_];
+		//upperLimit_ = new double[numberOfVariables_];
+		lowerLimits = new double[1][numberOfVariables_];
+		upperLimits = new double[1][numberOfVariables_];
+
 		for (int i = 0; i < numberOfVariables_; i++) {
-			lowerLimit_[i] = 0;
-			upperLimit_[i] = 99;
+			//lowerLimit_[i] = -10000;
+			lowerLimits[0][i] = pRanges[0].getMinimum();
+			//upperLimit_[i] = 10000;
+			upperLimits[0][i] = pRanges[0].getMaximum();
 		}
 
-		solutionType_ = new IntSolutionType(this);
+		solutionType_ = new ArrayParametersSolutionType(this);
+
+		ArrayList<ScalarNode> scalarNodes = graphManager.getScalarNodes(graphList.get(0));
+		this.scalarNodeIndexMap = new HashMap<>();
+
+		for (int i = 0; i < numberOfVariables_; i++) {
+			this.scalarNodeIndexMap.put(i, scalarNodes.get(i).getId());
+		}
+
 		//solutionType_ = new ArrayIntSolutionType(this);
-	}
-
-	//CANCELLATO PER RIMOZIONE OBJECT [][][]
-	/*protected Object[][][] getParameters(Solution solution) {
-		VariableTranslator translator = new VariableTranslator(solution);
-
-		Object[][][] arguments = translator.translateArray(this.parameters);
-		
-		return arguments;
-	}*/
-
-	protected Graph getGraphFromSolution(Solution solution) throws JMException {
-		GraphGenerator graphGenerator = new GraphGenerator();
-		ArrayList<Node> nodesOfSolution = new ArrayList<>();
-
-		Variable [] variables = solution.getDecisionVariables();
-
-		//Take nodes from chromosome
-		for (int i = 0; i < variables.length; i++) {
-			int graphIndex = (int) variables[i].getValue();
-
-			//Get i-Node from graphIndex's graphList
-			Node nodeToAdd = this.graphList.get(graphIndex).getNode(i);
-			nodesOfSolution.add(nodeToAdd);
-		}
-
-		//Build graph from these nodes
-		Graph newGraph = graphGenerator.generateGraphFromArrayNodes(nodesOfSolution, graphList.get(0));
-
-		return newGraph;
 	}
 
 	public List<Graph> getGraphList() {
@@ -138,19 +131,6 @@ public abstract class StandardProblem extends Problem {
 	@Override
 	public final void evaluate(Solution solution) throws JMException {
 		int tries = MAX_TRIES;
-		VariableTranslator variableTranslator = new VariableTranslator(solution);
-
-		Graph solutionGraph = this.getGraphFromSolution(solution);
-		Object[][][] arguments = variableTranslator.translateGraph(solutionGraph);
-
-		for (Object obj : arguments[2][0]) {
-			Integer pointerRef = (Integer)obj;
-			if (pointerRef < 0 || pointerRef >= numberOfArrays) {
-				System.err.println("Warning: invalid pointer for " + Arrays.toString(arguments[2][0]));
-				solution.setObjective(0, Double.MAX_VALUE);
-				return;
-			}
-		}
 		
 		while (tries > 0) {
 			try {
@@ -167,9 +147,8 @@ public abstract class StandardProblem extends Problem {
 	public final double evaluateWithBranchDistance(Solution solution) throws JMException {
 		int tries = MAX_TRIES;
 
-		VariableTranslator variableTranslator = new VariableTranslator(solution);
-		//Object[][][] arguments = this.getParameters(solution);
-		Graph solutionGraph = variableTranslator.getGraphFromSolution(getGraphList());
+		VariableTranslator variableTranslator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
+		Graph solutionGraph = variableTranslator.getGraphFromSolution(solution);
 		Object[][][] arguments = variableTranslator.translateGraph(solutionGraph);
 
 

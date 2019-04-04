@@ -9,6 +9,7 @@ import java.util.Set;
 import it.unisa.ocelot.genetic.StandardProblem;
 import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
+import jmetal.operators.mutation.GenericPolynomialMutation;
 import org.jgrapht.graph.DefaultEdge;
 
 import it.unisa.ocelot.c.cfg.CFG;
@@ -121,32 +122,30 @@ public class MOSA extends OcelotAlgorithm {
 		Operator scalarMutationOperator;
 		Operator crossoverOperator;
 		Operator selectionOperator;
+		Operator mutationOperator;
 
 		// Initialize the variables
 		population = new SolutionSet(populationSize);
 		evaluations = 0;
 
 		// Read the operators
-		indexMutationOperator = operators_.get("indexMutation");
-		scalarMutationOperator = operators_.get("scalarMutation");
+		//indexMutationOperator = operators_.get("indexMutation");
+		//scalarMutationOperator = operators_.get("scalarMutation");
 		crossoverOperator = operators_.get("crossover");
 		selectionOperator = operators_.get("selection");
+		mutationOperator = operators_.get("mutation");
 
 		// Create the initial solutionSet
 		Solution newSolution;
-		for (int i = 0; i < populationSize; i++) {
-			newSolution = new Solution(problem_);
-			population.add(newSolution);
-		}
-
-		resetPopulation(population);
 
 		System.out.println("Starting evaluation");
 		System.out.print("Evaluation done: " + evaluations + " of " + populationSize);
 		for (int i = 0; i < populationSize; i++) {
-			problem_.evaluate(population.get(i));
+			newSolution = new Solution(problem_);
+			problem_.evaluate(newSolution);
 			evaluations++;
 			System.out.print("\rEvaluation done: " + (evaluations) + " of " + populationSize);
+			population.add(newSolution);
 		}
 
 		// store every T.C. that covers previously uncovered branches in the
@@ -156,8 +155,8 @@ public class MOSA extends OcelotAlgorithm {
 		System.out.print("Evaluation done: " + (evaluations+1) + " of " + maxEvaluations);
 		while (evaluations < maxEvaluations && calculateCoverage() < maxCoverage) {
 
-			updateGraphList(population);
-			resetPopulation(population);
+			//updateGraphList(population);
+			//resetPopulation(population);
 
 			offspringPopulation = new SolutionSet(populationSize);
 			Solution[] parents = new Solution[2];
@@ -172,10 +171,13 @@ public class MOSA extends OcelotAlgorithm {
 					Solution[] offSpring = (Solution[]) crossoverOperator.execute(parents);
 
 					//mutation
-					indexMutationOperator.execute(offSpring[0]);
+					mutationOperator.execute(offSpring[0]);
+					mutationOperator.execute(offSpring[1]);
+
+					/*indexMutationOperator.execute(offSpring[0]);
 					indexMutationOperator.execute(offSpring[1]);
 					scalarMutationOperator.execute(offSpring[0]);
-					scalarMutationOperator.execute(offSpring[1]);
+					scalarMutationOperator.execute(offSpring[1]);*/
 
 					problem_.evaluate(offSpring[0]);
 					problem_.evaluate(offSpring[1]);
@@ -236,28 +238,6 @@ public class MOSA extends OcelotAlgorithm {
 		this.algorithmStats.setEvaluations(evaluations);
 
 		return this.archive;
-	}
-
-	private void resetPopulation(SolutionSet population) throws JMException {
-		for (int i = 0; i < population.size(); i++) {
-			for (int j = 0; j < population.get(i).getDecisionVariables().length; j++) {
-				population.get(i).getDecisionVariables()[j].setValue(i);
-			}
-		}
-	}
-
-	private void updateGraphList (SolutionSet population) throws JMException {
-		StandardProblem sp = (StandardProblem)problem_;
-		List<Graph> graphList = sp.getGraphList();
-		List<Graph> newGraphList = new ArrayList<>();
-
-		for (int i = 0; i < population.size(); i++) {
-			VariableTranslator variableTranslator = new VariableTranslator(population.get(i));
-			Graph newGraph = variableTranslator.getGraphFromSolution(graphList);
-			newGraphList.add(newGraph);
-		}
-
-		sp.setGraphList(newGraphList);
 	}
 
 	/**

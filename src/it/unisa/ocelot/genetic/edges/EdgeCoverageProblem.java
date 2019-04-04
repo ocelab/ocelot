@@ -10,6 +10,7 @@ import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 import it.unisa.ocelot.genetic.SerendipitousProblem;
 import it.unisa.ocelot.genetic.StandardProblem;
+import it.unisa.ocelot.genetic.VariableTranslator;
 import it.unisa.ocelot.genetic.encoding.graph.Graph;
 import it.unisa.ocelot.simulator.*;
 
@@ -65,7 +66,8 @@ public class EdgeCoverageProblem extends StandardProblem implements Serendipitou
 
 	public double evaluateSolution(Solution solution) throws JMException, SimulationException {
 		//Object[][][] arguments = this.getParameters(solution);
-		Graph graph = this.getGraphFromSolution(solution);
+        VariableTranslator variableTranslator = new VariableTranslator(this.graphList, this.scalarNodeIndexMap);
+        Graph graph = variableTranslator.getGraphFromSolution(solution);
 
 		//CBridge bridge = getCurrentBridge();
 		CBridge cBridge  = getCurrentBridge();

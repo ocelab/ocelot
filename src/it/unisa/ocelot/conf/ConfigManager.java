@@ -6,6 +6,7 @@ import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.c.cfg.nodes.CFGNodeNavigator;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class ConfigManager {
 		
 		this.myFilename = filename;
 	}
-	
+
 	public ConfigManager() {
 		this.myFilename = "";
 	}
@@ -140,6 +141,16 @@ public class ConfigManager {
 		
 		return basedir + this.properties.getProperty("test.filename");
 	}
+
+	public void setTestFileName (String testFileName) {
+		properties.setProperty("test.filename", testFileName);
+
+		try {
+			properties.store(new FileOutputStream(filename), null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Returns the name of the function to be tested (required)
@@ -147,6 +158,16 @@ public class ConfigManager {
 	 */
 	public String getTestFunction() {
 		return this.properties.getProperty("test.function");
+	}
+
+	public void setTestFunction (String testFunction) {
+		properties.setProperty("test.function", testFunction);
+
+		try {
+			properties.store(new FileOutputStream(filename), null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Deprecated
@@ -324,6 +345,16 @@ public class ConfigManager {
 		if (!basedir.endsWith("/"))
 			basedir += "/";
 		return basedir;
+	}
+
+	public void setTestBasedir (String testBasedir) {
+		properties.setProperty("test.basedir", testBasedir);
+
+		try {
+			properties.store(new FileOutputStream(filename), null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

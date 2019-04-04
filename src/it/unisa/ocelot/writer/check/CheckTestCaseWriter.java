@@ -31,7 +31,7 @@ public class CheckTestCaseWriter extends TestCaseWriter {
 		testCase += "START_TEST(" + this.getName() + ")\n";
 		testCase += "{\n";
 		
-		testCase += this.writeInitialization();
+		//testCase += this.writeInitialization();
 		
 		testCase += this.writeFunctionCall();
 		
@@ -47,7 +47,7 @@ public class CheckTestCaseWriter extends TestCaseWriter {
 	private String writeInitialization() {
 		String initialization = "";
 
-		VariableTranslator variableTranslator = new VariableTranslator(null);
+		VariableTranslator variableTranslator = new VariableTranslator(null, null);
 		this.testCase.setParameters(variableTranslator.translateGraph(this.testCase.getGraph()));
 
 		Object[] values = this.testCase.getParameters()[0][0];

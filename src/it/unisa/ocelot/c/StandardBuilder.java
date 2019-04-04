@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.CFGBuilder;
 import it.unisa.ocelot.c.compiler.GCC;
+import it.unisa.ocelot.c.compiler.writer.ASTWriter;
 import it.unisa.ocelot.c.instrumentor.CFunctionGenerator;
 import it.unisa.ocelot.c.instrumentor.ExternalReferencesVisitor;
 import it.unisa.ocelot.c.instrumentor.InstrumentorVisitor;
@@ -48,18 +49,18 @@ public class StandardBuilder extends Builder {
 			throw new BuildingException("No output stream specified");
 
 		try {
-			this.stream.print("Instrumenting C file... \n");
+			//this.stream.print("Instrumenting C file... \n");
 			instrument();
-			this.stream.println("Done!\n");
+			//this.stream.println("Done!\n");
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new BuildingException(e.getMessage());
 		}
 
 		//Instrument function files, in order to compile the sockets
 		CFG cfg = null;
 		try {
-			this.stream.print("Instrumenting Function files... \n");
+			//this.stream.print("Instrumenting Function files... \n");
 			cfg = CFGBuilder.build(config.getTestFilename(), config.getTestFunction());
 			CFunctionGenerator cFunctionGenerator = new CFunctionGenerator(cfg.getTypeGraph());
 
@@ -69,13 +70,13 @@ public class StandardBuilder extends Builder {
 			Utils.writeFile("socket/function.h", headerFunction);
 			Utils.writeFile("socket/function.c", sourceFunction);
 
-			this.stream.print("Done!\n");
+			//this.stream.print("Done!\n");
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 
 		//Builds the library
-		this.stream.print("Building library... ");
+		//this.stream.print("Building library... ");
 		this.makefileGenerator.generate();
 
 		Process proc = this.makefileGenerator.runCompiler();
@@ -84,17 +85,17 @@ public class StandardBuilder extends Builder {
 
 		try {
 			int result;
-			if ((result = proc.waitFor()) == 0)
-				this.stream.println("Done!");
+			if ((result = proc.waitFor()) == 0);
+				//this.stream.println("Done!");
 			else {
-				this.stream.println("ABORTED. An error occurred: " + result);
+				//this.stream.println("ABORTED. An error occurred: " + result);
 				throw new BuildingException(IOUtils.toString(proc.getErrorStream()));
 			}
 		} catch (InterruptedException e) {
 			throw new BuildingException("Interrupted");
 		}
 
-		this.stream.println("\nEverything done.");
+		//this.stream.println("\nEverything done.");
 	}
 
 	private void instrument() throws Exception {
@@ -116,7 +117,7 @@ public class StandardBuilder extends Builder {
 		translationUnit.accept(macroDefiner);
 		translationUnit.accept(instrumentor);
 
-		it.unisa.ocelot.c.compiler.writer.ASTWriter writer = new it.unisa.ocelot.c.compiler.writer.ASTWriter();
+		ASTWriter writer = new ASTWriter();
 
 		String outputCode = writer.write(translationUnit);
 
