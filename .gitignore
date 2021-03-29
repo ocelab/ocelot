@@ -45,7 +45,7 @@ manifest.mf
 nbproject/*
 
 # class for random tries
-src/it/unisa/ocelot/runnable/McCabe.java
+src/main/java/it/unisa/ocelot/runnable/McCabe.java
 
 *.csv
 
