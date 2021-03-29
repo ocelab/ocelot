@@ -1,5 +1,6 @@
 package it.unisa.ocelot.c.cfg;
 
+import it.unisa.ocelot.util.Utils;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
@@ -16,7 +17,8 @@ import static org.junit.Assert.*;
 public class CFGTest {
     @Test
     public void testBuilding() throws IOException, CoreException {
-        File testFile = new File("resources/testProject1/test1.c");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File testFile = new File(classLoader.getResource("testProject1/test1.c").getFile());
 
         CFG cfg = CFGBuilder.build(testFile.getCanonicalPath(), "testFunc");
 

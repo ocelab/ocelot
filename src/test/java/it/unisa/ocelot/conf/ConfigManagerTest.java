@@ -1,9 +1,11 @@
 package it.unisa.ocelot.conf;
 
+import it.unisa.ocelot.util.Utils;
 import org.apache.commons.lang3.Range;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -15,7 +17,9 @@ public class ConfigManagerTest {
 
     @Before
     public void setUp() throws IOException {
-        ConfigManager.setFilename("resources/tests/test.properties");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("tests/test.properties").getFile());
+        ConfigManager.setFilename(file.getAbsolutePath());
         config = ConfigManager.getInstance();
     }
 

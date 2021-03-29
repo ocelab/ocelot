@@ -11,7 +11,9 @@ public class UtilsTest {
 
     @Test
     public void readFile() throws Exception {
-        String reads = Utils.readFile("resources/tests/test_read.h");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("tests/test_read.h").getFile());
+        String reads = Utils.readFile(file.getAbsolutePath());
         assertEquals("// testing reading from file", reads);
     }
 
