@@ -15,7 +15,8 @@ import static org.junit.Assert.*;
 public class McCabeCalculatorTest {
     @Test
     public void testMcCabe() throws Exception {
-        File testFile = new File("resources/testProject1/test1.c");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File testFile = new File(classLoader.getResource("testProject1/test1.c").getFile());
 
         CFG cfg = CFGBuilder.build(testFile.getCanonicalPath(), "testFunc");
 

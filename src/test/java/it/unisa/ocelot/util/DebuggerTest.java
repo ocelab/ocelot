@@ -1,7 +1,5 @@
-package test.util;
+package it.unisa.ocelot.util;
 
-import it.unisa.ocelot.util.Debugger;
-import it.unisa.ocelot.util.Utils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +10,7 @@ import org.powermock.reflect.Whitebox;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Utils.class)
@@ -43,7 +41,7 @@ public class DebuggerTest {
     @Test
     public void save() throws Exception {
         PowerMockito.mockStatic(Utils.class);
-        PowerMockito.doNothing().when(Utils.class, "writeFile","src/test/resources/test.h","test");
+        PowerMockito.doNothing().when(Utils.class, "writeFile","src/test/resources/test.h", "test");
     }
 
     @Test

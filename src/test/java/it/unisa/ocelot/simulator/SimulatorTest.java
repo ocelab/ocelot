@@ -1,4 +1,4 @@
-package test.simulator;
+package it.unisa.ocelot.simulator;
 
 import it.unisa.ocelot.c.cfg.CFG;
 import it.unisa.ocelot.c.cfg.dominators.Dominators;
@@ -8,23 +8,14 @@ import it.unisa.ocelot.c.cfg.edges.LabeledEdge;
 import it.unisa.ocelot.c.cfg.edges.TrueEdge;
 import it.unisa.ocelot.c.cfg.nodes.CFGNode;
 import it.unisa.ocelot.genetic.edges.EdgeDistanceListener;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.Simulator;
-import it.unisa.ocelot.simulator.SimulatorListener;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
 
-import java.lang.reflect.Field;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the simulation on the CFG to calculate the fitness function

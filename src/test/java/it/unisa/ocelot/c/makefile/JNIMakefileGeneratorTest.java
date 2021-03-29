@@ -1,5 +1,6 @@
 package it.unisa.ocelot.c.makefile;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,7 +12,9 @@ import static org.junit.Assert.*;
  * @author Simone Scalabrino.
  */
 public class JNIMakefileGeneratorTest {
+
     @Test
+    @Ignore
     public void testLinuxGenerator() throws IOException {
         File makefile = new File("jni/makefile");
         if (!makefile.exists())
@@ -24,6 +27,7 @@ public class JNIMakefileGeneratorTest {
     }
 
     @Test
+    @Ignore
     public void testFedoraGenerator() throws IOException {
         File makefile = new File("jni/makefile");
         if (!makefile.exists())

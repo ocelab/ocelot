@@ -1,14 +1,7 @@
-package test.simulator;
+package it.unisa.ocelot.simulator;
 
-import it.unisa.ocelot.simulator.CaseExecutionEvent;
-import it.unisa.ocelot.simulator.EventsHandler;
-import it.unisa.ocelot.simulator.ExecutionEvent;
-import org.eclipse.cdt.utils.coff.Exe;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.*;
 

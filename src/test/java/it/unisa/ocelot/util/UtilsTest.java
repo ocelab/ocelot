@@ -1,17 +1,19 @@
-package test.util;
+package it.unisa.ocelot.util;
 
-import it.unisa.ocelot.util.Utils;
 import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class UtilsTest {
 
     @Test
     public void readFile() throws Exception {
-        String reads = Utils.readFile("src/test/resources/test_read.h");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("tests/test_read.h").getFile());
+        String reads = Utils.readFile(file.getAbsolutePath());
         assertEquals("// testing reading from file", reads);
     }
 

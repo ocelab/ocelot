@@ -1,11 +1,11 @@
-package test.util;
+package it.unisa.ocelot.util;
 
-import it.unisa.ocelot.util.Front;
 import jmetal.core.SolutionSet;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class FrontTest {
 
