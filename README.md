@@ -1,4 +1,5 @@
-# OCELOT
+
+# OCELOT [![Build Status](https://travis-ci.com/ocelab/ocelot.svg?branch=master)](https://travis-ci.com/ocelab/ocelot)
 
 OCELOT is a testing tool capable of generating automatically test data for a C function. It uses JNI in order to call dynamically the C function that will be tested.
 
