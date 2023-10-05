@@ -4,23 +4,23 @@
 #include "pointers.h"
 #include "lists.h"
 
-#ifndef _Included_OcelotHeader
-#define _Included_OcelotHeader
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define OCELOT_K 0.5
-#define OCELOT_KIND_STDEV 1
-#define OCELOT_KIND_CASEV 2
 
 #ifndef ABS
 #define ABS(x) (x < 0 ? -x : x)
 #endif
 
-#define OCELOD_DEREF(type, variable) ((type)*((double*)variable))
 
-extern _t_ocelot_array *_v_ocelot_pointers;
+#ifndef _Included_OcelotHeader
+#define _Included_OcelotHeader
+
+#define OCELOT_K 0.5
+#define OCELOT_KIND_STDEV 1
+#define OCELOT_KIND_CASEV 2
+
+#define OCELOD_DEREF(type, variable) ((type)*((double*)variable))
 
 typedef struct {
 	int kind;
@@ -81,10 +81,8 @@ double _f_ocelot_or(double, double);
 double _f_ocelot_istrue(double);
 double _f_ocelot_isfalse(double);
 
-_T_ocelot_list *_v_ocelot_events;
-_T_ocelot_list *_v_ocelot_fcalls;
+#endif
 
 #ifdef __cplusplus
 }
-#endif
 #endif

@@ -1,12 +1,13 @@
 #include <glib.h>
-#include "stdlib.h"
-#include "stddef.h"
+#include <stdlib.h>
+#include <stddef.h>
 
-#ifndef _Included_OcelotListsHeader
-#define _Included_OcelotListsHeader
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef _Included_OcelotListsHeader
+#define _Included_OcelotListsHeader
 
 #define _T_ocelot_list GArray
 
@@ -27,7 +28,8 @@ void _f_ocelot_list_shift(_T_ocelot_list*);
 #define OCLIST_SHIFT(list) g_array_remove_index(list, 0)
 #define OCLIST_SIZE(list) list->len
 
+#endif
+
 #ifdef __cplusplus
 }
-#endif
 #endif

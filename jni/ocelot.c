@@ -1,6 +1,11 @@
 #include "ocelot.h"
 #include <math.h>
 
+extern _t_ocelot_array *_v_ocelot_pointers;
+
+_T_ocelot_list *_v_ocelot_events;
+_T_ocelot_list *_v_ocelot_fcalls;
+
 void _f_ocelot_init() {
 	_v_ocelot_events = OCLIST_ALLOC(_T_ocelot_event);
 	_v_ocelot_fcalls = OCLIST_ALLOC(double);

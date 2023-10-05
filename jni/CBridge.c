@@ -38,6 +38,9 @@
 #define LOG_EVENT(event, logger) {}
 
 #endif
+						 
+extern _T_ocelot_list *_v_ocelot_events;
+extern _T_ocelot_list *_v_ocelot_fcalls;
 
 /*
  * Class:     it_unisa_ocelot_simulator_CBridge
